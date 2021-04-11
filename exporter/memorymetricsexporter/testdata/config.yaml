@@ -1,0 +1,17 @@
+receivers:
+  nop:
+
+processors:
+  nop:
+
+exporters:
+  memorymetrics:
+  memorymetrics/5:
+    window: 20m
+    interval: 2m
+  
+service:
+  pipelines:
+    metrics:
+      receivers: [nop]
+      exporters: [memorymetrics,memorymetrics/5]
