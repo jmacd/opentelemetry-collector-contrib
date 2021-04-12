@@ -19,19 +19,22 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer/pdata"
+	_ "go.opentelemetry.io/otel/attribute"
 )
 
-// memoryMetricsExporter is the implementation of file exporter that writes telemetry data to a file
-// in Protobuf-JSON format.
+// memoryMetricsExporter is an in-memory metrics buffer.
 type memoryMetricsExporter struct {
 }
 
 func (e *memoryMetricsExporter) ConsumeMetrics(_ context.Context, md pdata.Metrics) error {
 	// @@@
+	// What's the relationship between this code and Delta->Cumulative
+	// (Implement memory option like OTel-Go?)
 	return nil
 }
 
 func (e *memoryMetricsExporter) Start(context.Context, component.Host) error {
+	// Timer to ... update intervals.
 	return nil
 }
 
