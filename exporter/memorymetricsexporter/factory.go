@@ -49,8 +49,16 @@ func createMetricsExporter(
 	_ component.ExporterCreateParams,
 	cfg config.Exporter,
 ) (component.MetricsExporter, error) {
+	config := *cfg.(*Config)
 
-	exporter := &memoryMetricsExporter{}
+	num := config.Window / config.Interval
+	// @@@ if cfg.Window % cfg.Interval != 0
+
+	exporter := &memoryMetricsExporter{
+		config:     config,
+		oldestTime: time.Now(),
+		intervals:  make([]interval, num),
+	}
 
 	return exporter, nil
 }

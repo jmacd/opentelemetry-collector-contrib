@@ -16,15 +16,46 @@ package memorymetricsexporter
 
 import (
 	"context"
+	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer/pdata"
-	_ "go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric/number"
 )
 
 // memoryMetricsExporter is an in-memory metrics buffer.
-type memoryMetricsExporter struct {
-}
+type (
+	memoryMetricsExporter struct {
+		config Config
+
+		oldestTime time.Time
+		intervals  []interval
+	}
+
+	mapkey struct {
+		res   attribute.Distinct
+		attrs attribute.Distinct
+	}
+
+	interval struct {
+		m map[mapkey]*record
+	}
+
+	record struct {
+		s []sample
+	}
+
+	sample struct {
+		startNanos uint64
+		duration   time.Duration
+		external   attribute.Distinct
+
+		value interface{} // @@@ or ...?
+	}
+
+	scalar number.Number
+)
 
 func (e *memoryMetricsExporter) ConsumeMetrics(_ context.Context, md pdata.Metrics) error {
 	// @@@
