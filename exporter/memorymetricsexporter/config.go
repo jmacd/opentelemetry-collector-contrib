@@ -25,5 +25,6 @@ type Config struct {
 	*config.ExporterSettings `mapstructure:"-"`
 
 	Window   time.Duration `mapstructure:"window"`
+	Future   time.Duration `mapstructure:"future"`
 	Interval time.Duration `mapstructure:"interval"`
 }

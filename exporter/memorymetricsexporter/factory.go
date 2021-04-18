@@ -51,13 +51,26 @@ func createMetricsExporter(
 ) (component.MetricsExporter, error) {
 	config := *cfg.(*Config)
 
-	num := config.Window / config.Interval
-	// @@@ if cfg.Window % cfg.Interval != 0
+	// if config.Window%config.Interval != 0 {
+	// 	return nil, errors.New("window size must be a multiple of interval")
+	// }
+	// num := config.Window / config.Interval
+	// if num <= 0 {
+	// 	return nil, errors.New("invalid window/interval sizes")
+	// }
+	// if config.Future != 0 && config.Future%config.Interval != 0 {
+	// 	return nil, errors.New("future window size must be a multiple of interval")
+	// }
+	// numFuture := config.Future / config.Interval
+	// if numFuture < 0 {
+	// 	return nil, errors.New("invalid future/interval sizes")
+	// }
+	numIntervals := 1
 
 	exporter := &memoryMetricsExporter{
 		config:     config,
 		oldestTime: time.Now(),
-		intervals:  make([]interval, num),
+		intervals:  make([]interval, numIntervals),
 	}
 
 	return exporter, nil

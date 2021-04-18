@@ -26,39 +26,170 @@ import (
 
 // memoryMetricsExporter is an in-memory metrics buffer.
 type (
+	// memoryMetricsExporter is an Exporter that places metric
+	// events into a short-term buffer for the purposes of:
+	//
+	// - temporal alignment
+	// - re-aggregation
+	// - de-duplication
+	// - overlap resolution
+	// - join support (e.g., for "up")
 	memoryMetricsExporter struct {
+		// config describes the window size, interval size,
+		// and the ratio of past- and future-timestamped data
+		// to maintain.
 		config Config
 
+		// oldestTime is te start timestamp of intervals[0]
 		oldestTime time.Time
-		intervals  []interval
+
+		// intervals is a circular buffer
+		intervals []interval
+
+		// ... more fields
 	}
 
-	mapkey struct {
-		res   attribute.Distinct
-		attrs attribute.Distinct
-	}
-
+	// interval is one collection of streams, writers, and points.
 	interval struct {
-		m map[mapkey]*record
+		streams map[streamKey]*stream
 	}
 
-	record struct {
-		s []sample
+	// streamKey identifies an "in-practice" stream.  unit and
+	// kind are expected to be the same for a given name, but they
+	// are treated as independent due to [want an good adjective
+	// here] incompatibility.
+	streamKey struct {
+		// library is the instrumentation library
+		library string
+
+		// name is the metric name
+		name string
+
+		// unit are the units
+		unit string
+
+		// kind of the point kind, including monotonicity and
+		// temporality, bucket style, etc.
+		//
+		// NOT included in kind: number type.
+		kind kind
 	}
 
-	sample struct {
-		startNanos uint64
-		duration   time.Duration
-		external   attribute.Distinct
+	unixNanos uint64 // from the OTLP protocol
+	kind      int    // an enum (possibly equal to the top-level `oneof`?)
 
-		value interface{} // @@@ or ...?
+	// stream is a map of writers.
+	stream struct {
+		writers map[coordinate]*writer
 	}
 
-	scalar number.Number
+	// coordinate describes a single writer
+	coordinate struct {
+		resource   attribute.Distinct
+		attributes attribute.Distinct
+	}
+
+	// writer maintains a set of list of points.
+	writer struct {
+		points points
+	}
+
+	// point is a single point, described by
+	point struct {
+		startNanos unixNanos
+		timeNanos  unixNanos
+		external   attribute.Set
+
+		// scalar case
+		numberKind number.Kind
+		scalar     number.Number
+
+		// histogram case TODO
+	}
+
+	points []point
 )
 
-func (e *memoryMetricsExporter) ConsumeMetrics(_ context.Context, md pdata.Metrics) error {
-	// @@@
+const (
+	kindNone kind = iota
+	kindSumMonotonicDelta
+	kindSumMonotonicCumulative
+	kindSumNonMonotonicDelta
+	kindSumNonMonotonicCumulative
+	kindHistogramExplicitDelta
+	kindHistogramExplicitCumulative
+	kindSummary
+	kindGauge
+)
+
+func (e *memoryMetricsExporter) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
+	rms := md.ResourceMetrics()
+	for i := 0; i < rms.Len(); i++ {
+		rm := rms.At(i)
+		res := rm.Resource()
+		resAttrs := res.Attributes()
+		resKVs := make([]attribute.KeyValue, 0, resAttrs.Len())
+
+		resAttrs.ForEach(func(resKey string, resVal pdata.AttributeValue) {
+			var kv attribute.KeyValue
+			switch resVal.Type() {
+			case pdata.AttributeValueSTRING:
+				kv = attribute.String(resKey, resVal.StringVal())
+			case pdata.AttributeValueBOOL:
+				kv = attribute.Bool(resKey, resVal.BoolVal())
+			case pdata.AttributeValueINT:
+				kv = attribute.Int64(resKey, resVal.IntVal())
+			case pdata.AttributeValueDOUBLE:
+				kv = attribute.Float64(resKey, resVal.DoubleVal())
+			case pdata.AttributeValueMAP, pdata.AttributeValueARRAY,
+				pdata.AttributeValueNULL:
+				// TODO: error state, or format these; shrug don't do this.
+			}
+			resKVs = append(resKVs, kv)
+		})
+
+		resAttrSet := attribute.NewSet(resKVs...)
+
+		ilms := rm.InstrumentationLibraryMetrics()
+
+		for j := 0; j < ilms.Len(); j++ {
+			ilm := ilms.At(j)
+			library := ilm.InstrumentationLibrary().Name()
+
+			ms := ilm.Metrics()
+			for k := 0; k < ms.Len(); k++ {
+				m := ms.At(k)
+				var numberKind number.Kind
+
+				switch m.DataType() {
+				case pdata.MetricDataTypeIntGauge:
+					numberKind = number.Int64Kind
+					kind = kindGauge
+
+					//dataPointCount += m.IntGauge().DataPoints().Len()
+				case pdata.MetricDataTypeDoubleGauge:
+					numberKind = number.Float64Kind
+					kind = kindGauge
+
+					//dataPointCount += m.DoubleGauge().DataPoints().Len()
+				case pdata.MetricDataTypeIntSum:
+					//dataPointCount += m.IntSum().DataPoints().Len()
+				case pdata.MetricDataTypeDoubleSum:
+					//dataPointCount += m.DoubleSum().DataPoints().Len()
+				case pdata.MetricDataTypeIntHistogram:
+					//dataPointCount += m.IntHistogram().DataPoints().Len()
+				case pdata.MetricDataTypeHistogram:
+					//dataPointCount += m.Histogram().DataPoints().Len()
+				case pdata.MetricDataTypeSummary:
+					//dataPointCount += m.Summary().DataPoints().Len()
+				}
+			}
+		}
+	}
+
+	// interval := e.intervals[0]
+	// stream, ok := interval.streams[...]
+
 	// What's the relationship between this code and Delta->Cumulative
 	// (Implement memory option like OTel-Go?)
 	return nil
