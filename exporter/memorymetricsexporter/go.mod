@@ -8,4 +8,8 @@ require (
 	go.opentelemetry.io/otel v0.19.0
 	go.opentelemetry.io/otel/metric v0.19.0
 	go.uber.org/zap v1.16.0
+	golang.org/x/tools v0.1.1-0.20210408155258-593413344da1 // indirect
+	golang.org/x/tools/gopls v0.6.4 // indirect
+	honnef.co/go/tools v0.1.3 // indirect
+	mvdan.cc/gofumpt v0.1.1 // indirect
 )

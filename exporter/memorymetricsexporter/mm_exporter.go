@@ -70,13 +70,12 @@ type (
 
 		// kind of the point kind, including monotonicity and
 		// temporality, bucket style, etc.
-		//
-		// NOT included in kind: number type.
 		kind kind
 	}
 
+	kind pdata.MetricDataType
+
 	unixNanos uint64 // from the OTLP protocol
-	kind      int    // an enum (possibly equal to the top-level `oneof`?)
 
 	// stream is a map of writers.
 	stream struct {
@@ -108,72 +107,98 @@ type (
 	}
 
 	points []point
+
+	keyvals []attribute.KeyValue
 )
 
-const (
-	kindNone kind = iota
-	kindSumMonotonicDelta
-	kindSumMonotonicCumulative
-	kindSumNonMonotonicDelta
-	kindSumNonMonotonicCumulative
-	kindHistogramExplicitDelta
-	kindHistogramExplicitCumulative
-	kindSummary
-	kindGauge
-)
+func (kvs *keyvals) appendKeyValue(resKey string, resVal pdata.AttributeValue) {
+	var kv attribute.KeyValue
+	switch resVal.Type() {
+	case pdata.AttributeValueSTRING:
+		kv = attribute.String(resKey, resVal.StringVal())
+	case pdata.AttributeValueBOOL:
+		kv = attribute.Bool(resKey, resVal.BoolVal())
+	case pdata.AttributeValueINT:
+		kv = attribute.Int64(resKey, resVal.IntVal())
+	case pdata.AttributeValueDOUBLE:
+		kv = attribute.Float64(resKey, resVal.DoubleVal())
+	case pdata.AttributeValueMAP,
+		pdata.AttributeValueARRAY,
+		pdata.AttributeValueNULL:
+		// TODO: error state, or format these; shrug don't do this.
+	}
+	*kvs = append(*kvs, kv)
+}
 
 func (e *memoryMetricsExporter) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
+	// TODO: Temporal logic.
+	interval := e.intervals[0]
+
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 		res := rm.Resource()
 		resAttrs := res.Attributes()
-		resKVs := make([]attribute.KeyValue, 0, resAttrs.Len())
+		resKVs := make(keyvals, 0, resAttrs.Len())
 
-		resAttrs.ForEach(func(resKey string, resVal pdata.AttributeValue) {
-			var kv attribute.KeyValue
-			switch resVal.Type() {
-			case pdata.AttributeValueSTRING:
-				kv = attribute.String(resKey, resVal.StringVal())
-			case pdata.AttributeValueBOOL:
-				kv = attribute.Bool(resKey, resVal.BoolVal())
-			case pdata.AttributeValueINT:
-				kv = attribute.Int64(resKey, resVal.IntVal())
-			case pdata.AttributeValueDOUBLE:
-				kv = attribute.Float64(resKey, resVal.DoubleVal())
-			case pdata.AttributeValueMAP, pdata.AttributeValueARRAY,
-				pdata.AttributeValueNULL:
-				// TODO: error state, or format these; shrug don't do this.
-			}
-			resKVs = append(resKVs, kv)
-		})
+		resAttrs.ForEach(resKVs.appendKeyValue)
 
-		resAttrSet := attribute.NewSet(resKVs...)
+		resAttrSet := attribute.NewSet([]attribute.KeyValue(resKVs)...)
 
 		ilms := rm.InstrumentationLibraryMetrics()
 
 		for j := 0; j < ilms.Len(); j++ {
 			ilm := ilms.At(j)
-			library := ilm.InstrumentationLibrary().Name()
 
 			ms := ilm.Metrics()
 			for k := 0; k < ms.Len(); k++ {
 				m := ms.At(k)
-				var numberKind number.Kind
+
+				dtype := m.DataType()
+				// @@@ NO This needs temporality, monotonicity.
+				// fullKind := int32(dtype)
+
+				// skey := streamKey{
+				// 	library: ilm.InstrumentationLibrary().Name(),
+				// 	name:    m.Name(),
+				// 	unit:    m.Unit(),
+				// 	kind:    fullKind,
+				// }
+
+				// str, ok := interval.streams[skey]
+
+				// if !ok {
+				// 	str = &stream{
+				// 		writers: map[coordinate]*writer{},
+				// 	}
+				// 	interval.streams[skey] = str
+				// }
 
 				switch m.DataType() {
 				case pdata.MetricDataTypeIntGauge:
-					numberKind = number.Int64Kind
-					kind = kindGauge
+					dp := m.IntGauge().DataPoints()
+					for p := 0; p < dp.Len(); p++ {
+						pt := dp.At(p)
+						num := number.NewInt64Number(pt.Value())
+						e.addPoint(str, &resAttrSet, pt.LabelsMap(), num)
+					}
 
-					//dataPointCount += m.IntGauge().DataPoints().Len()
 				case pdata.MetricDataTypeDoubleGauge:
-					numberKind = number.Float64Kind
-					kind = kindGauge
+					dp := m.DoubleGauge().DataPoints()
+					for p := 0; p < dp.Len(); p++ {
+						pt := dp.At(p)
+						num := number.NewFloat64Number(pt.Value())
+						e.addPoint(str, &resAttrSet, pt.LabelsMap(), num)
+					}
 
-					//dataPointCount += m.DoubleGauge().DataPoints().Len()
 				case pdata.MetricDataTypeIntSum:
-					//dataPointCount += m.IntSum().DataPoints().Len()
+					dp := m.IntSum().DataPoints()
+					for p := 0; p < dp.Len(); p++ {
+						pt := dp.At(p)
+						num := number.NewInt64Number(pt.Value())
+						e.addPoint(str, &resAttrSet, pt.LabelsMap(), num)
+					}
+
 				case pdata.MetricDataTypeDoubleSum:
 					//dataPointCount += m.DoubleSum().DataPoints().Len()
 				case pdata.MetricDataTypeIntHistogram:
@@ -183,16 +208,28 @@ func (e *memoryMetricsExporter) ConsumeMetrics(ctx context.Context, md pdata.Met
 				case pdata.MetricDataTypeSummary:
 					//dataPointCount += m.Summary().DataPoints().Len()
 				}
+				// @@@
+
+				// mAttrs := make(keyvals, 0)
+
+				// coord := coordinate{
+				// 	resource:   resAttrSet.Equivalent(),
+				// 	attributes: nil,
+				// }
+
+				// _ = &coord
+				// _ = &str
 			}
 		}
 	}
 
-	// interval := e.intervals[0]
-	// stream, ok := interval.streams[...]
-
 	// What's the relationship between this code and Delta->Cumulative
 	// (Implement memory option like OTel-Go?)
 	return nil
+}
+
+func (e *memoryMetricsExporter) addPoint(str *stream, resource *attribute.Set, attrs pdata.StringMap, num number.Number) {
+
 }
 
 func (e *memoryMetricsExporter) Start(context.Context, component.Host) error {
