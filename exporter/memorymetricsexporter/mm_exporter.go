@@ -56,10 +56,10 @@ type (
 
 	// streamKey identifies an "in-practice" stream.  unit and
 	// kind are expected to be the same for a given name, but they
-	// are treated as independent due to [want an good adjective
-	// here] incompatibility.
+	// are treated as independent due to dissimilarity.
 	streamKey struct {
 		// library is the instrumentation library
+		// (library version is excluded).
 		library string
 
 		// name is the metric name
@@ -73,7 +73,7 @@ type (
 		kind kind
 	}
 
-	kind pdata.MetricDataType
+	kind int
 
 	unixNanos uint64 // from the OTLP protocol
 
@@ -130,6 +130,51 @@ func (kvs *keyvals) appendKeyValue(resKey string, resVal pdata.AttributeValue) {
 	*kvs = append(*kvs, kv)
 }
 
+const (
+	unknownKind = iota
+	gaugeKind
+	monoDeltaSumKind
+	monoCumulativeSumKind
+	nonMonoDeltaSumKind
+	nonMonoCumulativeSumKind
+	histogramDeltaKind
+	histogramCumulativeKind
+	summaryKind
+)
+
+func toKind(m pdata.Metric) kind {
+	switch m.DataType() {
+	case pdata.MetricDataTypeDoubleSum:
+		s := m.DoubleSum()
+		if s.AggregationTemporality() == pdata.AggregationTemporalityDelta {
+			if s.IsMonotonic() {
+				return monoDeltaSumKind
+			}
+			return nonMonoDeltaSumKind
+		} else if s.AggregationTemporality() == pdata.AggregationTemporalityCumulative {
+			if s.IsMonotonic() {
+				return monoCumulativeSumKind
+			}
+			return nonMonoCumulativeSumKind
+		}
+
+	case pdata.MetricDataTypeHistogram:
+		s := m.Histogram()
+		if s.AggregationTemporality() == pdata.AggregationTemporalityDelta {
+			return histogramDeltaKind
+		} else if s.AggregationTemporality() == pdata.AggregationTemporalityCumulative {
+			return histogramCumulativeKind
+		}
+
+	case pdata.MetricDataTypeDoubleGauge:
+		return gaugeKind
+	case pdata.MetricDataTypeSummary:
+		return summaryKind
+
+	}
+	return unknownKind
+}
+
 func (e *memoryMetricsExporter) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
 	// TODO: Temporal logic.
 	interval := e.intervals[0]
@@ -154,71 +199,44 @@ func (e *memoryMetricsExporter) ConsumeMetrics(ctx context.Context, md pdata.Met
 			for k := 0; k < ms.Len(); k++ {
 				m := ms.At(k)
 
-				dtype := m.DataType()
-				// @@@ NO This needs temporality, monotonicity.
-				// fullKind := int32(dtype)
+				skey := streamKey{
+					library: ilm.InstrumentationLibrary().Name(),
+					name:    m.Name(),
+					unit:    m.Unit(),
+					kind:    toKind(m),
+				}
 
-				// skey := streamKey{
-				// 	library: ilm.InstrumentationLibrary().Name(),
-				// 	name:    m.Name(),
-				// 	unit:    m.Unit(),
-				// 	kind:    fullKind,
-				// }
+				str, ok := interval.streams[skey]
 
-				// str, ok := interval.streams[skey]
-
-				// if !ok {
-				// 	str = &stream{
-				// 		writers: map[coordinate]*writer{},
-				// 	}
-				// 	interval.streams[skey] = str
-				// }
+				if !ok {
+					str = &stream{
+						writers: map[coordinate]*writer{},
+					}
+					interval.streams[skey] = str
+				}
 
 				switch m.DataType() {
-				case pdata.MetricDataTypeIntGauge:
-					dp := m.IntGauge().DataPoints()
-					for p := 0; p < dp.Len(); p++ {
-						pt := dp.At(p)
-						num := number.NewInt64Number(pt.Value())
-						e.addPoint(str, &resAttrSet, pt.LabelsMap(), num)
-					}
-
 				case pdata.MetricDataTypeDoubleGauge:
-					dp := m.DoubleGauge().DataPoints()
-					for p := 0; p < dp.Len(); p++ {
-						pt := dp.At(p)
+					pt := m.DoubleGauge().DataPoints()
+					for p := 0; p < pt.Len(); p++ {
+						pt := pt.At(p)
 						num := number.NewFloat64Number(pt.Value())
 						e.addPoint(str, &resAttrSet, pt.LabelsMap(), num)
 					}
 
-				case pdata.MetricDataTypeIntSum:
-					dp := m.IntSum().DataPoints()
-					for p := 0; p < dp.Len(); p++ {
-						pt := dp.At(p)
-						num := number.NewInt64Number(pt.Value())
+				case pdata.MetricDataTypeDoubleSum:
+					pt := m.DoubleSum().DataPoints()
+					for p := 0; p < pt.Len(); p++ {
+						pt := pt.At(p)
+						num := number.NewFloat64Number(pt.Value())
 						e.addPoint(str, &resAttrSet, pt.LabelsMap(), num)
 					}
 
-				case pdata.MetricDataTypeDoubleSum:
-					//dataPointCount += m.DoubleSum().DataPoints().Len()
-				case pdata.MetricDataTypeIntHistogram:
-					//dataPointCount += m.IntHistogram().DataPoints().Len()
 				case pdata.MetricDataTypeHistogram:
 					//dataPointCount += m.Histogram().DataPoints().Len()
 				case pdata.MetricDataTypeSummary:
 					//dataPointCount += m.Summary().DataPoints().Len()
 				}
-				// @@@
-
-				// mAttrs := make(keyvals, 0)
-
-				// coord := coordinate{
-				// 	resource:   resAttrSet.Equivalent(),
-				// 	attributes: nil,
-				// }
-
-				// _ = &coord
-				// _ = &str
 			}
 		}
 	}
@@ -229,7 +247,15 @@ func (e *memoryMetricsExporter) ConsumeMetrics(ctx context.Context, md pdata.Met
 }
 
 func (e *memoryMetricsExporter) addPoint(str *stream, resource *attribute.Set, attrs pdata.StringMap, num number.Number) {
+	// mAttrs := make(keyvals, 0)
 
+	// coord := coordinate{
+	// 	resource:   resAttrSet.Equivalent(),
+	// 	attributes: nil,
+	// }
+
+	// _ = &coord
+	// _ = &str
 }
 
 func (e *memoryMetricsExporter) Start(context.Context, component.Host) error {
