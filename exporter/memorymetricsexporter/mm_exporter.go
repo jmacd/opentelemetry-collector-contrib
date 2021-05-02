@@ -75,8 +75,6 @@ type (
 
 	kind int
 
-	unixNanos uint64 // from the OTLP protocol
-
 	// stream is a map of writers.
 	stream struct {
 		writers map[coordinate]*writer
@@ -95,15 +93,15 @@ type (
 
 	// point is a single point, described by
 	point struct {
-		startNanos unixNanos
-		timeNanos  unixNanos
-		external   attribute.Set
+		start pdata.Timestamp
+		ts    pdata.Timestamp
 
 		// scalar case
 		numberKind number.Kind
 		scalar     number.Number
 
-		// histogram case TODO
+		// TODO: histogram case
+		// TODO: track non-identifying labels
 	}
 
 	points []point
@@ -221,7 +219,12 @@ func (e *memoryMetricsExporter) ConsumeMetrics(ctx context.Context, md pdata.Met
 					for p := 0; p < pt.Len(); p++ {
 						pt := pt.At(p)
 						num := number.NewFloat64Number(pt.Value())
-						e.addPoint(str, &resAttrSet, pt.LabelsMap(), num)
+						e.addPoint(
+							str, &resAttrSet, pt.LabelsMap(),
+							pt.StartTimestamp(),
+							pt.Timestamp(),
+							number.Float64Kind, num,
+						)
 					}
 
 				case pdata.MetricDataTypeDoubleSum:
@@ -229,7 +232,12 @@ func (e *memoryMetricsExporter) ConsumeMetrics(ctx context.Context, md pdata.Met
 					for p := 0; p < pt.Len(); p++ {
 						pt := pt.At(p)
 						num := number.NewFloat64Number(pt.Value())
-						e.addPoint(str, &resAttrSet, pt.LabelsMap(), num)
+						e.addPoint(
+							str, &resAttrSet, pt.LabelsMap(),
+							pt.StartTimestamp(),
+							pt.Timestamp(),
+							number.Float64Kind, num,
+						)
 					}
 
 				case pdata.MetricDataTypeHistogram:
@@ -241,21 +249,41 @@ func (e *memoryMetricsExporter) ConsumeMetrics(ctx context.Context, md pdata.Met
 		}
 	}
 
-	// What's the relationship between this code and Delta->Cumulative
-	// (Implement memory option like OTel-Go?)
 	return nil
 }
 
-func (e *memoryMetricsExporter) addPoint(str *stream, resource *attribute.Set, attrs pdata.StringMap, num number.Number) {
-	// mAttrs := make(keyvals, 0)
+func (e *memoryMetricsExporter) addPoint(str *stream, resource *attribute.Set, attrs pdata.StringMap, start, ts pdata.Timestamp, nk number.Kind, num number.Number) {
+	// Note: not going to combine resource and attributes; mixed
+	// keys crossing resource and attributes will pass through.
 
-	// coord := coordinate{
-	// 	resource:   resAttrSet.Equivalent(),
-	// 	attributes: nil,
-	// }
+	mAttrs := make(keyvals, attrs.Len())
 
-	// _ = &coord
-	// _ = &str
+	attrs.ForEach(func(k, v string) {
+		mAttrs = append(mAttrs, attribute.String(k, v))
+	})
+
+	attrSet := attribute.NewSet(mAttrs...)
+
+	coord := coordinate{
+		resource:   resource.Equivalent(),
+		attributes: attrSet.Equivalent(),
+	}
+
+	wr, ok := str.writers[coord]
+
+	if !ok {
+		wr = &writer{}
+		str.writers[coord] = wr
+	}
+
+	pt := point{
+		start:      start,
+		ts:         ts,
+		numberKind: nk,
+		scalar:     num,
+	}
+
+	wr.points = append(wr.points, pt)
 }
 
 func (e *memoryMetricsExporter) Start(context.Context, component.Host) error {
