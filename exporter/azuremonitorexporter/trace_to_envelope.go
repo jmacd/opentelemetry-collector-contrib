@@ -60,8 +60,8 @@ func spanToEnvelope(
 
 	// According to the SpanKind documentation, we can assume it to be INTERNAL
 	// when we get UNSPECIFIED.
-	if spanKind == pdata.SpanKindUNSPECIFIED {
-		spanKind = pdata.SpanKindINTERNAL
+	if spanKind == pdata.SpanKindUnspecified {
+		spanKind = pdata.SpanKindInternal
 	}
 
 	attributeMap := span.Attributes()
@@ -82,7 +82,7 @@ func spanToEnvelope(
 	var dataSanitizeFunc func() []string
 	var dataProperties map[string]string
 
-	if spanKind == pdata.SpanKindSERVER || spanKind == pdata.SpanKindCONSUMER {
+	if spanKind == pdata.SpanKindServer || spanKind == pdata.SpanKindConsumer {
 		requestData := spanToRequestData(span, incomingSpanType)
 		dataProperties = requestData.Properties
 		dataSanitizeFunc = requestData.Sanitize
@@ -90,11 +90,11 @@ func spanToEnvelope(
 		envelope.Tags[contracts.OperationName] = requestData.Name
 		data.BaseData = requestData
 		data.BaseType = requestData.BaseType()
-	} else if spanKind == pdata.SpanKindCLIENT || spanKind == pdata.SpanKindPRODUCER || spanKind == pdata.SpanKindINTERNAL {
+	} else if spanKind == pdata.SpanKindClient || spanKind == pdata.SpanKindProducer || spanKind == pdata.SpanKindInternal {
 		remoteDependencyData := spanToRemoteDependencyData(span, incomingSpanType)
 
 		// Regardless of the detected Span type, if the SpanKind is Internal we need to set data.Type to InProc
-		if spanKind == pdata.SpanKindINTERNAL {
+		if spanKind == pdata.SpanKindInternal {
 			remoteDependencyData.Type = "InProc"
 		}
 
@@ -116,7 +116,10 @@ func spanToEnvelope(
 	resourceAttributes := resource.Attributes()
 
 	// Copy all the resource labels into the base data properties. Resource values are always strings
-	resourceAttributes.ForEach(func(k string, v pdata.AttributeValue) { dataProperties[k] = v.StringVal() })
+	resourceAttributes.Range(func(k string, v pdata.AttributeValue) bool {
+		dataProperties[k] = v.StringVal()
+		return true
+	})
 
 	// Copy the instrumentation properties
 	if instrumentationLibrary.Name() != "" {
@@ -493,14 +496,13 @@ func copyAndMapAttributes(
 	measurements map[string]float64,
 	mappingFunc func(k string, v pdata.AttributeValue)) {
 
-	attributeMap.ForEach(
-		func(k string, v pdata.AttributeValue) {
-			setAttributeValueAsPropertyOrMeasurement(k, v, properties, measurements)
-
-			if mappingFunc != nil {
-				mappingFunc(k, v)
-			}
-		})
+	attributeMap.Range(func(k string, v pdata.AttributeValue) bool {
+		setAttributeValueAsPropertyOrMeasurement(k, v, properties, measurements)
+		if mappingFunc != nil {
+			mappingFunc(k, v)
+		}
+		return true
+	})
 }
 
 // Copies all attributes to either properties or measurements without any kind of mapping to a known set of attributes
@@ -644,16 +646,16 @@ func setAttributeValueAsPropertyOrMeasurement(
 	measurements map[string]float64) {
 
 	switch attributeValue.Type() {
-	case pdata.AttributeValueBOOL:
+	case pdata.AttributeValueTypeBool:
 		properties[key] = strconv.FormatBool(attributeValue.BoolVal())
 
-	case pdata.AttributeValueSTRING:
+	case pdata.AttributeValueTypeString:
 		properties[key] = attributeValue.StringVal()
 
-	case pdata.AttributeValueINT:
+	case pdata.AttributeValueTypeInt:
 		measurements[key] = float64(attributeValue.IntVal())
 
-	case pdata.AttributeValueDOUBLE:
+	case pdata.AttributeValueTypeDouble:
 		measurements[key] = attributeValue.DoubleVal()
 	}
 }

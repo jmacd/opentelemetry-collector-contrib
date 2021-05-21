@@ -68,9 +68,9 @@ type link struct {
 	AnnotationType string `json:"meta.annotation_type"`
 }
 
-// newHoneycombTraceExporter creates and returns a new honeycombExporter. It
-// wraps the exporter in the component.TraceExporterOld helper method.
-func newHoneycombTraceExporter(cfg *Config, logger *zap.Logger) (*honeycombExporter, error) {
+// newHoneycombTracesExporter creates and returns a new honeycombExporter. It
+// wraps the exporter in the component.TracesExporterOld helper method.
+func newHoneycombTracesExporter(cfg *Config, logger *zap.Logger) (*honeycombExporter, error) {
 	libhoneyConfig := libhoney.Config{
 		WriteKey: cfg.APIKey,
 		Dataset:  cfg.Dataset,
@@ -176,17 +176,17 @@ func (e *honeycombExporter) pushTraceData(ctx context.Context, td pdata.Traces) 
 
 func getSpanKind(kind pdata.SpanKind) string {
 	switch kind {
-	case pdata.SpanKindCLIENT:
+	case pdata.SpanKindClient:
 		return "client"
-	case pdata.SpanKindSERVER:
+	case pdata.SpanKindServer:
 		return "server"
-	case pdata.SpanKindPRODUCER:
+	case pdata.SpanKindProducer:
 		return "producer"
-	case pdata.SpanKindCONSUMER:
+	case pdata.SpanKindConsumer:
 		return "consumer"
-	case pdata.SpanKindINTERNAL:
+	case pdata.SpanKindInternal:
 		return "internal"
-	case pdata.SpanKindUNSPECIFIED:
+	case pdata.SpanKindUnspecified:
 		fallthrough
 	default:
 		return "unspecified"

@@ -34,7 +34,7 @@ const (
 
 var (
 	errAtLeastOneAttributeNeeded = fmt.Errorf("option 'groupByKeys' must include at least one non-empty attribute name")
-	processorCapabilities        = component.ProcessorCapabilities{MutatesConsumedData: true}
+	consumerCapabilities         = consumer.Capabilities{MutatesData: true}
 )
 
 var once sync.Once
@@ -49,14 +49,14 @@ func NewFactory() component.ProcessorFactory {
 	return processorhelper.NewFactory(
 		typeStr,
 		createDefaultConfig,
-		processorhelper.WithTraces(createTraceProcessor),
+		processorhelper.WithTraces(createTracesProcessor),
 		processorhelper.WithLogs(createLogsProcessor))
 }
 
 // createDefaultConfig creates the default configuration for the processor.
 func createDefaultConfig() config.Processor {
 	return &Config{
-		ProcessorSettings: config.NewProcessorSettings(typeStr),
+		ProcessorSettings: config.NewProcessorSettings(config.NewID(typeStr)),
 		GroupByKeys:       []string{},
 	}
 }
@@ -84,8 +84,8 @@ func createGroupByAttrsProcessor(logger *zap.Logger, attributes []string) (*grou
 	return &groupByAttrsProcessor{logger: logger, groupByKeys: nonEmptyAttributes}, nil
 }
 
-// createTraceProcessor creates a trace processor based on this config.
-func createTraceProcessor(
+// createTracesProcessor creates a trace processor based on this config.
+func createTracesProcessor(
 	_ context.Context,
 	params component.ProcessorCreateParams,
 	cfg config.Processor,
@@ -97,11 +97,11 @@ func createTraceProcessor(
 		return nil, err
 	}
 
-	return processorhelper.NewTraceProcessor(
+	return processorhelper.NewTracesProcessor(
 		cfg,
 		nextConsumer,
 		gap,
-		processorhelper.WithCapabilities(processorCapabilities))
+		processorhelper.WithCapabilities(consumerCapabilities))
 }
 
 // createLogsProcessor creates a metrics processor based on this config.
@@ -121,5 +121,5 @@ func createLogsProcessor(
 		cfg,
 		nextConsumer,
 		gap,
-		processorhelper.WithCapabilities(processorCapabilities))
+		processorhelper.WithCapabilities(consumerCapabilities))
 }

@@ -25,6 +25,18 @@ var (
 	// conventionsMappings defines the mapping between OpenTelemetry semantic conventions
 	// and Datadog Agent conventions
 	conventionsMapping = map[string]string{
+		// Datadog conventions
+		// https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/
+		conventions.AttributeDeploymentEnvironment: "env",
+		conventions.AttributeServiceName:           "service",
+		conventions.AttributeServiceVersion:        "version",
+
+		// Cloud conventions
+		// https://www.datadoghq.com/blog/tagging-best-practices/
+		conventions.AttributeCloudProvider:         "cloud_provider",
+		conventions.AttributeCloudRegion:           "region",
+		conventions.AttributeCloudAvailabilityZone: "zone",
+
 		// ECS conventions
 		// https://github.com/DataDog/datadog-agent/blob/e081bed/pkg/tagger/collectors/ecs_extract.go
 		conventions.AttributeAWSECSTaskFamily: "task_family",
@@ -70,7 +82,7 @@ func TagsFromAttributes(attrs pdata.AttributeMap) []string {
 	var processAttributes processAttributes
 	var systemAttributes systemAttributes
 
-	attrs.ForEach(func(key string, value pdata.AttributeValue) {
+	attrs.Range(func(key string, value pdata.AttributeValue) bool {
 		switch key {
 		// Process attributes
 		case conventions.AttributeProcessExecutableName:
@@ -100,6 +112,7 @@ func TagsFromAttributes(attrs pdata.AttributeMap) []string {
 		if datadogKey, found := kubernetesMapping[key]; found && value.StringVal() != "" {
 			tags = append(tags, fmt.Sprintf("%s:%s", datadogKey, value.StringVal()))
 		}
+		return true
 	})
 
 	tags = append(tags, processAttributes.extractTags()...)

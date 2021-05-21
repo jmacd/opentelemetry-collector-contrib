@@ -55,24 +55,25 @@ func convertLogRecord(lr pdata.LogRecord, resourceAttrs pdata.AttributeMap, logg
 
 	var event sfxpb.Event
 
-	if categoryVal.Type() == pdata.AttributeValueINT {
+	if categoryVal.Type() == pdata.AttributeValueTypeInt {
 		asCat := sfxpb.EventCategory(categoryVal.IntVal())
 		event.Category = &asCat
 		attrs.Delete(splunk.SFxEventCategoryKey)
 	}
 
-	if mapVal, ok := attrs.Get(splunk.SFxEventPropertiesKey); ok && mapVal.Type() == pdata.AttributeValueMAP {
-		mapVal.MapVal().ForEach(func(k string, v pdata.AttributeValue) {
+	if mapVal, ok := attrs.Get(splunk.SFxEventPropertiesKey); ok && mapVal.Type() == pdata.AttributeValueTypeMap {
+		mapVal.MapVal().Range(func(k string, v pdata.AttributeValue) bool {
 			val, err := attributeValToPropertyVal(v)
 			if err != nil {
 				logger.Debug("Failed to convert log record property value to SignalFx property value", zap.Error(err), zap.String("key", k))
-				return
+				return true
 			}
 
 			event.Properties = append(event.Properties, &sfxpb.Property{
 				Key:   k,
 				Value: val,
 			})
+			return true
 		})
 	}
 	attrs.Delete(splunk.SFxEventPropertiesKey)
@@ -80,27 +81,29 @@ func convertLogRecord(lr pdata.LogRecord, resourceAttrs pdata.AttributeMap, logg
 	// keep a record of Resource attributes to add as dimensions
 	// so as not to modify LogRecord attributes
 	resourceAttrsForDimensions := pdata.NewAttributeMap()
-	resourceAttrs.ForEach(func(k string, v pdata.AttributeValue) {
+	resourceAttrs.Range(func(k string, v pdata.AttributeValue) bool {
 		// LogRecord attribute takes priority
 		if _, ok := attrs.Get(k); !ok {
 			resourceAttrsForDimensions.Insert(k, v)
 		}
+		return true
 	})
 
-	addDimension := func(k string, v pdata.AttributeValue) {
-		if v.Type() != pdata.AttributeValueSTRING {
+	addDimension := func(k string, v pdata.AttributeValue) bool {
+		if v.Type() != pdata.AttributeValueTypeString {
 			logger.Debug("Failed to convert log record or resource attribute value to SignalFx property value, key is not a string", zap.String("key", k))
-			return
+			return true
 		}
 
 		event.Dimensions = append(event.Dimensions, &sfxpb.Dimension{
 			Key:   k,
 			Value: v.StringVal(),
 		})
+		return true
 	}
 
-	resourceAttrsForDimensions.ForEach(addDimension)
-	attrs.ForEach(addDimension)
+	resourceAttrsForDimensions.Range(addDimension)
+	attrs.Range(addDimension)
 
 	event.EventType = lr.Name()
 	// Convert nanoseconds to nearest milliseconds, which is the unit of
@@ -113,16 +116,16 @@ func convertLogRecord(lr pdata.LogRecord, resourceAttrs pdata.AttributeMap, logg
 func attributeValToPropertyVal(v pdata.AttributeValue) (*sfxpb.PropertyValue, error) {
 	var val sfxpb.PropertyValue
 	switch v.Type() {
-	case pdata.AttributeValueINT:
+	case pdata.AttributeValueTypeInt:
 		asInt := v.IntVal()
 		val.IntValue = &asInt
-	case pdata.AttributeValueBOOL:
+	case pdata.AttributeValueTypeBool:
 		asBool := v.BoolVal()
 		val.BoolValue = &asBool
-	case pdata.AttributeValueDOUBLE:
+	case pdata.AttributeValueTypeDouble:
 		asDouble := v.DoubleVal()
 		val.DoubleValue = &asDouble
-	case pdata.AttributeValueSTRING:
+	case pdata.AttributeValueTypeString:
 		asString := v.StringVal()
 		val.StrValue = &asString
 	default:

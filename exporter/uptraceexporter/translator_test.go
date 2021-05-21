@@ -34,8 +34,8 @@ func fillAttributeMap(m pdata.AttributeMap) {
 
 	arrVal := pdata.NewAttributeValueArray()
 	arr := arrVal.ArrayVal()
-	arr.Append(pdata.NewAttributeValueBool(true))
-	arr.Append(pdata.NewAttributeValueBool(false))
+	arr.AppendEmpty().SetBoolVal(true)
+	arr.AppendEmpty().SetBoolVal(false)
 	m.Insert("array", arrVal)
 }
 
@@ -70,7 +70,7 @@ func TestEmptyArrayLabelValue(t *testing.T) {
 
 func TestArrayLabelValue(t *testing.T) {
 	arr := pdata.NewAnyValueArray()
-	arr.Append(pdata.NewAttributeValueNull())
+	arr.AppendEmpty()
 	_, ok := arrayLabelValue(arr)
 	require.False(t, ok)
 
@@ -78,7 +78,7 @@ func TestArrayLabelValue(t *testing.T) {
 	fillAttributeMap(mapVal.MapVal())
 
 	arr = pdata.NewAnyValueArray()
-	arr.Append(mapVal)
+	mapVal.CopyTo(arr.AppendEmpty())
 	value, ok := arrayLabelValue(arr)
 	require.True(t, ok)
 	require.Equal(t, attribute.STRING, value.Type())
@@ -95,13 +95,13 @@ func TestArrayLabelValue(t *testing.T) {
 	}
 	for _, test := range tests {
 		arr := pdata.NewAnyValueArray()
-		arr.Append(test.val)
+		test.val.CopyTo(arr.AppendEmpty())
 
 		value, ok := arrayLabelValue(arr)
 		require.True(t, ok)
 		require.Equal(t, attribute.ARRAY, value.Type())
 
-		arr.Append(pdata.NewAttributeValueNull())
+		arr.AppendEmpty()
 		_, ok = arrayLabelValue(arr)
 		require.False(t, ok)
 	}
@@ -114,11 +114,11 @@ func TestSpanKind(t *testing.T) {
 	}
 
 	tests := []Test{
-		{pdata.SpanKindCLIENT, "client"},
-		{pdata.SpanKindSERVER, "server"},
-		{pdata.SpanKindPRODUCER, "producer"},
-		{pdata.SpanKindCONSUMER, "consumer"},
-		{pdata.SpanKindINTERNAL, "internal"},
+		{pdata.SpanKindClient, "client"},
+		{pdata.SpanKindServer, "server"},
+		{pdata.SpanKindProducer, "producer"},
+		{pdata.SpanKindConsumer, "consumer"},
+		{pdata.SpanKindInternal, "internal"},
 	}
 
 	for _, test := range tests {

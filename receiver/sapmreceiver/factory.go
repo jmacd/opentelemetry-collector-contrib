@@ -42,15 +42,12 @@ func NewFactory() component.ReceiverFactory {
 	return receiverhelper.NewFactory(
 		typeStr,
 		createDefaultConfig,
-		receiverhelper.WithTraces(createTraceReceiver))
+		receiverhelper.WithTraces(createTracesReceiver))
 }
 
 func createDefaultConfig() config.Receiver {
 	return &Config{
-		ReceiverSettings: config.ReceiverSettings{
-			TypeVal: typeStr,
-			NameVal: typeStr,
-		},
+		ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
 		HTTPServerSettings: confighttp.HTTPServerSettings{
 			Endpoint: defaultEndpoint,
 		},
@@ -85,7 +82,7 @@ func (rCfg *Config) validate() error {
 }
 
 // CreateTracesReceiver creates a trace receiver based on provided config.
-func createTraceReceiver(
+func createTracesReceiver(
 	ctx context.Context,
 	params component.ReceiverCreateParams,
 	cfg config.Receiver,

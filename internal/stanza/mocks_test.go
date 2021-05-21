@@ -17,6 +17,7 @@ package stanza
 import (
 	"context"
 	"fmt"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -25,6 +26,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-log-collection/operator/builtin/transformer/noop"
 	"github.com/open-telemetry/opentelemetry-log-collection/operator/helper"
 	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/pdata"
 )
 
@@ -63,7 +65,7 @@ func (c *UnstartableConfig) Build(context operator.BuildContext) ([]operator.Ope
 }
 
 // Start will return an error
-func (o *UnstartableOperator) Start() error {
+func (o *UnstartableOperator) Start(_ operator.Persister) error {
 	return fmt.Errorf("something very unusual happened")
 }
 
@@ -74,6 +76,10 @@ func (o *UnstartableOperator) Process(ctx context.Context, entry *entry.Entry) e
 
 type mockLogsConsumer struct {
 	received int32
+}
+
+func (m *mockLogsConsumer) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
 }
 
 func (m *mockLogsConsumer) ConsumeLogs(ctx context.Context, ld pdata.Logs) error {
@@ -88,6 +94,10 @@ func (m *mockLogsConsumer) Received() int {
 
 type mockLogsRejecter struct {
 	rejected int32
+}
+
+func (m *mockLogsRejecter) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
 }
 
 func (m *mockLogsRejecter) ConsumeLogs(ctx context.Context, ld pdata.Logs) error {
@@ -115,11 +125,8 @@ func (f TestReceiverType) Type() config.Type {
 func (f TestReceiverType) CreateDefaultConfig() config.Receiver {
 	return &TestConfig{
 		BaseConfig: BaseConfig{
-			ReceiverSettings: config.ReceiverSettings{
-				TypeVal: config.Type(testType),
-				NameVal: testType,
-			},
-			Operators: OperatorConfigs{},
+			ReceiverSettings: config.NewReceiverSettings(config.NewID(testType)),
+			Operators:        OperatorConfigs{},
 			Converter: ConverterConfig{
 				MaxFlushCount: 1,
 				FlushInterval: 100 * time.Millisecond,
@@ -146,4 +153,41 @@ func (f TestReceiverType) DecodeInputConfig(cfg config.Receiver) (*operator.Conf
 		return nil, fmt.Errorf("Unknown input type")
 	}
 	return &operator.Config{Builder: NewUnstartableConfig()}, nil
+}
+
+func newMockPersister() *persister {
+	return &persister{
+		client: newMockClient(),
+	}
+}
+
+type mockClient struct {
+	cache    map[string][]byte
+	cacheMux sync.Mutex
+}
+
+func newMockClient() *mockClient {
+	return &mockClient{
+		cache: make(map[string][]byte),
+	}
+}
+
+func (p *mockClient) Get(_ context.Context, key string) ([]byte, error) {
+	p.cacheMux.Lock()
+	defer p.cacheMux.Unlock()
+	return p.cache[key], nil
+}
+
+func (p *mockClient) Set(_ context.Context, key string, value []byte) error {
+	p.cacheMux.Lock()
+	defer p.cacheMux.Unlock()
+	p.cache[key] = value
+	return nil
+}
+
+func (p *mockClient) Delete(_ context.Context, key string) error {
+	p.cacheMux.Lock()
+	defer p.cacheMux.Unlock()
+	delete(p.cache, key)
+	return nil
 }

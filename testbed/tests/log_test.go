@@ -41,7 +41,7 @@ func TestLog10kDPS(t *testing.T) {
 			sender:   testbed.NewOTLPLogsDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t)),
 			receiver: testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)),
 			resourceSpec: testbed.ResourceSpec{
-				ExpectedMaxCPU: 30,
+				ExpectedMaxCPU: 35,
 				ExpectedMaxRAM: 82,
 			},
 		},
@@ -53,6 +53,16 @@ func TestLog10kDPS(t *testing.T) {
 				ExpectedMaxCPU: 30,
 				ExpectedMaxRAM: 85,
 			},
+		},
+		{
+			name:     "filelog checkpoints",
+			sender:   datasenders.NewFileLogWriter(),
+			receiver: testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)),
+			resourceSpec: testbed.ResourceSpec{
+				ExpectedMaxCPU: 30,
+				ExpectedMaxRAM: 85,
+			},
+			extensions: datasenders.NewLocalFileStorageExtension(),
 		},
 		{
 			name:     "kubernetes containers",
@@ -101,7 +111,7 @@ func TestLog10kDPS(t *testing.T) {
 		},
 		{
 			name:     "syslog-tcp-batch-1",
-			sender:   datasenders.NewSyslogWriter("tcp", testbed.DefaultHost, testbed.GetAvailablePort(t), 1),
+			sender:   datasenders.NewTCPUDPWriter("tcp", testbed.DefaultHost, testbed.GetAvailablePort(t), 1),
 			receiver: testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)),
 			resourceSpec: testbed.ResourceSpec{
 				ExpectedMaxCPU: 80,
@@ -110,7 +120,7 @@ func TestLog10kDPS(t *testing.T) {
 		},
 		{
 			name:     "syslog-tcp-batch-100",
-			sender:   datasenders.NewSyslogWriter("tcp", testbed.DefaultHost, testbed.GetAvailablePort(t), 100),
+			sender:   datasenders.NewTCPUDPWriter("tcp", testbed.DefaultHost, testbed.GetAvailablePort(t), 100),
 			receiver: testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)),
 			resourceSpec: testbed.ResourceSpec{
 				ExpectedMaxCPU: 80,
@@ -133,6 +143,24 @@ func TestLog10kDPS(t *testing.T) {
 			receiver: datareceivers.NewSplunkHECDataReceiver(testbed.GetAvailablePort(t)),
 			resourceSpec: testbed.ResourceSpec{
 				ExpectedMaxCPU: 60,
+				ExpectedMaxRAM: 150,
+			},
+		},
+		{
+			name:     "tcp-batch-1",
+			sender:   datasenders.NewTCPUDPWriter("tcp", testbed.DefaultHost, testbed.GetAvailablePort(t), 1),
+			receiver: testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)),
+			resourceSpec: testbed.ResourceSpec{
+				ExpectedMaxCPU: 80,
+				ExpectedMaxRAM: 150,
+			},
+		},
+		{
+			name:     "tcp-batch-100",
+			sender:   datasenders.NewTCPUDPWriter("tcp", testbed.DefaultHost, testbed.GetAvailablePort(t), 100),
+			receiver: testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)),
+			resourceSpec: testbed.ResourceSpec{
+				ExpectedMaxCPU: 80,
 				ExpectedMaxRAM: 150,
 			},
 		},

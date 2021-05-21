@@ -19,6 +19,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -139,25 +140,26 @@ func (p *ResourceProvider) detectResource(ctx context.Context) {
 
 func AttributesToMap(am pdata.AttributeMap) map[string]interface{} {
 	mp := make(map[string]interface{}, am.Len())
-	am.ForEach(func(k string, v pdata.AttributeValue) {
+	am.Range(func(k string, v pdata.AttributeValue) bool {
 		mp[k] = UnwrapAttribute(v)
+		return true
 	})
 	return mp
 }
 
 func UnwrapAttribute(v pdata.AttributeValue) interface{} {
 	switch v.Type() {
-	case pdata.AttributeValueBOOL:
+	case pdata.AttributeValueTypeBool:
 		return v.BoolVal()
-	case pdata.AttributeValueINT:
+	case pdata.AttributeValueTypeInt:
 		return v.IntVal()
-	case pdata.AttributeValueDOUBLE:
+	case pdata.AttributeValueTypeDouble:
 		return v.DoubleVal()
-	case pdata.AttributeValueSTRING:
+	case pdata.AttributeValueTypeString:
 		return v.StringVal()
-	case pdata.AttributeValueARRAY:
+	case pdata.AttributeValueTypeArray:
 		return getSerializableArray(v.ArrayVal())
-	case pdata.AttributeValueMAP:
+	case pdata.AttributeValueTypeMap:
 		return AttributesToMap(v.MapVal())
 	default:
 		return nil
@@ -179,15 +181,25 @@ func MergeResource(to, from pdata.Resource, overrideTo bool) {
 	}
 
 	toAttr := to.Attributes()
-	from.Attributes().ForEach(func(k string, v pdata.AttributeValue) {
+	from.Attributes().Range(func(k string, v pdata.AttributeValue) bool {
 		if overrideTo {
 			toAttr.Upsert(k, v)
 		} else {
 			toAttr.Insert(k, v)
 		}
+		return true
 	})
 }
 
 func IsEmptyResource(res pdata.Resource) bool {
 	return res.Attributes().Len() == 0
+}
+
+// GOOSToOSType maps a runtime.GOOS-like value to os.type style.
+func GOOSToOSType(goos string) string {
+	switch goos {
+	case "dragonfly":
+		return "DRAGONFLYBSD"
+	}
+	return strings.ToUpper(goos)
 }

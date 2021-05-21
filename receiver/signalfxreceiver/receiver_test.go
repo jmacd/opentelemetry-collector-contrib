@@ -18,13 +18,12 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"runtime"
@@ -44,7 +43,6 @@ import (
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.opentelemetry.io/collector/testutil"
-	"go.opentelemetry.io/collector/translator/internaldata"
 	"go.uber.org/zap"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter"
@@ -66,7 +64,7 @@ func Test_signalfxeceiver_New(t *testing.T) {
 			args: args{
 				config: *defaultConfig,
 			},
-			wantStartErr: errNilNextConsumer,
+			wantStartErr: componenterror.ErrNilNextConsumer,
 		},
 		{
 			name: "default_endpoint",
@@ -111,62 +109,56 @@ func Test_signalfxeceiver_EndToEnd(t *testing.T) {
 	require.NoError(t, r.Start(context.Background(), componenttest.NewNopHost()))
 	runtime.Gosched()
 	defer r.Shutdown(context.Background())
-	require.Equal(t, componenterror.ErrAlreadyStarted, r.Start(context.Background(), componenttest.NewNopHost()))
 
 	unixSecs := int64(1574092046)
 	unixNSecs := int64(11 * time.Millisecond)
 	ts := pdata.TimestampFromTime(time.Unix(unixSecs, unixNSecs))
 
-	doubleVal := 1234.5678
-	doublePt := pdata.NewDoubleDataPoint()
-	doublePt.SetTimestamp(ts)
-	doublePt.SetValue(doubleVal)
-
-	int64Val := int64(123)
-	int64Pt := pdata.NewIntDataPoint()
-	int64Pt.SetTimestamp(ts)
-	int64Pt.SetValue(int64Val)
+	const doubleVal = 1234.5678
+	const int64Val = int64(123)
 
 	want := pdata.NewMetrics()
-	rms := want.ResourceMetrics()
-	rms.Resize(1)
-	rm := rms.At(0)
-
-	rm.InstrumentationLibraryMetrics().Resize(1)
-	ilm := rm.InstrumentationLibraryMetrics().At(0)
-	ilm.Metrics().Resize(4)
+	ilm := want.ResourceMetrics().AppendEmpty().InstrumentationLibraryMetrics().AppendEmpty()
 
 	{
-		m := ilm.Metrics().At(0)
+		m := ilm.Metrics().AppendEmpty()
 		m.SetName("gauge_double_with_dims")
 		m.SetDataType(pdata.MetricDataTypeDoubleGauge)
-		m.DoubleGauge().DataPoints().Append(doublePt)
+		doublePt := m.DoubleGauge().DataPoints().AppendEmpty()
+		doublePt.SetTimestamp(ts)
+		doublePt.SetValue(doubleVal)
 	}
 	{
-		m := ilm.Metrics().At(1)
+		m := ilm.Metrics().AppendEmpty()
 		m.SetName("gauge_int_with_dims")
 		m.SetDataType(pdata.MetricDataTypeIntGauge)
-		m.IntGauge().DataPoints().Append(int64Pt)
+		int64Pt := m.IntGauge().DataPoints().AppendEmpty()
+		int64Pt.SetTimestamp(ts)
+		int64Pt.SetValue(int64Val)
 	}
 	{
-		m := ilm.Metrics().At(2)
+		m := ilm.Metrics().AppendEmpty()
 		m.SetName("cumulative_double_with_dims")
 		m.SetDataType(pdata.MetricDataTypeDoubleSum)
 		m.DoubleSum().SetAggregationTemporality(pdata.AggregationTemporalityCumulative)
 		m.DoubleSum().SetIsMonotonic(true)
-		m.DoubleSum().DataPoints().Append(doublePt)
+		doublePt := m.DoubleSum().DataPoints().AppendEmpty()
+		doublePt.SetTimestamp(ts)
+		doublePt.SetValue(doubleVal)
 	}
 	{
-		m := ilm.Metrics().At(3)
+		m := ilm.Metrics().AppendEmpty()
 		m.SetName("cumulative_int_with_dims")
 		m.SetDataType(pdata.MetricDataTypeIntSum)
 		m.IntSum().SetAggregationTemporality(pdata.AggregationTemporalityCumulative)
 		m.IntSum().SetIsMonotonic(true)
-		m.IntSum().DataPoints().Append(int64Pt)
+		int64Pt := m.IntSum().DataPoints().AppendEmpty()
+		int64Pt.SetTimestamp(ts)
+		int64Pt.SetValue(int64Val)
 	}
 
 	expCfg := &signalfxexporter.Config{
-		ExporterSettings: config.NewExporterSettings("signalfx"),
+		ExporterSettings: config.NewExporterSettings(config.NewID("signalfx")),
 		IngestURL:        "http://" + addr + "/v2/datapoint",
 		APIURL:           "http://localhost",
 		AccessToken:      "access_token",
@@ -177,7 +169,14 @@ func Test_signalfxeceiver_EndToEnd(t *testing.T) {
 		expCfg)
 	require.NoError(t, err)
 	require.NoError(t, exp.Start(context.Background(), componenttest.NewNopHost()))
-	require.NoError(t, testutil.WaitForPort(t, port))
+	assert.Eventually(t, func() bool {
+		conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
+		if err == nil && conn != nil {
+			conn.Close()
+			return true
+		}
+		return false
+	}, 10*time.Second, 5*time.Millisecond, "failed to wait for the port to be open")
 	defer exp.Shutdown(context.Background())
 	require.NoError(t, exp.ConsumeMetrics(context.Background(), want))
 
@@ -186,9 +185,6 @@ func Test_signalfxeceiver_EndToEnd(t *testing.T) {
 	got := mds[0]
 	require.Equal(t, 1, got.ResourceMetrics().Len())
 	assert.Equal(t, want, got)
-
-	assert.NoError(t, r.Shutdown(context.Background()))
-	assert.Equal(t, componenterror.ErrAlreadyStopped, r.Shutdown(context.Background()))
 }
 
 func Test_sfxReceiver_handleReq(t *testing.T) {
@@ -547,8 +543,8 @@ func Test_sfxReceiver_TLS(t *testing.T) {
 	cfg.Endpoint = addr
 	cfg.HTTPServerSettings.TLSSetting = &configtls.TLSServerSetting{
 		TLSSetting: configtls.TLSSetting{
-			CertFile: "./testdata/testcert.crt",
-			KeyFile:  "./testdata/testkey.key",
+			CertFile: "./testdata/server.crt",
+			KeyFile:  "./testdata/server.key",
 		},
 	}
 	sink := new(consumertest.MetricsSink)
@@ -566,21 +562,12 @@ func Test_sfxReceiver_TLS(t *testing.T) {
 	msec := time.Now().Unix() * 1e3
 
 	want := pdata.NewMetrics()
-	want.ResourceMetrics().Resize(1)
-	rm := want.ResourceMetrics().At(0)
-	rm.InstrumentationLibraryMetrics().Resize(1)
-	ilm := rm.InstrumentationLibraryMetrics().At(0)
-	ms := ilm.Metrics()
-
-	ms.Resize(1)
-	m := ms.At(0)
+	m := want.ResourceMetrics().AppendEmpty().InstrumentationLibraryMetrics().AppendEmpty().Metrics().AppendEmpty()
 
 	m.SetDataType(pdata.MetricDataTypeIntGauge)
 	m.SetName("single")
 	dps := m.IntGauge().DataPoints()
-
-	dps.Resize(1)
-	dp := dps.At(0)
+	dp := dps.AppendEmpty()
 	dp.SetTimestamp(pdata.Timestamp(msec * 1e6))
 	dp.SetValue(13)
 
@@ -603,16 +590,19 @@ func Test_sfxReceiver_TLS(t *testing.T) {
 	require.NoErrorf(t, err, "should have no errors with new request: %v", err)
 	req.Header.Set("Content-Type", "application/x-protobuf")
 
-	caCert, err := ioutil.ReadFile("./testdata/testcert.crt")
-	require.NoErrorf(t, err, "failed to load certificate: %v", err)
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
+	tlscs := configtls.TLSClientSetting{
+		TLSSetting: configtls.TLSSetting{
+			CAFile:   "./testdata/ca.crt",
+			CertFile: "./testdata/client.crt",
+			KeyFile:  "./testdata/client.key",
+		},
+		ServerName: "localhost",
+	}
+	tls, errTLS := tlscs.LoadTLSConfig()
+	assert.NoError(t, errTLS)
 	client := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs: caCertPool,
-			},
+			TLSClientConfig: tls,
 		},
 	}
 
@@ -690,11 +680,10 @@ func Test_sfxReceiver_DatapointAccessTokenPassthrough(t *testing.T) {
 
 			mds := sink.AllMetrics()
 			require.Len(t, mds, 1)
-			got := internaldata.MetricsToOC(mds[0])
-			require.Len(t, got, 1)
+			resource := mds[0].ResourceMetrics().At(0).Resource()
 			tokenLabel := ""
-			if got[0].Resource != nil && got[0].Resource.Labels != nil {
-				tokenLabel = got[0].Resource.Labels["com.splunk.signalfx.access_token"]
+			if label, ok := resource.Attributes().Get("com.splunk.signalfx.access_token"); ok {
+				tokenLabel = label.StringVal()
 			}
 
 			if tt.passthrough {

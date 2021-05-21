@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"sync"
 
+	agentmetricspb "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/obsreport"
@@ -78,7 +79,7 @@ func (r *Receiver) Start(ctx context.Context, host component.Host) error {
 		return err
 	}
 
-	r.obsCtx = obsreport.ReceiverContext(ctx, r.config.Name(), r.transport)
+	r.obsCtx = obsreport.ReceiverContext(ctx, r.config.ID(), r.transport)
 
 	r.runnerCtx, r.runnerCancel = context.WithCancel(context.Background())
 	r.runner = interval.NewRunner(r.config.CollectionInterval, r)
@@ -110,7 +111,7 @@ func (r *Receiver) Setup() error {
 }
 
 type result struct {
-	md  *internaldata.MetricsData
+	md  *agentmetricspb.ExportMetricsServiceRequest
 	err error
 }
 
@@ -119,7 +120,7 @@ func (r *Receiver) Run() error {
 		return r.Setup()
 	}
 
-	c := obsreport.StartMetricsReceiveOp(r.obsCtx, typeStr, r.transport)
+	c := obsreport.StartMetricsReceiveOp(r.obsCtx, r.config.ID(), r.transport)
 
 	containers := r.client.Containers()
 	results := make(chan result, len(containers))
@@ -142,7 +143,7 @@ func (r *Receiver) Run() error {
 	for result := range results {
 		var err error
 		if result.md != nil {
-			md := internaldata.OCToMetrics(*result.md)
+			md := internaldata.OCToMetrics(result.md.Node, result.md.Resource, result.md.Metrics)
 			_, np := md.MetricAndDataPointCount()
 			numPoints += np
 			err = r.nextConsumer.ConsumeMetrics(r.runnerCtx, md)

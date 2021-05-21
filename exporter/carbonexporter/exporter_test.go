@@ -55,7 +55,7 @@ func TestNew(t *testing.T) {
 		{
 			name: "invalid_tcp_addr",
 			config: &Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 				Endpoint:         "http://localhost:2003",
 			},
 			wantErr: true,
@@ -63,7 +63,7 @@ func TestNew(t *testing.T) {
 		{
 			name: "invalid_timeout",
 			config: &Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 				Timeout:          -5 * time.Second,
 			},
 			wantErr: true,
@@ -86,16 +86,14 @@ func TestNew(t *testing.T) {
 
 func TestConsumeMetricsData(t *testing.T) {
 	t.Skip("skipping flaky test, see https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/396")
-	smallBatch := internaldata.OCToMetrics(internaldata.MetricsData{
-		Metrics: []*metricspb.Metric{
-			metricstestutil.Gauge(
-				"test_gauge",
-				[]string{"k0", "k1"},
-				metricstestutil.Timeseries(
-					time.Now(),
-					[]string{"v0", "v1"},
-					metricstestutil.Double(time.Now(), 123))),
-		},
+	smallBatch := internaldata.OCToMetrics(nil, nil, []*metricspb.Metric{
+		metricstestutil.Gauge(
+			"test_gauge",
+			[]string{"k0", "k1"},
+			metricstestutil.Timeseries(
+				time.Now(),
+				[]string{"v0", "v1"},
+				metricstestutil.Double(time.Now(), 123))),
 	})
 
 	largeBatch := generateLargeBatch()
@@ -285,16 +283,10 @@ func Test_connPool_Concurrency(t *testing.T) {
 }
 
 func generateLargeBatch() pdata.Metrics {
-	md := internaldata.MetricsData{
-		Node: &commonpb.Node{
-			ServiceInfo: &commonpb.ServiceInfo{Name: "test_carbon"},
-		},
-		Resource: &resourcepb.Resource{Type: "test"},
-	}
-
+	var metrics []*metricspb.Metric
 	ts := time.Now()
 	for i := 0; i < 65000; i++ {
-		md.Metrics = append(md.Metrics,
+		metrics = append(metrics,
 			metricstestutil.Gauge(
 				"test_"+strconv.Itoa(i),
 				[]string{"k0", "k1"},
@@ -310,5 +302,10 @@ func generateLargeBatch() pdata.Metrics {
 		)
 	}
 
-	return internaldata.OCToMetrics(md)
+	return internaldata.OCToMetrics(
+		&commonpb.Node{
+			ServiceInfo: &commonpb.ServiceInfo{Name: "test_carbon"},
+		},
+		&resourcepb.Resource{Type: "test"},
+		metrics)
 }

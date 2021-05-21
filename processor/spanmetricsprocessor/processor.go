@@ -83,7 +83,7 @@ type processorImp struct {
 	metricKeyToDimensions map[metricKey]dimKV
 }
 
-func newProcessor(logger *zap.Logger, config config.Exporter, nextConsumer consumer.Traces) (*processorImp, error) {
+func newProcessor(logger *zap.Logger, config config.Processor, nextConsumer consumer.Traces) (*processorImp, error) {
 	logger.Info("Building spanmetricsprocessor")
 	pConfig := config.(*Config)
 
@@ -166,16 +166,16 @@ func (p *processorImp) Start(ctx context.Context, host component.Host) error {
 	for k, exp := range exporters[config.MetricsDataType] {
 		metricsExp, ok := exp.(component.MetricsExporter)
 		if !ok {
-			return fmt.Errorf("the exporter %q isn't a metrics exporter", k.Name())
+			return fmt.Errorf("the exporter %q isn't a metrics exporter", k.String())
 		}
 
-		availableMetricsExporters = append(availableMetricsExporters, k.Name())
+		availableMetricsExporters = append(availableMetricsExporters, k.String())
 
 		p.logger.Debug("Looking for spanmetrics exporter from available exporters",
 			zap.String("spanmetrics-exporter", p.config.MetricsExporter),
 			zap.Any("available-exporters", availableMetricsExporters),
 		)
-		if k.Name() == p.config.MetricsExporter {
+		if k.String() == p.config.MetricsExporter {
 			p.metricsExporter = metricsExp
 			p.logger.Info("Found exporter", zap.String("spanmetrics-exporter", p.config.MetricsExporter))
 			break
@@ -195,18 +195,15 @@ func (p *processorImp) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-// GetCapabilities implements the component.Processor interface.
-func (p *processorImp) GetCapabilities() component.ProcessorCapabilities {
-	p.logger.Info("GetCapabilities for spanmetricsprocessor")
-	return component.ProcessorCapabilities{MutatesConsumedData: false}
+// Capabilities implements the consumer interface.
+func (p *processorImp) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
 }
 
 // ConsumeTraces implements the consumer.Traces interface.
 // It aggregates the trace data to generate metrics, forwarding these metrics to the discovered metrics exporter.
 // The original input trace data will be forwarded to the next consumer, unmodified.
 func (p *processorImp) ConsumeTraces(ctx context.Context, traces pdata.Traces) error {
-	p.logger.Info("Consuming trace data")
-
 	p.aggregateMetrics(traces)
 
 	m := p.buildMetrics()
@@ -217,38 +214,34 @@ func (p *processorImp) ConsumeTraces(ctx context.Context, traces pdata.Traces) e
 	}
 
 	// Forward trace data unmodified.
-	if err := p.nextConsumer.ConsumeTraces(ctx, traces); err != nil {
-		return err
-	}
-
-	return nil
+	return p.nextConsumer.ConsumeTraces(ctx, traces)
 }
 
 // buildMetrics collects the computed raw metrics data, builds the metrics object and
 // writes the raw metrics data into the metrics object.
 func (p *processorImp) buildMetrics() *pdata.Metrics {
-	ilm := pdata.NewInstrumentationLibraryMetrics()
+	m := pdata.NewMetrics()
+	ilm := m.ResourceMetrics().AppendEmpty().InstrumentationLibraryMetrics().AppendEmpty()
 	ilm.InstrumentationLibrary().SetName("spanmetricsprocessor")
 
 	p.lock.RLock()
-	p.collectCallMetrics(&ilm)
-	p.collectLatencyMetrics(&ilm)
+	p.collectCallMetrics(ilm)
+	p.collectLatencyMetrics(ilm)
 	p.lock.RUnlock()
 
-	rm := pdata.NewResourceMetrics()
-	ilms := rm.InstrumentationLibraryMetrics()
-	ilms.Append(ilm)
-
-	m := pdata.NewMetrics()
-	m.ResourceMetrics().Append(rm)
 	return &m
 }
 
 // collectLatencyMetrics collects the raw latency metrics, writing the data
 // into the given instrumentation library metrics.
-func (p *processorImp) collectLatencyMetrics(ilm *pdata.InstrumentationLibraryMetrics) {
+func (p *processorImp) collectLatencyMetrics(ilm pdata.InstrumentationLibraryMetrics) {
 	for key := range p.latencyCount {
-		dpLatency := pdata.NewIntHistogramDataPoint()
+		mLatency := ilm.Metrics().AppendEmpty()
+		mLatency.SetDataType(pdata.MetricDataTypeIntHistogram)
+		mLatency.SetName("latency")
+		mLatency.IntHistogram().SetAggregationTemporality(pdata.AggregationTemporalityCumulative)
+
+		dpLatency := mLatency.IntHistogram().DataPoints().AppendEmpty()
 		dpLatency.SetStartTimestamp(pdata.TimestampFromTime(p.startTime))
 		dpLatency.SetTimestamp(pdata.TimestampFromTime(time.Now()))
 		dpLatency.SetExplicitBounds(p.latencyBounds)
@@ -257,34 +250,25 @@ func (p *processorImp) collectLatencyMetrics(ilm *pdata.InstrumentationLibraryMe
 		dpLatency.SetSum(int64(p.latencySum[key]))
 
 		dpLatency.LabelsMap().InitFromMap(p.metricKeyToDimensions[key])
-
-		mLatency := pdata.NewMetric()
-		mLatency.SetDataType(pdata.MetricDataTypeIntHistogram)
-		mLatency.SetName("latency")
-		mLatency.IntHistogram().DataPoints().Append(dpLatency)
-		mLatency.IntHistogram().SetAggregationTemporality(pdata.AggregationTemporalityCumulative)
-		ilm.Metrics().Append(mLatency)
 	}
 }
 
 // collectCallMetrics collects the raw call count metrics, writing the data
 // into the given instrumentation library metrics.
-func (p *processorImp) collectCallMetrics(ilm *pdata.InstrumentationLibraryMetrics) {
+func (p *processorImp) collectCallMetrics(ilm pdata.InstrumentationLibraryMetrics) {
 	for key := range p.callSum {
-		dpCalls := pdata.NewIntDataPoint()
+		mCalls := ilm.Metrics().AppendEmpty()
+		mCalls.SetDataType(pdata.MetricDataTypeIntSum)
+		mCalls.SetName("calls_total")
+		mCalls.IntSum().SetIsMonotonic(true)
+		mCalls.IntSum().SetAggregationTemporality(pdata.AggregationTemporalityCumulative)
+
+		dpCalls := mCalls.IntSum().DataPoints().AppendEmpty()
 		dpCalls.SetStartTimestamp(pdata.TimestampFromTime(p.startTime))
 		dpCalls.SetTimestamp(pdata.TimestampFromTime(time.Now()))
 		dpCalls.SetValue(p.callSum[key])
 
 		dpCalls.LabelsMap().InitFromMap(p.metricKeyToDimensions[key])
-
-		mCalls := pdata.NewMetric()
-		mCalls.SetDataType(pdata.MetricDataTypeIntSum)
-		mCalls.SetName("calls_total")
-		mCalls.IntSum().SetIsMonotonic(true)
-		mCalls.IntSum().DataPoints().Append(dpCalls)
-		mCalls.IntSum().SetAggregationTemporality(pdata.AggregationTemporalityCumulative)
-		ilm.Metrics().Append(mCalls)
 	}
 }
 
@@ -355,16 +339,13 @@ func buildDimensionKVs(serviceName string, span pdata.Span, optionalDims []Dimen
 	dims[spanKindKey] = span.Kind().String()
 	dims[statusCodeKey] = span.Status().Code().String()
 	spanAttr := span.Attributes()
-	var value string
 	for _, d := range optionalDims {
-		// Set the default if configured, otherwise this metric will have no value set for the dimension.
-		if d.Default != nil {
-			value = *d.Default
-		}
 		if attr, ok := spanAttr.Get(d.Name); ok {
-			value = tracetranslator.AttributeValueToString(attr, false)
+			dims[d.Name] = tracetranslator.AttributeValueToString(attr)
+		} else if d.Default != nil {
+			// Set the default if configured, otherwise this metric should have no value set for the dimension.
+			dims[d.Name] = *d.Default
 		}
-		dims[d.Name] = value
 	}
 	return dims
 }
@@ -396,7 +377,7 @@ func buildKey(serviceName string, span pdata.Span, optionalDims []Dimension) met
 			value = *d.Default
 		}
 		if attr, ok := spanAttr.Get(d.Name); ok {
-			value = tracetranslator.AttributeValueToString(attr, false)
+			value = tracetranslator.AttributeValueToString(attr)
 		}
 		concatDimensionValue(&metricKeyBuilder, value, true)
 	}

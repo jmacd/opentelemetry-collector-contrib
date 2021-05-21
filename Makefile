@@ -25,6 +25,8 @@ INTEGRATION_TEST_MODULES := \
 	receiver/jmxreceiver/ \
 	receiver/redisreceiver \
 	receiver/zookeeperreceiver \
+	receiver/kafkametricsreceiver \
+	receiver/nginxreceiver \
 	internal/common
 
 .DEFAULT_GOAL := all
@@ -183,13 +185,13 @@ generate:
 # Build the Collector executable.
 .PHONY: otelcontribcol
 otelcontribcol:
-	GO111MODULE=on CGO_ENABLED=0 go build -o ./bin/otelcontribcol_$(GOOS)_$(GOARCH)$(EXTENSION) \
+	GO111MODULE=on CGO_ENABLED=0 go build -trimpath -o ./bin/otelcontribcol_$(GOOS)_$(GOARCH)$(EXTENSION) \
 		$(BUILD_INFO) ./cmd/otelcontribcol
 
 # Build the Collector executable, including unstable functionality.
 .PHONY: otelcontribcol-unstable
 otelcontribcol-unstable:
-	GO111MODULE=on CGO_ENABLED=0 go build -o ./bin/otelcontribcol_unstable_$(GOOS)_$(GOARCH)$(EXTENSION) \
+	GO111MODULE=on CGO_ENABLED=0 go build -trimpath -o ./bin/otelcontribcol_unstable_$(GOOS)_$(GOARCH)$(EXTENSION) \
 		$(BUILD_INFO) -tags enable_unstable ./cmd/otelcontribcol
 
 .PHONY: otelcontribcol-all-sys
@@ -257,3 +259,21 @@ build-examples:
 .PHONY: checkdoc
 checkdoc:
 	checkdoc --project-path $(CURDIR) --component-rel-path $(COMP_REL_PATH) --module-name $(MOD_NAME)
+
+# Function to execute a command. Note the empty line before endef to make sure each command
+# gets executed separately instead of concatenated with previous one.
+# Accepts command to execute as first parameter.
+define exec-command
+$(1)
+
+endef
+
+# List of directories where certificates are stored for unit tests.
+CERT_DIRS := receiver/sapmreceiver/testdata \
+             receiver/signalfxreceiver/testdata \
+             receiver/splunkhecreceiver/testdata
+
+# Generate certificates for unit tests relying on certificates.
+.PHONY: certs
+certs:
+	$(foreach dir, $(CERT_DIRS), $(call exec-command, @internal/buildscripts/gen-certs.sh -o $(dir)))

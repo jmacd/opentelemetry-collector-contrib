@@ -25,10 +25,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestNewTraceExporter(t *testing.T) {
+func TestNewTracesExporter(t *testing.T) {
 
-	got, err := newTraceExporter(zap.NewNop(), &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+	got, err := newTracesExporter(zap.NewNop(), &Config{
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		Endpoint:         "cn-hangzhou.log.aliyuncs.com",
 		Project:          "demo-project",
 		Logstore:         "demo-logstore",
@@ -37,11 +37,9 @@ func TestNewTraceExporter(t *testing.T) {
 	require.NotNil(t, got)
 
 	traces := pdata.NewTraces()
-	traces.ResourceSpans().Resize(1)
-	rs := traces.ResourceSpans().At(0)
-	rs.InstrumentationLibrarySpans().Resize(1)
-	ils := rs.InstrumentationLibrarySpans().At(0)
-	ils.Spans().Resize(1)
+	rs := traces.ResourceSpans().AppendEmpty()
+	ils := rs.InstrumentationLibrarySpans().AppendEmpty()
+	ils.Spans().AppendEmpty()
 
 	// This will put trace data to send buffer and return success.
 	err = got.ConsumeTraces(context.Background(), traces)
@@ -49,9 +47,9 @@ func TestNewTraceExporter(t *testing.T) {
 	assert.Nil(t, got.Shutdown(context.Background()))
 }
 
-func TestNewFailsWithEmptyTraceExporterName(t *testing.T) {
+func TestNewFailsWithEmptyTracesExporterName(t *testing.T) {
 
-	got, err := newTraceExporter(zap.NewNop(), &Config{})
+	got, err := newTracesExporter(zap.NewNop(), &Config{})
 	assert.Error(t, err)
 	require.Nil(t, got)
 }

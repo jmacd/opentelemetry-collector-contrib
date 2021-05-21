@@ -20,7 +20,11 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer/pdata"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 	"gopkg.in/zorkian/go-datadog-api.v2"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter/config"
@@ -31,10 +35,10 @@ import (
 
 func TestMetricValue(t *testing.T) {
 	var (
-		name  string   = "name"
-		value float64  = math.Pi
-		ts    uint64   = uint64(time.Now().UnixNano())
-		tags  []string = []string{"tool:opentelemetry", "version:0.1.0"}
+		name  = "name"
+		value = math.Pi
+		ts    = uint64(time.Now().UnixNano())
+		tags  = []string{"tool:opentelemetry", "version:0.1.0"}
 	)
 
 	metric := metrics.NewGauge(name, ts, value, tags)
@@ -125,8 +129,7 @@ func TestMetricDimensionsToMapKey(t *testing.T) {
 func TestMapIntMetrics(t *testing.T) {
 	ts := pdata.TimestampFromTime(time.Now())
 	slice := pdata.NewIntDataPointSlice()
-	slice.Resize(1)
-	point := slice.At(0)
+	point := slice.AppendEmpty()
 	point.SetValue(17)
 	point.SetTimestamp(ts)
 
@@ -145,8 +148,7 @@ func TestMapIntMetrics(t *testing.T) {
 func TestMapDoubleMetrics(t *testing.T) {
 	ts := pdata.TimestampFromTime(time.Now())
 	slice := pdata.NewDoubleDataPointSlice()
-	slice.Resize(1)
-	point := slice.At(0)
+	point := slice.AppendEmpty()
 	point.SetValue(math.Pi)
 	point.SetTimestamp(ts)
 
@@ -206,32 +208,31 @@ func TestMapIntMonotonicMetrics(t *testing.T) {
 func TestMapIntMonotonicDifferentDimensions(t *testing.T) {
 	metricName := "metric.example"
 	slice := pdata.NewIntDataPointSlice()
-	slice.Resize(6)
 
 	// No tags
-	point := slice.At(0)
+	point := slice.AppendEmpty()
 	point.SetTimestamp(seconds(0))
 
-	point = slice.At(1)
+	point = slice.AppendEmpty()
 	point.SetValue(20)
 	point.SetTimestamp(seconds(1))
 
 	// One tag: valA
-	point = slice.At(2)
+	point = slice.AppendEmpty()
 	point.SetTimestamp(seconds(0))
 	point.LabelsMap().Insert("key1", "valA")
 
-	point = slice.At(3)
+	point = slice.AppendEmpty()
 	point.SetValue(30)
 	point.SetTimestamp(seconds(1))
 	point.LabelsMap().Insert("key1", "valA")
 
 	// same tag: valB
-	point = slice.At(4)
+	point = slice.AppendEmpty()
 	point.SetTimestamp(seconds(0))
 	point.LabelsMap().Insert("key1", "valB")
 
-	point = slice.At(5)
+	point = slice.AppendEmpty()
 	point.SetValue(40)
 	point.SetTimestamp(seconds(1))
 	point.LabelsMap().Insert("key1", "valB")
@@ -327,32 +328,31 @@ func TestMapDoubleMonotonicMetrics(t *testing.T) {
 func TestMapDoubleMonotonicDifferentDimensions(t *testing.T) {
 	metricName := "metric.example"
 	slice := pdata.NewDoubleDataPointSlice()
-	slice.Resize(6)
 
 	// No tags
-	point := slice.At(0)
+	point := slice.AppendEmpty()
 	point.SetTimestamp(seconds(0))
 
-	point = slice.At(1)
+	point = slice.AppendEmpty()
 	point.SetValue(20)
 	point.SetTimestamp(seconds(1))
 
 	// One tag: valA
-	point = slice.At(2)
+	point = slice.AppendEmpty()
 	point.SetTimestamp(seconds(0))
 	point.LabelsMap().Insert("key1", "valA")
 
-	point = slice.At(3)
+	point = slice.AppendEmpty()
 	point.SetValue(30)
 	point.SetTimestamp(seconds(1))
 	point.LabelsMap().Insert("key1", "valA")
 
 	// one tag: valB
-	point = slice.At(4)
+	point = slice.AppendEmpty()
 	point.SetTimestamp(seconds(0))
 	point.LabelsMap().Insert("key1", "valB")
 
-	point = slice.At(5)
+	point = slice.AppendEmpty()
 	point.SetValue(40)
 	point.SetTimestamp(seconds(1))
 	point.LabelsMap().Insert("key1", "valB")
@@ -418,8 +418,7 @@ func TestMapDoubleMonotonicOutOfOrder(t *testing.T) {
 func TestMapIntHistogramMetrics(t *testing.T) {
 	ts := pdata.TimestampFromTime(time.Now())
 	slice := pdata.NewIntHistogramDataPointSlice()
-	slice.Resize(1)
-	point := slice.At(0)
+	point := slice.AppendEmpty()
 	point.SetCount(20)
 	point.SetSum(200)
 	point.SetBucketCounts([]uint64{2, 18})
@@ -470,8 +469,7 @@ func TestMapIntHistogramMetrics(t *testing.T) {
 func TestMapHistogramMetrics(t *testing.T) {
 	ts := pdata.TimestampFromTime(time.Now())
 	slice := pdata.NewHistogramDataPointSlice()
-	slice.Resize(1)
-	point := slice.At(0)
+	point := slice.AppendEmpty()
 	point.SetCount(20)
 	point.SetSum(math.Pi)
 	point.SetBucketCounts([]uint64{2, 18})
@@ -522,42 +520,43 @@ func TestMapHistogramMetrics(t *testing.T) {
 func TestRunningMetrics(t *testing.T) {
 	ms := pdata.NewMetrics()
 	rms := ms.ResourceMetrics()
-	rms.Resize(4)
 
-	rm := rms.At(0)
+	rm := rms.AppendEmpty()
 	resAttrs := rm.Resource().Attributes()
 	resAttrs.Insert(metadata.AttributeDatadogHostname, pdata.NewAttributeValueString("resource-hostname-1"))
 
-	rm = rms.At(1)
+	rm = rms.AppendEmpty()
 	resAttrs = rm.Resource().Attributes()
 	resAttrs.Insert(metadata.AttributeDatadogHostname, pdata.NewAttributeValueString("resource-hostname-1"))
 
-	rm = rms.At(2)
+	rm = rms.AppendEmpty()
 	resAttrs = rm.Resource().Attributes()
 	resAttrs.Insert(metadata.AttributeDatadogHostname, pdata.NewAttributeValueString("resource-hostname-2"))
+
+	rms.AppendEmpty()
 
 	cfg := config.MetricsConfig{}
 	prevPts := newTTLMap()
 
-	series, _ := mapMetrics(cfg, prevPts, ms)
+	buildInfo := component.BuildInfo{
+		Version: "1.0",
+	}
+
+	series, _ := mapMetrics(zap.NewNop(), cfg, prevPts, "fallbackHostname", ms, buildInfo)
 
 	runningHostnames := []string{}
-	noHostname := 0
 
 	for _, metric := range series {
-		if *metric.Metric == "datadog_exporter.metrics.running" {
+		if *metric.Metric == "otel.datadog_exporter.metrics.running" {
 			if metric.Host != nil {
 				runningHostnames = append(runningHostnames, *metric.Host)
-			} else {
-				noHostname++
 			}
 		}
 	}
 
-	assert.Equal(t, noHostname, 1)
 	assert.ElementsMatch(t,
 		runningHostnames,
-		[]string{"resource-hostname-1", "resource-hostname-1", "resource-hostname-2"},
+		[]string{"fallbackHostname", "resource-hostname-1", "resource-hostname-1", "resource-hostname-2"},
 	)
 
 }
@@ -569,84 +568,75 @@ const (
 func createTestMetrics() pdata.Metrics {
 	md := pdata.NewMetrics()
 	rms := md.ResourceMetrics()
-	rms.Resize(1)
-
-	rm := rms.At(0)
+	rm := rms.AppendEmpty()
 
 	attrs := rm.Resource().Attributes()
 	attrs.InsertString(metadata.AttributeDatadogHostname, testHostname)
 	ilms := rm.InstrumentationLibraryMetrics()
-	ilms.Resize(1)
 
-	metricsArray := ilms.At(0).Metrics()
-	metricsArray.Resize(9) // first one is TypeNone to test that it's ignored
+	metricsArray := ilms.AppendEmpty().Metrics()
+	metricsArray.AppendEmpty() // first one is TypeNone to test that it's ignored
 
 	// IntGauge
-	met := metricsArray.At(1)
+	met := metricsArray.AppendEmpty()
 	met.SetName("int.gauge")
 	met.SetDataType(pdata.MetricDataTypeIntGauge)
 	dpsInt := met.IntGauge().DataPoints()
-	dpsInt.Resize(1)
-	dpInt := dpsInt.At(0)
+	dpInt := dpsInt.AppendEmpty()
 	dpInt.SetTimestamp(seconds(0))
 	dpInt.SetValue(1)
 
 	// DoubleGauge
-	met = metricsArray.At(2)
+	met = metricsArray.AppendEmpty()
 	met.SetName("double.gauge")
 	met.SetDataType(pdata.MetricDataTypeDoubleGauge)
 	dpsDouble := met.DoubleGauge().DataPoints()
-	dpsDouble.Resize(1)
-	dpDouble := dpsDouble.At(0)
+	dpDouble := dpsDouble.AppendEmpty()
 	dpDouble.SetTimestamp(seconds(0))
 	dpDouble.SetValue(math.Pi)
 
 	// IntSum
-	met = metricsArray.At(3)
+	met = metricsArray.AppendEmpty()
 	met.SetName("int.sum")
 	met.SetDataType(pdata.MetricDataTypeIntSum)
 	dpsInt = met.IntSum().DataPoints()
-	dpsInt.Resize(1)
-	dpInt = dpsInt.At(0)
+	dpInt = dpsInt.AppendEmpty()
 	dpInt.SetTimestamp(seconds(0))
 	dpInt.SetValue(2)
 
 	// DoubleSum
-	met = metricsArray.At(4)
+	met = metricsArray.AppendEmpty()
 	met.SetName("double.sum")
 	met.SetDataType(pdata.MetricDataTypeDoubleSum)
 	dpsDouble = met.DoubleSum().DataPoints()
-	dpsDouble.Resize(1)
-	dpDouble = dpsDouble.At(0)
+	dpDouble = dpsDouble.AppendEmpty()
 	dpDouble.SetTimestamp(seconds(0))
 	dpDouble.SetValue(math.E)
 
 	// IntHistogram
-	met = metricsArray.At(5)
+	met = metricsArray.AppendEmpty()
 	met.SetName("int.histogram")
 	met.SetDataType(pdata.MetricDataTypeIntHistogram)
 	dpsIntHist := met.IntHistogram().DataPoints()
-	dpsIntHist.Resize(1)
-	dpIntHist := dpsIntHist.At(0)
+	dpIntHist := dpsIntHist.AppendEmpty()
 	dpIntHist.SetCount(20)
 	dpIntHist.SetSum(100)
 	dpIntHist.SetBucketCounts([]uint64{2, 18})
 	dpIntHist.SetTimestamp(seconds(0))
 
 	// Histogram
-	met = metricsArray.At(6)
+	met = metricsArray.AppendEmpty()
 	met.SetName("double.histogram")
 	met.SetDataType(pdata.MetricDataTypeHistogram)
 	dpsDoubleHist := met.Histogram().DataPoints()
-	dpsDoubleHist.Resize(1)
-	dpDoubleHist := dpsDoubleHist.At(0)
+	dpDoubleHist := dpsDoubleHist.AppendEmpty()
 	dpDoubleHist.SetCount(20)
 	dpDoubleHist.SetSum(math.Phi)
 	dpDoubleHist.SetBucketCounts([]uint64{2, 18})
 	dpDoubleHist.SetTimestamp(seconds(0))
 
 	// Int Sum (cumulative)
-	met = metricsArray.At(7)
+	met = metricsArray.AppendEmpty()
 	met.SetName("int.cumulative.sum")
 	met.SetDataType(pdata.MetricDataTypeIntSum)
 	met.IntSum().SetAggregationTemporality(pdata.AggregationTemporalityCumulative)
@@ -661,7 +651,7 @@ func createTestMetrics() pdata.Metrics {
 	dpInt.SetValue(7)
 
 	// Double Sum (cumulative)
-	met = metricsArray.At(8)
+	met = metricsArray.AppendEmpty()
 	met.SetName("double.cumulative.sum")
 	met.SetDataType(pdata.MetricDataTypeDoubleSum)
 	met.DoubleSum().SetAggregationTemporality(pdata.AggregationTemporalityCumulative)
@@ -681,7 +671,7 @@ func createTestMetrics() pdata.Metrics {
 func removeRunningMetrics(series []datadog.Metric) []datadog.Metric {
 	filtered := []datadog.Metric{}
 	for _, m := range series {
-		if m.GetMetric() != "datadog_exporter.metrics.running" {
+		if m.GetMetric() != "otel.datadog_exporter.metrics.running" {
 			filtered = append(filtered, m)
 		}
 	}
@@ -703,7 +693,14 @@ func testCount(name string, val float64) datadog.Metric {
 func TestMapMetrics(t *testing.T) {
 	md := createTestMetrics()
 	cfg := config.MetricsConfig{SendMonotonic: true}
-	series, dropped := mapMetrics(cfg, newTTLMap(), md)
+	buildInfo := component.BuildInfo{
+		Version: "1.0",
+	}
+
+	core, observed := observer.New(zapcore.DebugLevel)
+	testLogger := zap.New(core)
+	series, dropped := mapMetrics(testLogger, cfg, newTTLMap(), "", md, buildInfo)
+
 	assert.Equal(t, dropped, 0)
 	filtered := removeRunningMetrics(series)
 	assert.ElementsMatch(t, filtered, []datadog.Metric{
@@ -718,4 +715,7 @@ func TestMapMetrics(t *testing.T) {
 		testCount("int.cumulative.sum", 3),
 		testCount("double.cumulative.sum", math.Pi),
 	})
+
+	// One metric was unknown or unsupported
+	assert.Equal(t, observed.FilterMessage("Unknown or unsupported metric type").Len(), 1)
 }

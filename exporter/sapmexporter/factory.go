@@ -34,12 +34,12 @@ func NewFactory() component.ExporterFactory {
 	return exporterhelper.NewFactory(
 		typeStr,
 		createDefaultConfig,
-		exporterhelper.WithTraces(createTraceExporter))
+		exporterhelper.WithTraces(createTracesExporter))
 }
 
 func createDefaultConfig() config.Exporter {
 	return &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		NumWorkers:       defaultNumWorkers,
 		AccessTokenPassthroughConfig: splunk.AccessTokenPassthroughConfig{
 			AccessTokenPassthrough: true,
@@ -50,11 +50,11 @@ func createDefaultConfig() config.Exporter {
 	}
 }
 
-func createTraceExporter(
+func createTracesExporter(
 	_ context.Context,
 	params component.ExporterCreateParams,
 	cfg config.Exporter,
 ) (component.TracesExporter, error) {
 	eCfg := cfg.(*Config)
-	return newSAPMTraceExporter(eCfg, params)
+	return newSAPMTracesExporter(eCfg, params)
 }

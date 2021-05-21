@@ -122,19 +122,17 @@ func fillHTTPClientSpan(span pdata.Span) {
 	span.SetSpanID(newSegmentID())
 	span.SetParentSpanID(newSegmentID())
 	span.SetName("/users/junit")
-	span.SetKind(pdata.SpanKindCLIENT)
+	span.SetKind(pdata.SpanKindClient)
 	span.SetStartTimestamp(pdata.TimestampFromTime(startTime))
 	span.SetEndTimestamp(pdata.TimestampFromTime(endTime))
 	span.SetTraceState("x:y")
 
-	span.Events().Resize(1)
-	event := span.Events().At(0)
+	event := span.Events().AppendEmpty()
 	event.SetName("event")
 	event.SetTimestamp(1024)
 	event.Attributes().InsertString("key", "value")
 
-	span.Links().Resize(1)
-	link := span.Links().At(0)
+	link := span.Links().AppendEmpty()
 	link.SetTraceState("link:state")
 	link.Attributes().InsertString("link", "true")
 
@@ -157,7 +155,7 @@ func fillHTTPServerSpan(span pdata.Span) {
 	span.SetSpanID(newSegmentID())
 	span.SetParentSpanID(newSegmentID())
 	span.SetName("/users/junit")
-	span.SetKind(pdata.SpanKindSERVER)
+	span.SetKind(pdata.SpanKindServer)
 	span.SetStartTimestamp(pdata.TimestampFromTime(startTime))
 	span.SetEndTimestamp(pdata.TimestampFromTime(endTime))
 
@@ -191,12 +189,12 @@ func newSegmentID() pdata.SpanID {
 }
 
 func TestSpanKindToShortString(t *testing.T) {
-	assert.Equal(t, spanKindToShortString(pdata.SpanKindCONSUMER), "consumer")
-	assert.Equal(t, spanKindToShortString(pdata.SpanKindPRODUCER), "producer")
-	assert.Equal(t, spanKindToShortString(pdata.SpanKindCLIENT), "client")
-	assert.Equal(t, spanKindToShortString(pdata.SpanKindSERVER), "server")
-	assert.Equal(t, spanKindToShortString(pdata.SpanKindINTERNAL), "internal")
-	assert.Equal(t, spanKindToShortString(pdata.SpanKindUNSPECIFIED), "")
+	assert.Equal(t, spanKindToShortString(pdata.SpanKindConsumer), "consumer")
+	assert.Equal(t, spanKindToShortString(pdata.SpanKindProducer), "producer")
+	assert.Equal(t, spanKindToShortString(pdata.SpanKindClient), "client")
+	assert.Equal(t, spanKindToShortString(pdata.SpanKindServer), "server")
+	assert.Equal(t, spanKindToShortString(pdata.SpanKindInternal), "internal")
+	assert.Equal(t, spanKindToShortString(pdata.SpanKindUnspecified), "")
 }
 
 func TestStatusCodeToShortString(t *testing.T) {

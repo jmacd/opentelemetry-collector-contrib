@@ -54,7 +54,7 @@ func TestLoadConfig(t *testing.T) {
 	assert.Nil(t, err)
 
 	factory := NewFactory()
-	factories.Receivers[config.Type(typeStr)] = factory
+	factories.Receivers[typeStr] = factory
 	cfg, err := configtest.LoadConfigFile(
 		t, path.Join(".", "testdata", "config.yaml"), factories,
 	)
@@ -63,7 +63,7 @@ func TestLoadConfig(t *testing.T) {
 
 	assert.Equal(t, len(cfg.Receivers), 1)
 
-	assert.Equal(t, testdataConfigYamlAsMap(), cfg.Receivers["filelog"])
+	assert.Equal(t, testdataConfigYamlAsMap(), cfg.Receivers[config.NewID("filelog")])
 }
 
 func TestCreateWithInvalidInputConfig(t *testing.T) {
@@ -106,7 +106,7 @@ func TestReadStaticFile(t *testing.T) {
 
 	rcvr, err := f.CreateLogsReceiver(context.Background(), params, cfg, sink)
 	require.NoError(t, err, "failed to create receiver")
-	require.NoError(t, rcvr.Start(context.Background(), &testHost{t: t}))
+	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
 
 	// Build the expected set by using stanza.Converter to translate entries
 	// to pdata Logs.
@@ -190,7 +190,7 @@ func (rt *rotationTest) Run(t *testing.T) {
 	// when more than 100 logs are written, and deletion when more than 200 are written.
 	// Write 300 and validate that we got the all despite rotation and deletion.
 	logger := newRotatingLogger(t, tempDir, 100, 1, rt.copyTruncate, rt.sequential)
-	numLogs := 2
+	numLogs := 300
 
 	// Build expected outputs
 	expectedTimestamp, _ := time.ParseInLocation("2006-01-02", "2020-08-25", time.Local)
@@ -203,7 +203,7 @@ func (rt *rotationTest) Run(t *testing.T) {
 
 	rcvr, err := f.CreateLogsReceiver(context.Background(), params, cfg, sink)
 	require.NoError(t, err, "failed to create receiver")
-	require.NoError(t, rcvr.Start(context.Background(), &testHost{t: t}))
+	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
 
 	for i := 0; i < numLogs; i++ {
 		msg := fmt.Sprintf("This is a simple log line with the number %3d", i)
@@ -275,25 +275,10 @@ func expectNLogs(sink *consumertest.LogsSink, expected int) func() bool {
 	return func() bool { return sink.LogRecordsCount() == expected }
 }
 
-type testHost struct {
-	component.Host
-	t *testing.T
-}
-
-var _ component.Host = (*testHost)(nil)
-
-// ReportFatalError causes the test to be run to fail.
-func (h *testHost) ReportFatalError(err error) {
-	h.t.Fatalf("receiver reported a fatal error: %v", err)
-}
-
 func testdataConfigYamlAsMap() *FileLogConfig {
 	return &FileLogConfig{
 		BaseConfig: stanza.BaseConfig{
-			ReceiverSettings: config.ReceiverSettings{
-				TypeVal: "filelog",
-				NameVal: "filelog",
-			},
+			ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
 			Operators: stanza.OperatorConfigs{
 				map[string]interface{}{
 					"type":  "regex_parser",
@@ -324,10 +309,7 @@ func testdataConfigYamlAsMap() *FileLogConfig {
 func testdataRotateTestYamlAsMap(tempDir string) *FileLogConfig {
 	return &FileLogConfig{
 		BaseConfig: stanza.BaseConfig{
-			ReceiverSettings: config.ReceiverSettings{
-				TypeVal: "filelog",
-				NameVal: "filelog",
-			},
+			ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
 			Operators: stanza.OperatorConfigs{
 				map[string]interface{}{
 					"type":  "regex_parser",

@@ -76,13 +76,13 @@ func Test_carbonreceiver_New(t *testing.T) {
 			args: args{
 				config: *defaultConfig,
 			},
-			wantErr: errNilNextConsumer,
+			wantErr: componenterror.ErrNilNextConsumer,
 		},
 		{
 			name: "empty_endpoint",
 			args: args{
 				config: Config{
-					ReceiverSettings: config.ReceiverSettings{},
+					ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
 				},
 				nextConsumer: consumertest.NewNop(),
 			},
@@ -92,9 +92,7 @@ func Test_carbonreceiver_New(t *testing.T) {
 			name: "invalid_transport",
 			args: args{
 				config: Config{
-					ReceiverSettings: config.ReceiverSettings{
-						NameVal: "invalid_transport_rcv",
-					},
+					ReceiverSettings: config.NewReceiverSettings(config.NewIDWithName(typeStr, "invalid_transport_rcv")),
 					NetAddr: confignet.NetAddr{
 						Endpoint:  "localhost:2003",
 						Transport: "unknown_transp",
@@ -106,15 +104,13 @@ func Test_carbonreceiver_New(t *testing.T) {
 				},
 				nextConsumer: consumertest.NewNop(),
 			},
-			wantErr: errors.New("unsupported transport \"unknown_transp\" for receiver \"invalid_transport_rcv\""),
+			wantErr: errors.New("unsupported transport \"unknown_transp\" for receiver carbon/invalid_transport_rcv"),
 		},
 		{
 			name: "regex_parser",
 			args: args{
 				config: Config{
-					ReceiverSettings: config.ReceiverSettings{
-						NameVal: "regex_parser_rcv",
-					},
+					ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
 					NetAddr: confignet.NetAddr{
 						Endpoint:  "localhost:2003",
 						Transport: "tcp",
@@ -137,9 +133,7 @@ func Test_carbonreceiver_New(t *testing.T) {
 			name: "negative_tcp_idle_timeout",
 			args: args{
 				config: Config{
-					ReceiverSettings: config.ReceiverSettings{
-						NameVal: "negative_tcp_idle_timeout",
-					},
+					ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
 					NetAddr: confignet.NetAddr{
 						Endpoint:  "localhost:2003",
 						Transport: "tcp",
@@ -217,7 +211,6 @@ func Test_carbonreceiver_EndToEnd(t *testing.T) {
 			require.NoError(t, r.Start(context.Background(), componenttest.NewNopHost()))
 			runtime.Gosched()
 			defer r.Shutdown(context.Background())
-			require.Equal(t, componenterror.ErrAlreadyStarted, r.Start(context.Background(), componenttest.NewNopHost()))
 
 			snd := tt.clientFn(t)
 
@@ -234,16 +227,11 @@ func Test_carbonreceiver_EndToEnd(t *testing.T) {
 
 			mdd := sink.AllMetrics()
 			require.Len(t, mdd, 1)
-			ocmd := internaldata.MetricsToOC(mdd[0])
-			require.Len(t, ocmd, 1)
-			require.Len(t, ocmd[0].Metrics, 1)
-			metric := ocmd[0].Metrics[0]
-			assert.Equal(t, carbonMetric.Name, metric.GetMetricDescriptor().GetName())
-			tss := metric.GetTimeseries()
+			_, _, metrics := internaldata.ResourceMetricsToOC(mdd[0].ResourceMetrics().At(0))
+			require.Len(t, metrics, 1)
+			assert.Equal(t, carbonMetric.Name, metrics[0].GetMetricDescriptor().GetName())
+			tss := metrics[0].GetTimeseries()
 			require.Equal(t, 1, len(tss))
-
-			assert.NoError(t, r.Shutdown(context.Background()))
-			assert.Equal(t, componenterror.ErrAlreadyStopped, r.Shutdown(context.Background()))
 		})
 	}
 }

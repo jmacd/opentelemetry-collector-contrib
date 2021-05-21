@@ -31,7 +31,7 @@ const (
 	typeStr = "metricstransform"
 )
 
-var processorCapabilities = component.ProcessorCapabilities{MutatesConsumedData: true}
+var consumerCapabilities = consumer.Capabilities{MutatesData: true}
 
 // NewFactory returns a new factory for the Metrics Transform processor.
 func NewFactory() component.ProcessorFactory {
@@ -43,7 +43,7 @@ func NewFactory() component.ProcessorFactory {
 
 func createDefaultConfig() config.Processor {
 	return &Config{
-		ProcessorSettings: config.NewProcessorSettings(typeStr),
+		ProcessorSettings: config.NewProcessorSettings(config.NewID(typeStr)),
 	}
 }
 
@@ -58,13 +58,13 @@ func createMetricsProcessor(
 		return nil, err
 	}
 
-	metricsProcessor := newMetricsTransformProcessor(params.Logger, buildHelperConfig(oCfg, params.ApplicationStartInfo.Version))
+	metricsProcessor := newMetricsTransformProcessor(params.Logger, buildHelperConfig(oCfg, params.BuildInfo.Version))
 
 	return processorhelper.NewMetricsProcessor(
 		cfg,
 		nextConsumer,
 		metricsProcessor,
-		processorhelper.WithCapabilities(processorCapabilities))
+		processorhelper.WithCapabilities(consumerCapabilities))
 }
 
 // validateConfiguration validates the input configuration has all of the required fields for the processor
@@ -180,9 +180,9 @@ func buildHelperConfig(config *Config, version string) []internalTransform {
 func createFilter(filterConfig FilterConfig) internalFilter {
 	switch filterConfig.MatchType {
 	case StrictMatchType:
-		return internalFilterStrict{include: filterConfig.Include}
+		return internalFilterStrict{include: filterConfig.Include, matchLabels: filterConfig.MatchLabels}
 	case RegexpMatchType:
-		return internalFilterRegexp{include: regexp.MustCompile(filterConfig.Include)}
+		return internalFilterRegexp{include: regexp.MustCompile(filterConfig.Include), matchLabels: getFilterRegexpMap(filterConfig.MatchLabels)}
 	}
 
 	return nil
@@ -206,4 +206,13 @@ func sliceToSet(slice []string) map[string]bool {
 		set[s] = true
 	}
 	return set
+}
+
+func getFilterRegexpMap(strMap map[string]string) map[string]*regexp.Regexp {
+	regexpMap := make(map[string]*regexp.Regexp)
+
+	for k, value := range strMap {
+		regexpMap[k] = regexp.MustCompile(value)
+	}
+	return regexpMap
 }

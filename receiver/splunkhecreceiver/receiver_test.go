@@ -18,8 +18,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -392,8 +390,8 @@ func Test_splunkhecReceiver_TLS(t *testing.T) {
 	cfg.Endpoint = addr
 	cfg.TLSSetting = &configtls.TLSServerSetting{
 		TLSSetting: configtls.TLSSetting{
-			CertFile: "./testdata/testcert.crt",
-			KeyFile:  "./testdata/testkey.key",
+			CertFile: "./testdata/server.crt",
+			KeyFile:  "./testdata/server.key",
 		},
 	}
 	cfg.initialize()
@@ -410,12 +408,9 @@ func Test_splunkhecReceiver_TLS(t *testing.T) {
 	t.Log("Event Reception Started")
 
 	logs := pdata.NewLogs()
-	logs.ResourceLogs().Resize(1)
-	rl := logs.ResourceLogs().At(0)
-	rl.InstrumentationLibraryLogs().Resize(1)
-	ill := rl.InstrumentationLibraryLogs().At(0)
-	ill.Logs().Resize(1)
-	lr := ill.Logs().At(0)
+	rl := logs.ResourceLogs().AppendEmpty()
+	ill := rl.InstrumentationLibraryLogs().AppendEmpty()
+	lr := ill.Logs().AppendEmpty()
 
 	now := time.Now()
 	msecInt64 := now.UnixNano() / 1e6
@@ -438,16 +433,19 @@ func Test_splunkhecReceiver_TLS(t *testing.T) {
 	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
 	require.NoErrorf(t, err, "should have no errors with new request: %v", err)
 
-	caCert, err := ioutil.ReadFile("./testdata/testcert.crt")
-	require.NoErrorf(t, err, "failed to load certificate: %v", err)
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
+	tlscs := configtls.TLSClientSetting{
+		TLSSetting: configtls.TLSSetting{
+			CAFile:   "./testdata/ca.crt",
+			CertFile: "./testdata/client.crt",
+			KeyFile:  "./testdata/client.key",
+		},
+		ServerName: "localhost",
+	}
+	tls, errTLS := tlscs.LoadTLSConfig()
+	assert.NoError(t, errTLS)
 	client := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs: caCertPool,
-			},
+			TLSClientConfig: tls,
 		},
 	}
 
@@ -504,7 +502,7 @@ func Test_splunkhecReceiver_AccessTokenPassthrough(t *testing.T) {
 			splunkhecMsg := buildSplunkHecMsg(currentTime, 3)
 			msgBytes, _ := json.Marshal(splunkhecMsg)
 			req := httptest.NewRequest("POST", "http://localhost", bytes.NewReader(msgBytes))
-			if tt.token.Type() != pdata.AttributeValueNULL {
+			if tt.token.Type() != pdata.AttributeValueTypeNull {
 				req.Header.Set("Splunk", tt.token.StringVal())
 			}
 
@@ -528,7 +526,7 @@ func Test_splunkhecReceiver_AccessTokenPassthrough(t *testing.T) {
 			tokenLabel, exists := resource.Attributes().Get("com.splunk.hec.access_token")
 
 			if tt.passthrough {
-				if tt.token.Type() == pdata.AttributeValueNULL {
+				if tt.token.Type() == pdata.AttributeValueTypeNull {
 					assert.False(t, exists)
 				} else {
 					assert.Equal(t, tt.token.StringVal(), tokenLabel.StringVal())
@@ -577,11 +575,10 @@ func Test_Logs_splunkhecReceiver_IndexSourceTypePassthrough(t *testing.T) {
 
 			factory := splunkhecexporter.NewFactory()
 			exporterConfig := splunkhecexporter.Config{
-				ExporterSettings:   config.NewExporterSettings("splunkhec"),
+				ExporterSettings:   config.NewExporterSettings(config.NewID("splunkhec")),
 				Token:              "ignored",
 				SourceType:         "defaultsourcetype",
 				Index:              "defaultindex",
-				InsecureSkipVerify: true,
 				DisableCompression: true,
 				Endpoint:           endServer.URL,
 			}
@@ -676,11 +673,10 @@ func Test_Metrics_splunkhecReceiver_IndexSourceTypePassthrough(t *testing.T) {
 
 			factory := splunkhecexporter.NewFactory()
 			exporterConfig := splunkhecexporter.Config{
-				ExporterSettings:   config.NewExporterSettings("splunkhec"),
+				ExporterSettings:   config.NewExporterSettings(config.NewID("splunkhec")),
 				Token:              "ignored",
 				SourceType:         "defaultsourcetype",
 				Index:              "defaultindex",
-				InsecureSkipVerify: true,
 				DisableCompression: true,
 				Endpoint:           endServer.URL,
 			}

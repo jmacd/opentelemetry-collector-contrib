@@ -20,7 +20,7 @@ import (
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.uber.org/zap"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws"
+	aws "github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/metrics"
 )
 
 var deltaMetricCalculator = aws.NewFloat64DeltaCalculator()
@@ -205,8 +205,9 @@ func (dps SummaryDataPointSlice) At(i int) DataPoint {
 // and optionally adds in the OTel instrumentation library name
 func createLabels(labelsMap pdata.StringMap, instrLibName string) map[string]string {
 	labels := make(map[string]string, labelsMap.Len()+1)
-	labelsMap.ForEach(func(k, v string) {
+	labelsMap.Range(func(k, v string) bool {
 		labels[k] = v
+		return true
 	})
 
 	// Add OTel instrumentation lib name as an additional label if it is defined
@@ -271,7 +272,13 @@ func getDataPoints(pmd *pdata.Metric, metadata CWMetricMetadata, logger *zap.Log
 		}
 	case pdata.MetricDataTypeSummary:
 		metric := pmd.Summary()
-		adjusterMetadata.adjustToDelta = true
+		// For summaries coming from the prometheus receiver, the sum and count are cumulative, whereas for summaries
+		// coming from other sources, e.g. SDK, the sum and count are delta by being accumulated and reset periodically.
+		// In order to ensure metrics are sent as deltas, we check the receiver attribute (which can be injected by
+		// attribute processor) from resource metrics. If it exists, and equals to prometheus, the sum and count will be
+		// converted.
+		// For more information: https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/prometheusreceiver/DESIGN.md#summary
+		adjusterMetadata.adjustToDelta = metadata.receiver == prometheusReceiver
 		dps = SummaryDataPointSlice{
 			metadata.InstrumentationLibraryName,
 			adjusterMetadata,

@@ -157,7 +157,7 @@ func TestResourceProcessor(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			factory := &factory{providers: map[string]*internal.ResourceProvider{}}
+			factory := &factory{providers: map[config.ComponentID]*internal.ResourceProvider{}}
 
 			md1 := &MockDetector{}
 			md1.On("Detect").Return(tt.detectedResource, tt.detectedError)
@@ -171,7 +171,7 @@ func TestResourceProcessor(t *testing.T) {
 			}
 
 			cfg := &Config{
-				ProcessorSettings: config.NewProcessorSettings(typeStr),
+				ProcessorSettings: config.NewProcessorSettings(config.NewID(typeStr)),
 				Override:          tt.override,
 				Detectors:         tt.detectorKeys,
 				Timeout:           time.Second,
@@ -179,7 +179,7 @@ func TestResourceProcessor(t *testing.T) {
 
 			// Test trace consuner
 			ttn := new(consumertest.TracesSink)
-			rtp, err := factory.createTraceProcessor(context.Background(), component.ProcessorCreateParams{Logger: zap.NewNop()}, cfg, ttn)
+			rtp, err := factory.createTracesProcessor(context.Background(), component.ProcessorCreateParams{Logger: zap.NewNop()}, cfg, ttn)
 
 			if tt.expectedNewError != "" {
 				assert.EqualError(t, err, tt.expectedNewError)
@@ -187,7 +187,7 @@ func TestResourceProcessor(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			assert.True(t, rtp.GetCapabilities().MutatesConsumedData)
+			assert.True(t, rtp.Capabilities().MutatesData)
 
 			err = rtp.Start(context.Background(), componenttest.NewNopHost())
 
@@ -200,8 +200,7 @@ func TestResourceProcessor(t *testing.T) {
 			defer func() { assert.NoError(t, rtp.Shutdown(context.Background())) }()
 
 			td := pdata.NewTraces()
-			td.ResourceSpans().Resize(1)
-			tt.sourceResource.CopyTo(td.ResourceSpans().At(0).Resource())
+			tt.sourceResource.CopyTo(td.ResourceSpans().AppendEmpty().Resource())
 
 			err = rtp.ConsumeTraces(context.Background(), td)
 			require.NoError(t, err)
@@ -221,7 +220,7 @@ func TestResourceProcessor(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			assert.True(t, rmp.GetCapabilities().MutatesConsumedData)
+			assert.True(t, rmp.Capabilities().MutatesData)
 
 			err = rmp.Start(context.Background(), componenttest.NewNopHost())
 
@@ -234,9 +233,7 @@ func TestResourceProcessor(t *testing.T) {
 			defer func() { assert.NoError(t, rmp.Shutdown(context.Background())) }()
 
 			// TODO create pdata.Metrics directly when this is no longer internal
-			err = rmp.ConsumeMetrics(context.Background(), internaldata.OCToMetrics(internaldata.MetricsData{
-				Resource: oCensusResource(tt.sourceResource),
-			}))
+			err = rmp.ConsumeMetrics(context.Background(), internaldata.OCToMetrics(nil, oCensusResource(tt.sourceResource), nil))
 			require.NoError(t, err)
 			got = tmn.AllMetrics()[0].ResourceMetrics().At(0).Resource()
 
@@ -254,7 +251,7 @@ func TestResourceProcessor(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			assert.True(t, rlp.GetCapabilities().MutatesConsumedData)
+			assert.True(t, rlp.Capabilities().MutatesData)
 
 			err = rlp.Start(context.Background(), componenttest.NewNopHost())
 
@@ -267,8 +264,7 @@ func TestResourceProcessor(t *testing.T) {
 			defer func() { assert.NoError(t, rlp.Shutdown(context.Background())) }()
 
 			ld := pdata.NewLogs()
-			ld.ResourceLogs().Resize(1)
-			tt.sourceResource.CopyTo(ld.ResourceLogs().At(0).Resource())
+			tt.sourceResource.CopyTo(ld.ResourceLogs().AppendEmpty().Resource())
 
 			err = rlp.ConsumeLogs(context.Background(), ld)
 			require.NoError(t, err)
@@ -287,8 +283,9 @@ func oCensusResource(res pdata.Resource) *resourcepb.Resource {
 	}
 
 	mp := make(map[string]string, res.Attributes().Len())
-	res.Attributes().ForEach(func(k string, v pdata.AttributeValue) {
+	res.Attributes().Range(func(k string, v pdata.AttributeValue) bool {
 		mp[k] = v.StringVal()
+		return true
 	})
 
 	return &resourcepb.Resource{Labels: mp}

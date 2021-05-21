@@ -65,9 +65,9 @@ const (
 	sourceFormat = "tail_sampling"
 )
 
-// newTraceProcessor returns a processor.TraceProcessor that will perform tail sampling according to the given
+// newTracesProcessor returns a processor.TracesProcessor that will perform tail sampling according to the given
 // configuration.
-func newTraceProcessor(logger *zap.Logger, nextConsumer consumer.Traces, cfg Config) (component.TracesProcessor, error) {
+func newTracesProcessor(logger *zap.Logger, nextConsumer consumer.Traces, cfg Config) (component.TracesProcessor, error) {
 	if nextConsumer == nil {
 		return nil, componenterror.ErrNilNextConsumer
 	}
@@ -122,7 +122,7 @@ func getPolicyEvaluator(logger *zap.Logger, cfg *PolicyCfg) (sampling.PolicyEval
 		return sampling.NewNumericAttributeFilter(logger, nafCfg.Key, nafCfg.MinValue, nafCfg.MaxValue), nil
 	case StringAttribute:
 		safCfg := cfg.StringAttributeCfg
-		return sampling.NewStringAttributeFilter(logger, safCfg.Key, safCfg.Values), nil
+		return sampling.NewStringAttributeFilter(logger, safCfg.Key, safCfg.Values, safCfg.EnabledRegexMatching, safCfg.CacheMaxSize), nil
 	case RateLimiting:
 		rlfCfg := cfg.RateLimitingCfg
 		return sampling.NewRateLimiting(logger, rlfCfg.SpansPerSecond), nil
@@ -190,7 +190,7 @@ func (tsp *tailSamplingSpanProcessor) samplingPolicyOnTick() {
 
 func (tsp *tailSamplingSpanProcessor) makeDecision(id pdata.TraceID, trace *sampling.TraceData, metrics *policyMetrics) (sampling.Decision, *Policy) {
 	finalDecision := sampling.NotSampled
-	var matchingPolicy *Policy = nil
+	var matchingPolicy *Policy
 
 	for i, policy := range tsp.policies {
 		policyEvaluateStartTime := time.Now()
@@ -349,8 +349,8 @@ func (tsp *tailSamplingSpanProcessor) processTraces(resourceSpans pdata.Resource
 	stats.Record(tsp.ctx, statNewTraceIDReceivedCount.M(newTraceIDs))
 }
 
-func (tsp *tailSamplingSpanProcessor) GetCapabilities() component.ProcessorCapabilities {
-	return component.ProcessorCapabilities{MutatesConsumedData: false}
+func (tsp *tailSamplingSpanProcessor) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
 }
 
 // Start is invoked during service startup.
@@ -381,11 +381,9 @@ func (tsp *tailSamplingSpanProcessor) dropTrace(traceID pdata.TraceID, deletionT
 
 func prepareTraceBatch(rss pdata.ResourceSpans, spans []*pdata.Span) pdata.Traces {
 	traceTd := pdata.NewTraces()
-	traceTd.ResourceSpans().Resize(1)
-	rs := traceTd.ResourceSpans().At(0)
+	rs := traceTd.ResourceSpans().AppendEmpty()
 	rss.Resource().CopyTo(rs.Resource())
-	rs.InstrumentationLibrarySpans().Resize(1)
-	ils := rs.InstrumentationLibrarySpans().At(0)
+	ils := rs.InstrumentationLibrarySpans().AppendEmpty()
 	for _, span := range spans {
 		ils.Spans().Append(*span)
 	}

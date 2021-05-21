@@ -68,13 +68,13 @@ func newSAPMExporter(cfg *Config, params component.ExporterCreateParams) (sapmEx
 	}, err
 }
 
-func newSAPMTraceExporter(cfg *Config, params component.ExporterCreateParams) (component.TracesExporter, error) {
+func newSAPMTracesExporter(cfg *Config, params component.ExporterCreateParams) (component.TracesExporter, error) {
 	se, err := newSAPMExporter(cfg, params)
 	if err != nil {
 		return nil, err
 	}
 
-	te, err := exporterhelper.NewTraceExporter(
+	te, err := exporterhelper.NewTracesExporter(
 		cfg,
 		params.Logger,
 		se.pushTraceData,
@@ -153,14 +153,13 @@ func filterTokenFromProcess(proc *model.Process) {
 	if proc == nil {
 		return
 	}
-	for i := range proc.Tags {
+	for i := 0; i < len(proc.Tags); {
 		if proc.Tags[i].Key == splunk.SFxAccessTokenLabel {
-			// Switch this tag with last one.
-			lastPos := len(proc.Tags) - 1
-			tmp := proc.Tags[lastPos]
-			proc.Tags[lastPos] = proc.Tags[i]
-			proc.Tags[i] = tmp
-			proc.Tags = proc.Tags[0:lastPos]
+			proc.Tags[i] = proc.Tags[len(proc.Tags)-1]
+			// We do not need to put proc.Tags[i] at the end, as it will be discarded anyway
+			proc.Tags = proc.Tags[:len(proc.Tags)-1]
+			continue
 		}
+		i++
 	}
 }

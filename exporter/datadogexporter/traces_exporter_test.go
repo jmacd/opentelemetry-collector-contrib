@@ -39,7 +39,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter/testutils"
 )
 
-func testTraceExporterHelper(td pdata.Traces, t *testing.T) []string {
+func testTracesExporterHelper(td pdata.Traces, t *testing.T) []string {
 	metricsServer := testutils.DatadogServerMock()
 	defer metricsServer.Close()
 
@@ -62,7 +62,7 @@ func testTraceExporterHelper(td pdata.Traces, t *testing.T) []string {
 
 	defer server.Close()
 	cfg := config.Config{
-		ExporterSettings: otelconfig.NewExporterSettings(typeStr),
+		ExporterSettings: otelconfig.NewExporterSettings(otelconfig.NewID(typeStr)),
 		API: config.APIConfig{
 			Key: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 		},
@@ -81,12 +81,13 @@ func testTraceExporterHelper(td pdata.Traces, t *testing.T) []string {
 			TCPAddr: confignet.TCPAddr{
 				Endpoint: server.URL,
 			},
+			IgnoreResources: []string{},
 		},
 	}
 
 	params := component.ExporterCreateParams{Logger: zap.NewNop()}
 
-	exporter, err := createTraceExporter(context.Background(), params, &cfg)
+	exporter, err := createTracesExporter(context.Background(), params, &cfg)
 
 	assert.NoError(t, err)
 
@@ -153,7 +154,7 @@ func testJSONTraceStatsPayload(t *testing.T, rw http.ResponseWriter, req *http.R
 	assert.NotNil(t, statsData.Stats)
 }
 
-func TestNewTraceExporter(t *testing.T) {
+func TestNewTracesExporter(t *testing.T) {
 	metricsServer := testutils.DatadogServerMock()
 	defer metricsServer.Close()
 
@@ -163,7 +164,7 @@ func TestNewTraceExporter(t *testing.T) {
 	params := component.ExporterCreateParams{Logger: zap.NewNop()}
 
 	// The client should have been created correctly
-	exp := newTraceExporter(context.Background(), params, cfg)
+	exp := newTracesExporter(context.Background(), params, cfg)
 	assert.NotNil(t, exp)
 }
 
@@ -191,7 +192,7 @@ func TestPushTraceData(t *testing.T) {
 	}
 
 	params := component.ExporterCreateParams{Logger: zap.NewNop()}
-	exp := newTraceExporter(context.Background(), params, cfg)
+	exp := newTracesExporter(context.Background(), params, cfg)
 
 	err := exp.pushTraceData(context.Background(), testutils.TestTraces.Clone())
 	assert.NoError(t, err)
@@ -206,7 +207,7 @@ func TestPushTraceData(t *testing.T) {
 func TestTraceAndStatsExporter(t *testing.T) {
 	// ensure that the protobuf serialized traces payload contains HostName Env and Traces
 	// ensure that the json gzipped stats payload contains HostName Env and Stats
-	got := testTraceExporterHelper(simpleTraces(), t)
+	got := testTracesExporterHelper(simpleTraces(), t)
 
 	// ensure a protobuf and json payload are sent
 	assert.Equal(t, 2, len(got))
@@ -220,12 +221,6 @@ func simpleTraces() pdata.Traces {
 
 func simpleTracesWithID(traceID pdata.TraceID) pdata.Traces {
 	traces := pdata.NewTraces()
-	traces.ResourceSpans().Resize(1)
-	rs := traces.ResourceSpans().At(0)
-	rs.InstrumentationLibrarySpans().Resize(1)
-	ils := rs.InstrumentationLibrarySpans().At(0)
-	ils.Spans().Resize(1)
-	ils.Spans().At(0).SetTraceID(traceID)
-
+	traces.ResourceSpans().AppendEmpty().InstrumentationLibrarySpans().AppendEmpty().Spans().AppendEmpty().SetTraceID(traceID)
 	return traces
 }

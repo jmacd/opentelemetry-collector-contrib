@@ -35,7 +35,7 @@ func TestCreateDefaultConfig(t *testing.T) {
 	assert.NoError(t, configcheck.ValidateConfig(cfg))
 }
 
-func TestCreateTraceExporter(t *testing.T) {
+func TestCreateTracesExporter(t *testing.T) {
 
 	factories, err := componenttest.NopFactories()
 	require.NoError(t, err)
@@ -47,7 +47,7 @@ func TestCreateTraceExporter(t *testing.T) {
 	require.NoError(t, err)
 
 	params := component.ExporterCreateParams{Logger: zap.NewNop()}
-	exporter, err := factory.CreateTracesExporter(context.Background(), params, cfg.Exporters["logzio/2"])
+	exporter, err := factory.CreateTracesExporter(context.Background(), params, cfg.Exporters[config.NewIDWithName(typeStr, "2")])
 	assert.Nil(t, err)
 	assert.NotNil(t, exporter)
 }

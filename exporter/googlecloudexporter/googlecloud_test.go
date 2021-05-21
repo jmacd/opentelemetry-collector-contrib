@@ -20,6 +20,7 @@ import (
 	"testing"
 	"time"
 
+	agentmetricspb "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1"
 	metricspb "github.com/census-instrumentation/opencensus-proto/gen-go/metrics/v1"
 	resourcepb "github.com/census-instrumentation/opencensus-proto/gen-go/resource/v1"
 	"github.com/stretchr/testify/assert"
@@ -66,7 +67,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 		{
 			name: "Standard",
 			cfg: &Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 				ProjectID:        "idk",
 				Endpoint:         "127.0.0.1:8080",
 				UseInsecure:      true,
@@ -75,7 +76,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 		{
 			name: "Standard_WithoutSendingQueue",
 			cfg: &Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 				ProjectID:        "idk",
 				Endpoint:         "127.0.0.1:8080",
 				UseInsecure:      true,
@@ -98,8 +99,8 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 
 			go srv.Serve(lis)
 
-			createParams := component.ExporterCreateParams{Logger: zap.NewNop(), ApplicationStartInfo: component.ApplicationStartInfo{Version: "v0.0.1"}}
-			sde, err := newGoogleCloudTraceExporter(test.cfg, createParams)
+			createParams := component.ExporterCreateParams{Logger: zap.NewNop(), BuildInfo: component.BuildInfo{Version: "v0.0.1"}}
+			sde, err := newGoogleCloudTracesExporter(test.cfg, createParams)
 			if test.expectedErr != "" {
 				assert.EqualError(t, err, test.expectedErr)
 				return
@@ -112,13 +113,10 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 
 			resource := pdata.NewResource()
 			traces := pdata.NewTraces()
-			traces.ResourceSpans().Resize(1)
-			rspans := traces.ResourceSpans().At(0)
+			rspans := traces.ResourceSpans().AppendEmpty()
 			resource.CopyTo(rspans.Resource())
-			rspans.InstrumentationLibrarySpans().Resize(1)
-			ispans := rspans.InstrumentationLibrarySpans().At(0)
-			ispans.Spans().Resize(1)
-			span := ispans.Spans().At(0)
+			ispans := rspans.InstrumentationLibrarySpans().AppendEmpty()
+			span := ispans.Spans().AppendEmpty()
 			span.SetName(spanName)
 			span.SetStartTimestamp(pdata.TimestampFromTime(testTime))
 			err = sde.ConsumeTraces(context.Background(), traces)
@@ -188,7 +186,7 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 	}
 
 	sde, err := newGoogleCloudMetricsExporter(&Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		ProjectID:        "idk",
 		Endpoint:         "127.0.0.1:8080",
 		UserAgent:        "MyAgent {{version}}",
@@ -199,7 +197,7 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 	},
 		component.ExporterCreateParams{
 			Logger: zap.NewNop(),
-			ApplicationStartInfo: component.ApplicationStartInfo{
+			BuildInfo: component.BuildInfo{
 				Version: "v0.0.1",
 			},
 		},
@@ -207,7 +205,7 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { require.NoError(t, sde.Shutdown(context.Background())) }()
 
-	md := internaldata.MetricsData{
+	md := agentmetricspb.ExportMetricsServiceRequest{
 		Resource: &resourcepb.Resource{
 			Type: "host",
 			Labels: map[string]string{
@@ -274,7 +272,7 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 		Type: "test",
 	}
 
-	assert.NoError(t, sde.ConsumeMetrics(context.Background(), internaldata.OCToMetrics(md)), err)
+	assert.NoError(t, sde.ConsumeMetrics(context.Background(), internaldata.OCToMetrics(md.Node, md.Resource, md.Metrics)), err)
 
 	expectedNames := map[string]struct{}{
 		"projects/idk/metricDescriptors/custom.googleapis.com/opencensus/test_gauge1": {},

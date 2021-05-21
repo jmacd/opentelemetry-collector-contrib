@@ -80,9 +80,13 @@ func createLogsReceiver(logReceiverType LogReceiverType) receiverhelper.CreateLo
 		if baseCfg.Converter.FlushInterval > 0 {
 			opts = append(opts, WithFlushInterval(baseCfg.Converter.FlushInterval))
 		}
+		if baseCfg.Converter.WorkerCount > 0 {
+			opts = append(opts, WithWorkerCount(baseCfg.Converter.WorkerCount))
+		}
 		converter := NewConverter(opts...)
 
 		return &receiver{
+			id:        cfg.ID(),
 			agent:     logAgent,
 			emitter:   emitter,
 			consumer:  nextConsumer,

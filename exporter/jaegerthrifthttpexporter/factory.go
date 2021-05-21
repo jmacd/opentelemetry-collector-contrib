@@ -35,17 +35,17 @@ func NewFactory() component.ExporterFactory {
 	return exporterhelper.NewFactory(
 		typeStr,
 		createDefaultConfig,
-		exporterhelper.WithTraces(createTraceExporter))
+		exporterhelper.WithTraces(createTracesExporter))
 }
 
 func createDefaultConfig() config.Exporter {
 	return &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		Timeout:          defaultHTTPTimeout,
 	}
 }
 
-func createTraceExporter(
+func createTracesExporter(
 	_ context.Context,
 	_ component.ExporterCreateParams,
 	config config.Exporter,
@@ -55,19 +55,14 @@ func createTraceExporter(
 	_, err := url.ParseRequestURI(expCfg.URL)
 	if err != nil {
 		// TODO: Improve error message, see #215
-		err = fmt.Errorf(
-			"%q config requires a valid \"url\": %v",
-			expCfg.Name(),
-			err)
+		err = fmt.Errorf("%q config requires a valid \"url\": %v", expCfg.ID().String(), err)
 		return nil, err
 	}
 
 	if expCfg.Timeout <= 0 {
-		err := fmt.Errorf(
-			"%q config requires a positive value for \"timeout\"",
-			expCfg.Name())
+		err := fmt.Errorf("%q config requires a positive value for \"timeout\"", expCfg.ID().String())
 		return nil, err
 	}
 
-	return newTraceExporter(config, component.ExporterCreateParams{Logger: zap.NewNop()}, expCfg.URL, expCfg.Headers, expCfg.Timeout)
+	return newTracesExporter(config, component.ExporterCreateParams{Logger: zap.NewNop()}, expCfg.URL, expCfg.Headers, expCfg.Timeout)
 }

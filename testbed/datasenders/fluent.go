@@ -25,6 +25,7 @@ import (
 
 	"github.com/fluent/fluent-logger-golang/fluent"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.opentelemetry.io/collector/testbed/testbed"
 )
@@ -72,6 +73,10 @@ func NewFluentLogsForwarder(t *testing.T, port int) *FluentLogsForwarder {
 	return f
 }
 
+func (f *FluentLogsForwarder) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
+}
+
 func (f *FluentLogsForwarder) Start() error {
 	return nil
 }
@@ -103,23 +108,24 @@ func (f *FluentLogsForwarder) ConsumeLogs(_ context.Context, logs pdata.Logs) er
 func (f *FluentLogsForwarder) convertLogToMap(lr pdata.LogRecord) map[string]string {
 	out := map[string]string{}
 
-	if lr.Body().Type() == pdata.AttributeValueSTRING {
+	if lr.Body().Type() == pdata.AttributeValueTypeString {
 		out["log"] = lr.Body().StringVal()
 	}
 
-	lr.Attributes().ForEach(func(k string, v pdata.AttributeValue) {
+	lr.Attributes().Range(func(k string, v pdata.AttributeValue) bool {
 		switch v.Type() {
-		case pdata.AttributeValueSTRING:
+		case pdata.AttributeValueTypeString:
 			out[k] = v.StringVal()
-		case pdata.AttributeValueINT:
+		case pdata.AttributeValueTypeInt:
 			out[k] = strconv.FormatInt(v.IntVal(), 10)
-		case pdata.AttributeValueDOUBLE:
+		case pdata.AttributeValueTypeDouble:
 			out[k] = strconv.FormatFloat(v.DoubleVal(), 'f', -1, 64)
-		case pdata.AttributeValueBOOL:
+		case pdata.AttributeValueTypeBool:
 			out[k] = strconv.FormatBool(v.BoolVal())
 		default:
 			panic("missing case")
 		}
+		return true
 	})
 
 	return out
@@ -131,19 +137,20 @@ func (f *FluentLogsForwarder) convertLogToJSON(lr pdata.LogRecord) []byte {
 	}
 	rec["log"] = lr.Body().StringVal()
 
-	lr.Attributes().ForEach(func(k string, v pdata.AttributeValue) {
+	lr.Attributes().Range(func(k string, v pdata.AttributeValue) bool {
 		switch v.Type() {
-		case pdata.AttributeValueSTRING:
+		case pdata.AttributeValueTypeString:
 			rec[k] = v.StringVal()
-		case pdata.AttributeValueINT:
+		case pdata.AttributeValueTypeInt:
 			rec[k] = strconv.FormatInt(v.IntVal(), 10)
-		case pdata.AttributeValueDOUBLE:
+		case pdata.AttributeValueTypeDouble:
 			rec[k] = strconv.FormatFloat(v.DoubleVal(), 'f', -1, 64)
-		case pdata.AttributeValueBOOL:
+		case pdata.AttributeValueTypeBool:
 			rec[k] = strconv.FormatBool(v.BoolVal())
 		default:
 			panic("missing case")
 		}
+		return true
 	})
 	b, err := json.Marshal(rec)
 	if err != nil {

@@ -17,51 +17,73 @@ package protocol
 import (
 	"time"
 
+	"github.com/montanaflynn/stats"
 	"go.opentelemetry.io/collector/consumer/pdata"
 )
 
 func buildCounterMetric(parsedMetric statsDMetric, timeNow time.Time) pdata.InstrumentationLibraryMetrics {
-	dp := pdata.NewIntDataPoint()
+	ilm := pdata.NewInstrumentationLibraryMetrics()
+	nm := ilm.Metrics().AppendEmpty()
+	nm.SetName(parsedMetric.description.name)
+	if parsedMetric.unit != "" {
+		nm.SetUnit(parsedMetric.unit)
+	}
+	nm.SetDataType(pdata.MetricDataTypeIntSum)
+	nm.IntSum().SetAggregationTemporality(pdata.AggregationTemporalityDelta)
+	nm.IntSum().SetIsMonotonic(true)
+
+	dp := nm.IntSum().DataPoints().AppendEmpty()
 	dp.SetValue(parsedMetric.intvalue)
 	dp.SetTimestamp(pdata.TimestampFromTime(timeNow))
 	for i, key := range parsedMetric.labelKeys {
 		dp.LabelsMap().Insert(key, parsedMetric.labelValues[i])
 	}
 
-	nm := pdata.NewMetric()
-	nm.SetName(parsedMetric.description.name)
-	if parsedMetric.unit != "" {
-		nm.SetUnit(parsedMetric.unit)
-	}
-	nm.SetDataType(pdata.MetricDataTypeIntSum)
-	nm.IntSum().DataPoints().Append(dp)
-	nm.IntSum().SetAggregationTemporality(pdata.AggregationTemporalityDelta)
-	nm.IntSum().SetIsMonotonic(true)
-
-	ilm := pdata.NewInstrumentationLibraryMetrics()
-	ilm.Metrics().Append(nm)
-
 	return ilm
 }
 
 func buildGaugeMetric(parsedMetric statsDMetric, timeNow time.Time) pdata.InstrumentationLibraryMetrics {
-	dp := pdata.NewDoubleDataPoint()
+	ilm := pdata.NewInstrumentationLibraryMetrics()
+	nm := ilm.Metrics().AppendEmpty()
+	nm.SetName(parsedMetric.description.name)
+	if parsedMetric.unit != "" {
+		nm.SetUnit(parsedMetric.unit)
+	}
+	nm.SetDataType(pdata.MetricDataTypeDoubleGauge)
+	dp := nm.DoubleGauge().DataPoints().AppendEmpty()
 	dp.SetValue(parsedMetric.floatvalue)
 	dp.SetTimestamp(pdata.TimestampFromTime(timeNow))
 	for i, key := range parsedMetric.labelKeys {
 		dp.LabelsMap().Insert(key, parsedMetric.labelValues[i])
 	}
 
-	nm := pdata.NewMetric()
-	nm.SetName(parsedMetric.description.name)
-	if parsedMetric.unit != "" {
-		nm.SetUnit(parsedMetric.unit)
+	return ilm
+}
+
+func buildSummaryMetric(summaryMetric summaryMetric) pdata.InstrumentationLibraryMetrics {
+	dp := pdata.NewSummaryDataPoint()
+	dp.SetCount(uint64(len(summaryMetric.summaryPoints)))
+	sum, _ := stats.Sum(summaryMetric.summaryPoints)
+	dp.SetSum(sum)
+	dp.SetTimestamp(pdata.TimestampFromTime(summaryMetric.timeNow))
+
+	quantile := []float64{0, 10, 50, 90, 95, 100}
+	for _, v := range quantile {
+		eachQuantile := pdata.NewValueAtQuantile()
+		eachQuantile.SetQuantile(v)
+		eachQuantileValue, _ := stats.PercentileNearestRank(summaryMetric.summaryPoints, v)
+		eachQuantile.SetValue(eachQuantileValue)
+		dp.QuantileValues().Append(eachQuantile)
 	}
-	nm.SetDataType(pdata.MetricDataTypeDoubleGauge)
-	nm.DoubleGauge().DataPoints().Append(dp)
+
+	nm := pdata.NewMetric()
+	nm.SetName(summaryMetric.name)
+	nm.SetDataType(pdata.MetricDataTypeSummary)
+	nm.Summary().DataPoints().Append(dp)
 
 	ilm := pdata.NewInstrumentationLibraryMetrics()
 	ilm.Metrics().Append(nm)
 
 	return ilm
+
 }

@@ -29,7 +29,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws"
+	aws "github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/metrics"
 )
 
 func generateTestIntGauge(name string) *metricspb.Metric {
@@ -277,8 +277,7 @@ func TestIntDataPointSliceAt(t *testing.T) {
 	for _, tc := range testDeltaCases {
 		t.Run(tc.testName, func(t *testing.T) {
 			testDPS := pdata.NewIntDataPointSlice()
-			testDPS.Resize(1)
-			testDP := testDPS.At(0)
+			testDP := testDPS.AppendEmpty()
 			testDP.SetValue(tc.value.(int64))
 			testDP.LabelsMap().InitFromMap(labels)
 
@@ -343,8 +342,7 @@ func TestDoubleDataPointSliceAt(t *testing.T) {
 	for _, tc := range testDeltaCases {
 		t.Run(tc.testName, func(t *testing.T) {
 			testDPS := pdata.NewDoubleDataPointSlice()
-			testDPS.Resize(1)
-			testDP := testDPS.At(0)
+			testDP := testDPS.AppendEmpty()
 			testDP.SetValue(tc.value.(float64))
 			testDP.LabelsMap().InitFromMap(labels)
 
@@ -381,8 +379,7 @@ func TestHistogramDataPointSliceAt(t *testing.T) {
 	labels := map[string]string{"label1": "value1"}
 
 	testDPS := pdata.NewHistogramDataPointSlice()
-	testDPS.Resize(1)
-	testDP := testDPS.At(0)
+	testDP := testDPS.AppendEmpty()
 	testDP.SetCount(uint64(17))
 	testDP.SetSum(float64(17.13))
 	testDP.SetBucketCounts([]uint64{1, 2, 3})
@@ -442,8 +439,7 @@ func TestSummaryDataPointSliceAt(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.testName, func(t *testing.T) {
 			testDPS := pdata.NewSummaryDataPointSlice()
-			testDPS.Resize(1)
-			testDP := testDPS.At(0)
+			testDP := testDPS.AppendEmpty()
 			testDP.SetSum(tt.inputSumCount[0].(float64))
 			testDP.SetCount(tt.inputSumCount[1].(uint64))
 
@@ -490,7 +486,7 @@ func TestSummaryDataPointSliceAt(t *testing.T) {
 			assert.Equal(t, expectedMetricStats.Max, actualMetricsStats.Max)
 			assert.Equal(t, expectedMetricStats.Min, actualMetricsStats.Min)
 			assert.InDelta(t, expectedMetricStats.Count, actualMetricsStats.Count, 0.1)
-			assert.True(t, expectedMetricStats.Sum-actualMetricsStats.Sum < float64(0.02))
+			assert.InDelta(t, expectedMetricStats.Sum, actualMetricsStats.Sum, 0.02)
 		})
 	}
 }
@@ -540,12 +536,14 @@ func TestGetDataPoints(t *testing.T) {
 		"log-stream",
 	}
 	testCases := []struct {
-		testName           string
-		metric             *metricspb.Metric
-		expectedDataPoints DataPoints
+		testName            string
+		isPrometheusMetrics bool
+		metric              *metricspb.Metric
+		expectedDataPoints  DataPoints
 	}{
 		{
 			"Int gauge",
+			false,
 			generateTestIntGauge("foo"),
 			IntDataPointSlice{
 				metadata.InstrumentationLibraryName,
@@ -555,6 +553,7 @@ func TestGetDataPoints(t *testing.T) {
 		},
 		{
 			"Double gauge",
+			false,
 			generateTestDoubleGauge("foo"),
 			DoubleDataPointSlice{
 				metadata.InstrumentationLibraryName,
@@ -564,6 +563,7 @@ func TestGetDataPoints(t *testing.T) {
 		},
 		{
 			"Int sum",
+			false,
 			generateTestIntSum("foo"),
 			IntDataPointSlice{
 				metadata.InstrumentationLibraryName,
@@ -573,6 +573,7 @@ func TestGetDataPoints(t *testing.T) {
 		},
 		{
 			"Double sum",
+			false,
 			generateTestDoubleSum("foo"),
 			DoubleDataPointSlice{
 				metadata.InstrumentationLibraryName,
@@ -582,6 +583,7 @@ func TestGetDataPoints(t *testing.T) {
 		},
 		{
 			"Double histogram",
+			false,
 			generateTestHistogram("foo"),
 			HistogramDataPointSlice{
 				metadata.InstrumentationLibraryName,
@@ -589,7 +591,18 @@ func TestGetDataPoints(t *testing.T) {
 			},
 		},
 		{
-			"Summary",
+			"Summary from SDK",
+			false,
+			generateTestSummary("foo"),
+			SummaryDataPointSlice{
+				metadata.InstrumentationLibraryName,
+				dmm,
+				pdata.SummaryDataPointSlice{},
+			},
+		},
+		{
+			"Summary from Prometheus",
+			true,
 			generateTestSummary("foo"),
 			SummaryDataPointSlice{
 				metadata.InstrumentationLibraryName,
@@ -600,12 +613,10 @@ func TestGetDataPoints(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		oc := internaldata.MetricsData{
-			Metrics: []*metricspb.Metric{tc.metric},
-		}
+		ocMetrics := []*metricspb.Metric{tc.metric}
 
 		// Retrieve *pdata.Metric
-		rm := internaldata.OCToMetrics(oc).ResourceMetrics().At(0)
+		rm := internaldata.OCToMetrics(nil, nil, ocMetrics).ResourceMetrics().At(0)
 		metric := rm.InstrumentationLibraryMetrics().At(0).Metrics().At(0)
 
 		logger := zap.NewNop()
@@ -613,6 +624,11 @@ func TestGetDataPoints(t *testing.T) {
 		expectedLabels := pdata.NewStringMap().InitFromMap(map[string]string{"label1": "value1"})
 
 		t.Run(tc.testName, func(t *testing.T) {
+			if tc.isPrometheusMetrics {
+				metadata.receiver = prometheusReceiver
+			} else {
+				metadata.receiver = ""
+			}
 			dps := getDataPoints(&metric, metadata, logger)
 			assert.NotNil(t, dps)
 			assert.Equal(t, reflect.TypeOf(tc.expectedDataPoints), reflect.TypeOf(dps))
@@ -642,7 +658,9 @@ func TestGetDataPoints(t *testing.T) {
 				assert.Equal(t, []float64{0, 10}, dp.ExplicitBounds())
 				assert.Equal(t, expectedLabels, dp.LabelsMap())
 			case SummaryDataPointSlice:
+				expectedDPS := tc.expectedDataPoints.(SummaryDataPointSlice)
 				assert.Equal(t, metadata.InstrumentationLibraryName, convertedDPS.instrumentationLibraryName)
+				assert.Equal(t, expectedDPS.deltaMetricMetadata, convertedDPS.deltaMetricMetadata)
 				assert.Equal(t, 1, convertedDPS.Len())
 				dp := convertedDPS.SummaryDataPointSlice.At(0)
 				assert.Equal(t, 15.0, dp.Sum())
@@ -688,17 +706,15 @@ func TestGetDataPoints(t *testing.T) {
 }
 
 func BenchmarkGetDataPoints(b *testing.B) {
-	oc := internaldata.MetricsData{
-		Metrics: []*metricspb.Metric{
-			generateTestIntGauge("int-gauge"),
-			generateTestDoubleGauge("double-gauge"),
-			generateTestIntSum("int-sum"),
-			generateTestDoubleSum("double-sum"),
-			generateTestHistogram("double-histogram"),
-			generateTestSummary("summary"),
-		},
+	ocMetrics := []*metricspb.Metric{
+		generateTestIntGauge("int-gauge"),
+		generateTestDoubleGauge("double-gauge"),
+		generateTestIntSum("int-sum"),
+		generateTestDoubleSum("double-sum"),
+		generateTestHistogram("double-histogram"),
+		generateTestSummary("summary"),
 	}
-	rms := internaldata.OCToMetrics(oc).ResourceMetrics()
+	rms := internaldata.OCToMetrics(nil, nil, ocMetrics).ResourceMetrics()
 	metrics := rms.At(0).InstrumentationLibraryMetrics().At(0).Metrics()
 	numMetrics := metrics.Len()
 

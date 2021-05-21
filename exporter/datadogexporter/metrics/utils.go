@@ -18,11 +18,10 @@ import (
 	"fmt"
 	"strings"
 
-	"go.uber.org/zap"
+	"go.opentelemetry.io/collector/component"
 	"gopkg.in/zorkian/go-datadog-api.v2"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter/config"
-	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter/metadata"
 )
 
 const (
@@ -64,29 +63,32 @@ func NewCount(name string, ts uint64, value float64, tags []string) datadog.Metr
 }
 
 // DefaultMetrics creates built-in metrics to report that an exporter is running
-func DefaultMetrics(exporterType string, timestamp uint64) []datadog.Metric {
-	return []datadog.Metric{
-		NewGauge(fmt.Sprintf("datadog_exporter.%s.running", exporterType), timestamp, 1.0, []string{}),
+func DefaultMetrics(exporterType string, hostname string, timestamp uint64, buildInfo component.BuildInfo) []datadog.Metric {
+	var tags []string
+
+	if buildInfo.Version != "" {
+		tags = append(tags, "version:"+buildInfo.Version)
 	}
+
+	if buildInfo.Command != "" {
+		tags = append(tags, "command:"+buildInfo.Command)
+	}
+
+	metrics := []datadog.Metric{
+		NewGauge(fmt.Sprintf("otel.datadog_exporter.%s.running", exporterType), timestamp, 1.0, tags),
+	}
+
+	for i := range metrics {
+		metrics[i].SetHost(hostname)
+	}
+
+	return metrics
 }
 
 // ProcessMetrics adds the hostname to the metric and prefixes it with the "otel"
 // namespace as the Datadog backend expects
-func ProcessMetrics(ms []datadog.Metric, logger *zap.Logger, cfg *config.Config) {
+func ProcessMetrics(ms []datadog.Metric, cfg *config.Config) {
 	addNamespace(ms, otelNamespacePrefix)
-	addHostname(ms, logger, cfg)
-}
-
-// addHostname adds an hostname to metrics, either using the hostname given
-// in the config, or retrieved from the host metadata
-func addHostname(metrics []datadog.Metric, logger *zap.Logger, cfg *config.Config) {
-	overrideHostname := cfg.Hostname != ""
-
-	for i := range metrics {
-		if overrideHostname || metrics[i].GetHost() == "" {
-			metrics[i].Host = metadata.GetHost(logger, cfg)
-		}
-	}
 }
 
 // shouldPrepend decides if a given metric name should be prepended by `otel.`.
@@ -94,7 +96,7 @@ func addHostname(metrics []datadog.Metric, logger *zap.Logger, cfg *config.Confi
 // - hostmetrics receiver metrics (since they clash with Datadog Agent system check) and
 // - running metrics
 func shouldPrepend(name string) bool {
-	namespaces := [...]string{"datadog_exporter.", "system.", "process."}
+	namespaces := [...]string{"system.", "process."}
 	for _, ns := range namespaces {
 		if strings.HasPrefix(name, ns) {
 			return true

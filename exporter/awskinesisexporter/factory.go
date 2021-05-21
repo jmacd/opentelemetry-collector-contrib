@@ -34,12 +34,12 @@ func NewFactory() component.ExporterFactory {
 	return exporterhelper.NewFactory(
 		typeStr,
 		createDefaultConfig,
-		exporterhelper.WithTraces(createTraceExporter))
+		exporterhelper.WithTraces(createTracesExporter))
 }
 
 func createDefaultConfig() config.Exporter {
 	return &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		AWS: AWSConfig{
 			Region: "us-west-2",
 		},
@@ -59,14 +59,14 @@ func createDefaultConfig() config.Exporter {
 	}
 }
 
-func createTraceExporter(
+func createTracesExporter(
 	_ context.Context,
 	params component.ExporterCreateParams,
 	config config.Exporter,
 ) (component.TracesExporter, error) {
 	c := config.(*Config)
 	k, err := awskinesis.NewExporter(&awskinesis.Options{
-		Name:               c.Name(),
+		Name:               c.ID().String(),
 		StreamName:         c.AWS.StreamName,
 		AWSRegion:          c.AWS.Region,
 		AWSRole:            c.AWS.Role,

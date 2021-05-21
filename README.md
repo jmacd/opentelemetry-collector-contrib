@@ -60,17 +60,19 @@ small number of users.
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Triagers ([@open-telemetry/collector-contrib-triagers](https://github.com/orgs/open-telemetry/teams/collector-contrib-triagers))
-- [Andrew Hsu](https://github.com/andrewhsu), Lightstep
+- [Alolita Sharma](https://github.com/alolita), AWS
 - [Steve Flanders](https://github.com/flands), Splunk
 
 Approvers ([@open-telemetry/collector-contrib-approvers](https://github.com/orgs/open-telemetry/teams/collector-contrib-approvers)):
 
+- [Anthony Mirabella](https://github.com/Aneurysm9), AWS
 - [Anuraag Agrawal](https://github.com/anuraaga), AWS
 - [Daniel Jaglowski](https://github.com/djaglowski), observIQ
 - [Dmitrii Anoshin](https://github.com/dmitryax), Splunk
 - [Jay Camp](https://github.com/jrcamp), Splunk
 - [Juraci Paixão Kröhling](https://github.com/jpkrohling), Red Hat
 - [Kevin Brockhoff](https://github.com/kbrockhoff), Daugherty Business Solutions
+- [Pablo Baeyens](https://github.com/mx-psi), DataDog
 - [Owais Lone](https://github.com/owais), Splunk
 
 Maintainers ([@open-telemetry/collector-contrib-maintainer](https://github.com/orgs/open-telemetry/teams/collector-contrib-maintainer)):
@@ -78,7 +80,7 @@ Maintainers ([@open-telemetry/collector-contrib-maintainer](https://github.com/o
 - [Bogdan Drutu](https://github.com/BogdanDrutu), Splunk
 - [Tigran Najaryan](https://github.com/tigrannajaryan), Splunk
 
-Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/master/community-membership.md).
+Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md).
 
 ## PRs and Reviews
 

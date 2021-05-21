@@ -29,6 +29,7 @@ import (
 	"go.opentelemetry.io/collector/component/componenthelper"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.uber.org/zap"
@@ -48,7 +49,7 @@ func TestNewLogsExporter(t *testing.T) {
 		{
 			"empty",
 			&Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 			},
 			errNoResolver,
 		},
@@ -310,8 +311,7 @@ func TestNoLogsInBatch(t *testing.T) {
 			"no instrumentation library logs",
 			func() pdata.Logs {
 				batch := pdata.NewLogs()
-				rl := pdata.NewResourceLogs()
-				batch.ResourceLogs().Append(rl)
+				batch.ResourceLogs().AppendEmpty()
 				return batch
 			}(),
 		},
@@ -319,10 +319,7 @@ func TestNoLogsInBatch(t *testing.T) {
 			"no logs",
 			func() pdata.Logs {
 				batch := pdata.NewLogs()
-				rl := pdata.NewResourceLogs()
-				ill := pdata.NewInstrumentationLibraryLogs()
-				rl.InstrumentationLibraryLogs().Append(ill)
-				batch.ResourceLogs().Append(rl)
+				batch.ResourceLogs().AppendEmpty().InstrumentationLibraryLogs().AppendEmpty()
 				return batch
 			}(),
 		},
@@ -411,7 +408,7 @@ func TestRollingUpdatesWhenConsumeLogs(t *testing.T) {
 	res.resInterval = 10 * time.Millisecond
 
 	cfg := &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		Resolver: ResolverSettings{
 			DNS: &DNSResolver{Hostname: "service-1", Port: ""},
 		},
@@ -505,23 +502,18 @@ func simpleLogs() pdata.Logs {
 
 func simpleLogWithID(id pdata.TraceID) pdata.Logs {
 	logs := pdata.NewLogs()
-	logs.ResourceLogs().Resize(1)
-	rl := logs.ResourceLogs().At(0)
-	rl.InstrumentationLibraryLogs().Resize(1)
-	ill := rl.InstrumentationLibraryLogs().At(0)
-	ill.Logs().Resize(1)
-	ill.Logs().At(0).SetTraceID(id)
+	rl := logs.ResourceLogs().AppendEmpty()
+	ill := rl.InstrumentationLibraryLogs().AppendEmpty()
+	ill.Logs().AppendEmpty().SetTraceID(id)
 
 	return logs
 }
 
 func simpleLogWithoutID() pdata.Logs {
 	logs := pdata.NewLogs()
-	logs.ResourceLogs().Resize(1)
-	rl := logs.ResourceLogs().At(0)
-	rl.InstrumentationLibraryLogs().Resize(1)
-	ill := rl.InstrumentationLibraryLogs().At(0)
-	ill.Logs().Resize(1)
+	rl := logs.ResourceLogs().AppendEmpty()
+	ill := rl.InstrumentationLibraryLogs().AppendEmpty()
+	ill.Logs().AppendEmpty()
 
 	return logs
 }
@@ -529,6 +521,10 @@ func simpleLogWithoutID() pdata.Logs {
 type mockLogsExporter struct {
 	component.Component
 	ConsumeLogsFn func(ctx context.Context, ld pdata.Logs) error
+}
+
+func (e *mockLogsExporter) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
 }
 
 func (e *mockLogsExporter) ConsumeLogs(ctx context.Context, ld pdata.Logs) error {

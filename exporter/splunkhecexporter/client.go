@@ -60,7 +60,7 @@ func (c *client) pushMetricsData(
 		return nil
 	}
 
-	body, compressed, err := encodeBody(&c.zippers, splunkDataPoints, c.config.DisableCompression)
+	body, compressed, err := encodeBodyEvents(&c.zippers, splunkDataPoints, c.config.DisableCompression)
 	if err != nil {
 		return consumererror.Permanent(err)
 	}
@@ -86,16 +86,7 @@ func (c *client) pushMetricsData(
 	io.Copy(ioutil.Discard, resp.Body)
 	resp.Body.Close()
 
-	// Splunk accepts all 2XX codes.
-	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		err = fmt.Errorf(
-			"HTTP %d %q",
-			resp.StatusCode,
-			http.StatusText(resp.StatusCode))
-		return err
-	}
-
-	return nil
+	return splunk.HandleHTTPCode(resp)
 }
 
 func (c *client) pushTraceData(
@@ -122,7 +113,7 @@ func (c *client) sendSplunkEvents(ctx context.Context, splunkEvents []*splunk.Ev
 	return c.postEvents(ctx, body, compressed)
 }
 
-func (c *client) pushLogData(ctx context.Context, ld pdata.Logs) (err error) {
+func (c *client) pushLogData(ctx context.Context, ld pdata.Logs) error {
 	c.wg.Add(1)
 	defer c.wg.Done()
 
@@ -160,7 +151,7 @@ func (c *client) pushLogData(ctx context.Context, ld pdata.Logs) (err error) {
 // pushLogDataInBatches sends batches of Splunk events in JSON format.
 // The batch content length is restricted to MaxContentLengthLogs.
 // ld log records are parsed to Splunk events.
-func (c *client) pushLogDataInBatches(ctx context.Context, ld pdata.Logs, send func(context.Context, *bytes.Buffer) error) (err error) {
+func (c *client) pushLogDataInBatches(ctx context.Context, ld pdata.Logs, send func(context.Context, *bytes.Buffer) error) error {
 	// Length of retained bytes in buffer after truncation.
 	var bufLen int
 	// Buffer capacity.
@@ -195,7 +186,7 @@ func (c *client) pushLogDataInBatches(ctx context.Context, ld pdata.Logs, send f
 				// Parsing log record to Splunk event.
 				event := mapLogRecordToSplunkEvent(res, logs.At(k), c.config, c.logger)
 				// JSON encoding event and writing to buffer.
-				if err = encoder.Encode(event); err != nil {
+				if err := encoder.Encode(event); err != nil {
 					permanentErrors = append(permanentErrors, consumererror.Permanent(fmt.Errorf("dropped log event: %v, error: %v", event, err)))
 					continue
 				}
@@ -223,7 +214,7 @@ func (c *client) pushLogDataInBatches(ctx context.Context, ld pdata.Logs, send f
 				// Truncating buffer at tracked length below capacity and sending.
 				buf.Truncate(bufLen)
 				if buf.Len() > 0 {
-					if err = send(ctx, buf); err != nil {
+					if err := send(ctx, buf); err != nil {
 						return consumererror.NewLogs(err, *subLogs(&ld, bufFront))
 					}
 				}
@@ -238,7 +229,7 @@ func (c *client) pushLogDataInBatches(ctx context.Context, ld pdata.Logs, send f
 	}
 
 	if buf.Len() > 0 {
-		if err = send(ctx, buf); err != nil {
+		if err := send(ctx, buf); err != nil {
 			return consumererror.NewLogs(err, *subLogs(&ld, bufFront))
 		}
 	}
@@ -264,19 +255,13 @@ func (c *client) postEvents(ctx context.Context, events io.Reader, compressed bo
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
+	err = splunk.HandleHTTPCode(resp)
 
 	io.Copy(ioutil.Discard, resp.Body)
-	resp.Body.Close()
 
-	// Splunk accepts all 2XX codes.
-	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		err = fmt.Errorf(
-			"HTTP %d %q",
-			resp.StatusCode,
-			http.StatusText(resp.StatusCode))
-		return err
-	}
-	return nil
+	return err
 }
 
 // subLogs returns a subset of `ld` starting from index `from` to the end.
@@ -291,7 +276,7 @@ func subLogs(ld *pdata.Logs, from *logIndex) *pdata.Logs {
 	resourcesSub := subset.ResourceLogs()
 
 	for i := from.resource; i < resources.Len(); i++ {
-		resourcesSub.Append(pdata.NewResourceLogs())
+		resourcesSub.AppendEmpty()
 		resources.At(i).Resource().CopyTo(resourcesSub.At(i - from.resource).Resource())
 
 		libraries := resources.At(i).InstrumentationLibraryLogs()
@@ -302,7 +287,7 @@ func subLogs(ld *pdata.Logs, from *logIndex) *pdata.Logs {
 			j = from.library
 		}
 		for jSub := 0; j < libraries.Len(); j++ {
-			librariesSub.Append(pdata.NewInstrumentationLibraryLogs())
+			librariesSub.AppendEmpty()
 			libraries.At(j).InstrumentationLibrary().CopyTo(librariesSub.At(jSub).InstrumentationLibrary())
 
 			logs := libraries.At(j).Logs()
@@ -313,8 +298,9 @@ func subLogs(ld *pdata.Logs, from *logIndex) *pdata.Logs {
 			if i == from.resource && j == from.library {
 				k = from.record
 			}
-			for kSub := 0; k < logs.Len(); k++ {
-				logsSub.Append(pdata.NewLogRecord())
+
+			for kSub := 0; k < logs.Len(); k++ { //revive:disable-line:var-naming
+				logsSub.AppendEmpty()
 				logs.At(k).CopyTo(logsSub.At(kSub))
 				kSub++
 			}
@@ -328,19 +314,6 @@ func encodeBodyEvents(zippers *sync.Pool, evs []*splunk.Event, disableCompressio
 	buf := new(bytes.Buffer)
 	encoder := json.NewEncoder(buf)
 	for _, e := range evs {
-		err := encoder.Encode(e)
-		if err != nil {
-			return nil, false, err
-		}
-		buf.WriteString("\r\n\r\n")
-	}
-	return getReader(zippers, buf, disableCompression)
-}
-
-func encodeBody(zippers *sync.Pool, dps []*splunk.Event, disableCompression bool) (bodyReader io.Reader, compressed bool, err error) {
-	buf := new(bytes.Buffer)
-	encoder := json.NewEncoder(buf)
-	for _, e := range dps {
 		err := encoder.Encode(e)
 		if err != nil {
 			return nil, false, err
@@ -369,7 +342,7 @@ func getReader(zippers *sync.Pool, b *bytes.Buffer, disableCompression bool) (io
 	return b, false, err
 }
 
-func (c *client) stop(context context.Context) error {
+func (c *client) stop(context.Context) error {
 	c.wg.Wait()
 	return nil
 }

@@ -43,10 +43,7 @@ func NewFactory() component.ReceiverFactory {
 func createDefaultConfig() config.Receiver {
 	return &Config{
 		ScraperControllerSettings: scraperhelper.ScraperControllerSettings{
-			ReceiverSettings: config.ReceiverSettings{
-				TypeVal: typeStr,
-				NameVal: typeStr,
-			},
+			ReceiverSettings:   config.NewReceiverSettings(config.NewID(typeStr)),
 			CollectionInterval: 10 * time.Second,
 		},
 		HTTPClientSettings: confighttp.HTTPClientSettings{
@@ -65,7 +62,7 @@ func createMetricsReceiver(
 	cfg := rConf.(*Config)
 
 	ns := newNginxScraper(params.Logger, cfg)
-	scraper := scraperhelper.NewResourceMetricsScraper(typeStr, ns.scrape)
+	scraper := scraperhelper.NewResourceMetricsScraper(cfg.ID(), ns.scrape)
 
 	return scraperhelper.NewScraperControllerReceiver(
 		&cfg.ScraperControllerSettings, params.Logger, consumer,

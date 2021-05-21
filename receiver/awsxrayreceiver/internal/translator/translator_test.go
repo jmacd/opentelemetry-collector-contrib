@@ -26,7 +26,7 @@ import (
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.opentelemetry.io/collector/translator/conventions"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/awsxray"
+	awsxray "github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/xray"
 )
 
 type perSpanProperties struct {
@@ -85,7 +85,7 @@ func TestTranslation(t *testing.T) {
 	}{
 		{
 			testCase:   "TranslateInstrumentedServerSegment",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "serverSample.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "serverSample.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				attrs := make(map[string]pdata.AttributeValue)
 				attrs[conventions.AttributeCloudProvider] = pdata.NewAttributeValueString(conventions.AttributeCloudProviderAWS)
@@ -110,7 +110,7 @@ func TestTranslation(t *testing.T) {
 					name:         *seg.Name,
 					startTimeSec: *seg.StartTime,
 					endTimeSec:   seg.EndTime,
-					spanKind:     pdata.SpanKindSERVER,
+					spanKind:     pdata.SpanKindServer,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -131,7 +131,7 @@ func TestTranslation(t *testing.T) {
 		},
 		{
 			testCase:   "TranslateInstrumentedClientSegment",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "ddbSample.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "ddbSample.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				attrs := make(map[string]pdata.AttributeValue)
 				attrs[conventions.AttributeCloudProvider] = pdata.NewAttributeValueString(conventions.AttributeCloudProviderAWS)
@@ -154,7 +154,7 @@ func TestTranslation(t *testing.T) {
 					name:         *seg.Name,
 					startTimeSec: *seg.StartTime,
 					endTimeSec:   seg.EndTime,
-					spanKind:     pdata.SpanKindSERVER,
+					spanKind:     pdata.SpanKindServer,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeError,
 					},
@@ -185,7 +185,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg7df6.Name,
 					startTimeSec: *subseg7df6.StartTime,
 					endTimeSec:   subseg7df6.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeError,
 					},
@@ -220,7 +220,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg7318.Name,
 					startTimeSec: *subseg7318.StartTime,
 					endTimeSec:   subseg7318.EndTime,
-					spanKind:     pdata.SpanKindCLIENT,
+					spanKind:     pdata.SpanKindClient,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -236,7 +236,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg0239.Name,
 					startTimeSec: *subseg0239.StartTime,
 					endTimeSec:   subseg0239.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -252,7 +252,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg23cf.Name,
 					startTimeSec: *subseg23cf.StartTime,
 					endTimeSec:   subseg23cf.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -275,7 +275,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg417b.Name,
 					startTimeSec: *subseg417b.StartTime,
 					endTimeSec:   subseg417b.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -298,7 +298,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg0cab.Name,
 					startTimeSec: *subseg0cab.StartTime,
 					endTimeSec:   subseg0cab.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -321,7 +321,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subsegF8db.Name,
 					startTimeSec: *subsegF8db.StartTime,
 					endTimeSec:   subsegF8db.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -344,7 +344,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subsegE2de.Name,
 					startTimeSec: *subsegE2de.StartTime,
 					endTimeSec:   subsegE2de.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -360,7 +360,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subsegA70b.Name,
 					startTimeSec: *subsegA70b.StartTime,
 					endTimeSec:   subsegA70b.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -376,7 +376,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subsegC053.Name,
 					startTimeSec: *subsegC053.StartTime,
 					endTimeSec:   subsegC053.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -392,7 +392,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg5fca.Name,
 					startTimeSec: *subseg5fca.StartTime,
 					endTimeSec:   subseg5fca.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -428,7 +428,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg7163.Name,
 					startTimeSec: *subseg7163.StartTime,
 					endTimeSec:   subseg7163.EndTime,
-					spanKind:     pdata.SpanKindCLIENT,
+					spanKind:     pdata.SpanKindClient,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeError,
 					},
@@ -444,7 +444,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg9da0.Name,
 					startTimeSec: *subseg9da0.StartTime,
 					endTimeSec:   subseg9da0.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -462,7 +462,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg56b1.Name,
 					startTimeSec: *subseg56b1.StartTime,
 					endTimeSec:   subseg56b1.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeError,
 					},
@@ -478,7 +478,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subseg6f90.Name,
 					startTimeSec: *subseg6f90.StartTime,
 					endTimeSec:   subseg6f90.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -494,7 +494,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subsegAcfa.Name,
 					startTimeSec: *subsegAcfa.StartTime,
 					endTimeSec:   subsegAcfa.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -512,7 +512,7 @@ func TestTranslation(t *testing.T) {
 					name:         *subsegBa8d.Name,
 					startTimeSec: *subsegBa8d.StartTime,
 					endTimeSec:   subsegBa8d.EndTime,
-					spanKind:     pdata.SpanKindINTERNAL,
+					spanKind:     pdata.SpanKindInternal,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeError,
 					},
@@ -553,7 +553,7 @@ func TestTranslation(t *testing.T) {
 		},
 		{
 			testCase:   "[aws] TranslateMissingAWSFieldSegment",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "awsMissingAwsField.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "awsMissingAwsField.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				attrs := make(map[string]pdata.AttributeValue)
 				attrs[conventions.AttributeCloudProvider] = pdata.NewAttributeValueString("unknown")
@@ -567,7 +567,7 @@ func TestTranslation(t *testing.T) {
 					name:         *seg.Name,
 					startTimeSec: *seg.StartTime,
 					endTimeSec:   seg.EndTime,
-					spanKind:     pdata.SpanKindSERVER,
+					spanKind:     pdata.SpanKindServer,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -588,7 +588,7 @@ func TestTranslation(t *testing.T) {
 		},
 		{
 			testCase:   "[aws] TranslateEC2AWSFieldsSegment",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "awsValidAwsFields.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "awsValidAwsFields.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				attrs := make(map[string]pdata.AttributeValue)
 				attrs[conventions.AttributeCloudProvider] = pdata.NewAttributeValueString(conventions.AttributeCloudProviderAWS)
@@ -631,7 +631,7 @@ func TestTranslation(t *testing.T) {
 					name:         *seg.Name,
 					startTimeSec: *seg.StartTime,
 					endTimeSec:   seg.EndTime,
-					spanKind:     pdata.SpanKindSERVER,
+					spanKind:     pdata.SpanKindServer,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -652,7 +652,7 @@ func TestTranslation(t *testing.T) {
 		},
 		{
 			testCase:   "TranslateCauseIsExceptionId",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "minCauseIsExceptionId.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "minCauseIsExceptionId.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				attrs := make(map[string]pdata.AttributeValue)
 				attrs[conventions.AttributeCloudProvider] = pdata.NewAttributeValueString("unknown")
@@ -665,7 +665,7 @@ func TestTranslation(t *testing.T) {
 					name:         *seg.Name,
 					startTimeSec: *seg.StartTime,
 					endTimeSec:   seg.EndTime,
-					spanKind:     pdata.SpanKindSERVER,
+					spanKind:     pdata.SpanKindServer,
 					spanStatus: spanSt{
 						message: *seg.Cause.ExceptionID,
 						code:    pdata.StatusCodeError,
@@ -687,7 +687,7 @@ func TestTranslation(t *testing.T) {
 		},
 		{
 			testCase:   "TranslateInvalidNamespace",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "invalidNamespace.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "invalidNamespace.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				return nil
 			},
@@ -705,7 +705,7 @@ func TestTranslation(t *testing.T) {
 		},
 		{
 			testCase:   "TranslateIndepSubsegment",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "indepSubsegment.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "indepSubsegment.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				attrs := make(map[string]pdata.AttributeValue)
 				attrs[conventions.AttributeCloudProvider] = pdata.NewAttributeValueString("unknown")
@@ -729,7 +729,7 @@ func TestTranslation(t *testing.T) {
 					name:         *seg.Name,
 					startTimeSec: *seg.StartTime,
 					endTimeSec:   seg.EndTime,
-					spanKind:     pdata.SpanKindCLIENT,
+					spanKind:     pdata.SpanKindClient,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -750,7 +750,7 @@ func TestTranslation(t *testing.T) {
 		},
 		{
 			testCase:   "TranslateIndepSubsegmentForContentLengthString",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "indepSubsegmentWithContentLengthString.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "indepSubsegmentWithContentLengthString.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				attrs := make(map[string]pdata.AttributeValue)
 				attrs[conventions.AttributeCloudProvider] = pdata.NewAttributeValueString("unknown")
@@ -776,7 +776,7 @@ func TestTranslation(t *testing.T) {
 					name:         *seg.Name,
 					startTimeSec: *seg.StartTime,
 					endTimeSec:   seg.EndTime,
-					spanKind:     pdata.SpanKindCLIENT,
+					spanKind:     pdata.SpanKindClient,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -797,7 +797,7 @@ func TestTranslation(t *testing.T) {
 		},
 		{
 			testCase:   "TranslateSql",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "indepSubsegmentWithSql.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "indepSubsegmentWithSql.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				attrs := make(map[string]pdata.AttributeValue)
 				attrs[conventions.AttributeCloudProvider] = pdata.NewAttributeValueString("unknown")
@@ -821,7 +821,7 @@ func TestTranslation(t *testing.T) {
 					name:         *seg.Name,
 					startTimeSec: *seg.StartTime,
 					endTimeSec:   seg.EndTime,
-					spanKind:     pdata.SpanKindCLIENT,
+					spanKind:     pdata.SpanKindClient,
 					spanStatus: spanSt{
 						code: pdata.StatusCodeUnset,
 					},
@@ -842,7 +842,7 @@ func TestTranslation(t *testing.T) {
 		},
 		{
 			testCase:   "TranslateInvalidSqlUrl",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "indepSubsegmentWithInvalidSqlUrl.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "indepSubsegmentWithInvalidSqlUrl.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				return nil
 			},
@@ -863,7 +863,7 @@ func TestTranslation(t *testing.T) {
 		{
 			testCase:                  "TranslateJsonUnmarshallFailed",
 			expectedUnmarshallFailure: true,
-			samplePath:                path.Join("../../../../internal/awsxray", "testdata", "minCauseIsInvalid.txt"),
+			samplePath:                path.Join("../../../../internal/aws/xray", "testdata", "minCauseIsInvalid.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				return nil
 			},
@@ -883,7 +883,7 @@ func TestTranslation(t *testing.T) {
 		},
 		{
 			testCase:   "TranslateRootSegValidationFailed",
-			samplePath: path.Join("../../../../internal/awsxray", "testdata", "segmentValidationFailed.txt"),
+			samplePath: path.Join("../../../../internal/aws/xray", "testdata", "segmentValidationFailed.txt"),
 			expectedResourceAttrs: func(seg *awsxray.Segment) map[string]pdata.AttributeValue {
 				return nil
 			},
@@ -993,15 +993,15 @@ func initResourceSpans(expectedSeg *awsxray.Segment,
 	if len(resourceAttrs) > 0 {
 		rs.Resource().Attributes().InitFromMap(resourceAttrs)
 	} else {
-		rs.Resource().Attributes().InitEmptyWithCapacity(initAttrCapacity)
+		rs.Resource().Attributes().Clear()
+		rs.Resource().Attributes().EnsureCapacity(initAttrCapacity)
 	}
 
 	if len(propsPerSpan) == 0 {
 		return &rs
 	}
 
-	rs.InstrumentationLibrarySpans().Resize(1)
-	ls := rs.InstrumentationLibrarySpans().At(0)
+	ls := rs.InstrumentationLibrarySpans().AppendEmpty()
 	ls.Spans().Resize(len(propsPerSpan))
 
 	for i, props := range propsPerSpan {
@@ -1035,7 +1035,8 @@ func initResourceSpans(expectedSeg *awsxray.Segment,
 		if len(props.attrs) > 0 {
 			sp.Attributes().InitFromMap(props.attrs)
 		} else {
-			sp.Attributes().InitEmptyWithCapacity(initAttrCapacity)
+			sp.Attributes().Clear()
+			sp.Attributes().EnsureCapacity(initAttrCapacity)
 		}
 	}
 	return &rs
@@ -1079,8 +1080,8 @@ func compare2ResourceSpans(t *testing.T, testCase string, exp, act *pdata.Resour
 			actS.Attributes().Sort(),
 			fmt.Sprintf("%s: span[%s].Attributes() differ", testCase, expS.SpanID().HexString()),
 		)
-		expS.Attributes().InitEmptyWithCapacity(0)
-		actS.Attributes().InitEmptyWithCapacity(0)
+		expS.Attributes().Clear()
+		actS.Attributes().Clear()
 
 		expEvts := expS.Events()
 		actEvts := actS.Events()
@@ -1101,8 +1102,8 @@ func compare2ResourceSpans(t *testing.T, testCase string, exp, act *pdata.Resour
 				fmt.Sprintf("%s: span[%s], event[%d].Attributes() differ",
 					testCase, expS.SpanID().HexString(), j),
 			)
-			expEvt.Attributes().InitEmptyWithCapacity(0)
-			actEvt.Attributes().InitEmptyWithCapacity(0)
+			expEvt.Attributes().Clear()
+			actEvt.Attributes().Clear()
 		}
 	}
 

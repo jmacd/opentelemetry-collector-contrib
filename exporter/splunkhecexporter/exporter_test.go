@@ -27,11 +27,14 @@ import (
 	"time"
 
 	commonpb "github.com/census-instrumentation/opencensus-proto/gen-go/agent/common/v1"
+	agentmetricspb "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1"
 	metricspb "github.com/census-instrumentation/opencensus-proto/gen-go/metrics/v1"
 	resourcepb "github.com/census-instrumentation/opencensus-proto/gen-go/resource/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/config/configtls"
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/testutil/metricstestutil"
@@ -44,7 +47,8 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	got, err := createExporter(nil, zap.NewNop())
+	buildInfo := component.DefaultBuildInfo()
+	got, err := createExporter(nil, zap.NewNop(), &buildInfo)
 	assert.EqualError(t, err, "nil config")
 	assert.Nil(t, got)
 
@@ -53,13 +57,31 @@ func TestNew(t *testing.T) {
 		Endpoint:        "https://example.com:8088",
 		TimeoutSettings: exporterhelper.TimeoutSettings{Timeout: 1 * time.Second},
 	}
-	got, err = createExporter(config, zap.NewNop())
+	got, err = createExporter(config, zap.NewNop(), &buildInfo)
 	assert.NoError(t, err)
 	require.NotNil(t, got)
+
+	config = &Config{
+		Token:           "someToken",
+		Endpoint:        "https://example.com:8088",
+		TimeoutSettings: exporterhelper.TimeoutSettings{Timeout: 1 * time.Second},
+		TLSSetting: configtls.TLSClientSetting{
+			TLSSetting: configtls.TLSSetting{
+				CAFile:   "file-not-found",
+				CertFile: "file-not-found",
+				KeyFile:  "file-not-found",
+			},
+			Insecure:           false,
+			InsecureSkipVerify: false,
+		},
+	}
+	got, err = createExporter(config, zap.NewNop(), &buildInfo)
+	assert.Error(t, err)
+	require.Nil(t, got)
 }
 
 func TestConsumeMetricsData(t *testing.T) {
-	smallBatch := internaldata.MetricsData{
+	smallBatch := &agentmetricspb.ExportMetricsServiceRequest{
 		Node: &commonpb.Node{
 			ServiceInfo: &commonpb.ServiceInfo{Name: "test_splunk"},
 		},
@@ -76,7 +98,7 @@ func TestConsumeMetricsData(t *testing.T) {
 	}
 	tests := []struct {
 		name             string
-		md               internaldata.MetricsData
+		md               *agentmetricspb.ExportMetricsServiceRequest
 		reqTestFunc      func(t *testing.T, r *http.Request)
 		httpResponseCode int
 		wantErr          bool
@@ -146,10 +168,13 @@ func TestConsumeMetricsData(t *testing.T) {
 			config.SourceType = "test_type"
 			config.Token = "1234"
 			config.Index = "test_index"
+			config.SplunkAppName = "OpenTelemetry-Collector Splunk Exporter"
+			config.SplunkAppVersion = "v0.0.1"
 
-			sender := buildClient(options, config, zap.NewNop())
+			sender, err := buildClient(options, config, zap.NewNop())
+			assert.NoError(t, err)
 
-			md := internaldata.OCToMetrics(tt.md)
+			md := internaldata.OCToMetrics(tt.md.Node, tt.md.Resource, tt.md.Metrics)
 			err = sender.pushMetricsData(context.Background(), md)
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -161,8 +186,8 @@ func TestConsumeMetricsData(t *testing.T) {
 	}
 }
 
-func generateLargeBatch() internaldata.MetricsData {
-	md := internaldata.MetricsData{
+func generateLargeBatch() *agentmetricspb.ExportMetricsServiceRequest {
+	md := &agentmetricspb.ExportMetricsServiceRequest{
 		Node: &commonpb.Node{
 			ServiceInfo: &commonpb.ServiceInfo{Name: "test_splunkhec"},
 		},
@@ -192,10 +217,8 @@ func generateLargeBatch() internaldata.MetricsData {
 
 func generateLargeLogsBatch() pdata.Logs {
 	logs := pdata.NewLogs()
-	logs.ResourceLogs().Resize(1)
-	rl := logs.ResourceLogs().At(0)
-	rl.InstrumentationLibraryLogs().Resize(1)
-	ill := rl.InstrumentationLibraryLogs().At(0)
+	rl := logs.ResourceLogs().AppendEmpty()
+	ill := rl.InstrumentationLibraryLogs().AppendEmpty()
 	ill.Logs().Resize(65000)
 	ts := pdata.Timestamp(123)
 	for i := 0; i < 65000; i++ {
@@ -213,12 +236,12 @@ func generateLargeLogsBatch() pdata.Logs {
 }
 
 func TestConsumeLogsData(t *testing.T) {
-	logRecord := pdata.NewLogRecord()
+	smallBatch := pdata.NewLogs()
+	logRecord := smallBatch.ResourceLogs().AppendEmpty().InstrumentationLibraryLogs().AppendEmpty().Logs().AppendEmpty()
 	logRecord.Body().SetStringVal("mylog")
 	logRecord.Attributes().InsertString(conventions.AttributeHostName, "myhost")
 	logRecord.Attributes().InsertString("custom", "custom")
 	logRecord.SetTimestamp(123)
-	smallBatch := makeLog(logRecord)
 	tests := []struct {
 		name             string
 		ld               pdata.Logs
@@ -291,8 +314,11 @@ func TestConsumeLogsData(t *testing.T) {
 			config.SourceType = "test_type"
 			config.Token = "1234"
 			config.Index = "test_index"
+			config.SplunkAppName = "OpenTelemetry-Collector Splunk Exporter"
+			config.SplunkAppVersion = "v0.0.1"
 
-			sender := buildClient(options, config, zap.NewNop())
+			sender, err := buildClient(options, config, zap.NewNop())
+			assert.NoError(t, err)
 
 			err = sender.pushLogData(context.Background(), tt.ld)
 			if tt.wantErr {
@@ -306,11 +332,12 @@ func TestConsumeLogsData(t *testing.T) {
 }
 
 func TestExporterStartAlwaysReturnsNil(t *testing.T) {
+	buildInfo := component.DefaultBuildInfo()
 	config := &Config{
 		Endpoint: "https://example.com:8088",
 		Token:    "abc",
 	}
-	e, err := createExporter(config, zap.NewNop())
+	e, err := createExporter(config, zap.NewNop(), &buildInfo)
 	assert.NoError(t, err)
 	assert.NoError(t, e.start(context.Background(), componenttest.NewNopHost()))
 }

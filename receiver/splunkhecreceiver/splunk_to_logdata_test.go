@@ -90,9 +90,8 @@ func Test_SplunkHecToLogData(t *testing.T) {
 				logsSlice := createLogsSlice(nanoseconds)
 				arrVal := pdata.NewAttributeValueArray()
 				arr := arrVal.ArrayVal()
-				arr.Resize(2)
-				arr.At(0).SetStringVal("foo")
-				arr.At(1).SetStringVal("bar")
+				arr.AppendEmpty().SetStringVal("foo")
+				arr.AppendEmpty().SetStringVal("bar")
 				arrVal.CopyTo(logsSlice.At(0).InstrumentationLibraryLogs().At(0).Logs().At(0).Body())
 				return logsSlice
 			}(),
@@ -161,12 +160,9 @@ func Test_SplunkHecToLogData(t *testing.T) {
 
 func createLogsSlice(nanoseconds int) pdata.ResourceLogsSlice {
 	lrs := pdata.NewResourceLogsSlice()
-	lrs.Resize(1)
-	lr := lrs.At(0)
-	lr.InstrumentationLibraryLogs().Resize(1)
-	ill := lr.InstrumentationLibraryLogs().At(0)
-	ill.Logs().Resize(1)
-	logRecord := ill.Logs().At(0)
+	lr := lrs.AppendEmpty()
+	ill := lr.InstrumentationLibraryLogs().AppendEmpty()
+	logRecord := ill.Logs().AppendEmpty()
 	logRecord.SetName("mysourcetype")
 	logRecord.Body().SetStringVal("value")
 	logRecord.SetTimestamp(pdata.Timestamp(nanoseconds))
@@ -217,8 +213,7 @@ func Test_ConvertAttributeValueArray(t *testing.T) {
 	assert.NoError(t, err)
 	arrValue := pdata.NewAttributeValueArray()
 	arr := arrValue.ArrayVal()
-	arr.Resize(1)
-	arr.At(0).SetStringVal("foo")
+	arr.AppendEmpty().SetStringVal("foo")
 	assert.Equal(t, arrValue, value)
 }
 

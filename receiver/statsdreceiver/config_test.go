@@ -15,6 +15,7 @@
 package statsdreceiver
 
 import (
+	"fmt"
 	"path"
 	"testing"
 	"time"
@@ -25,6 +26,8 @@ import (
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/config/confignet"
 	"go.opentelemetry.io/collector/config/configtest"
+
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver/protocol"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -42,19 +45,92 @@ func TestLoadConfig(t *testing.T) {
 
 	assert.Equal(t, len(cfg.Receivers), 2)
 
-	r0 := cfg.Receivers["statsd"]
+	r0 := cfg.Receivers[config.NewID(typeStr)]
 	assert.Equal(t, factory.CreateDefaultConfig(), r0)
 
-	r1 := cfg.Receivers["statsd/receiver_settings"]
+	r1 := cfg.Receivers[config.NewIDWithName(typeStr, "receiver_settings")]
 	assert.Equal(t, &Config{
-		ReceiverSettings: config.ReceiverSettings{
-			TypeVal: config.Type(typeStr),
-			NameVal: "statsd/receiver_settings",
-		},
+		ReceiverSettings: config.NewReceiverSettings(config.NewIDWithName(typeStr, "receiver_settings")),
 		NetAddr: confignet.NetAddr{
 			Endpoint:  "localhost:12345",
 			Transport: "custom_transport",
 		},
-		AggregationInterval: 70 * time.Second,
+		AggregationInterval:   70 * time.Second,
+		TimerHistogramMapping: []protocol.TimerHistogramMapping{{StatsdType: "histogram", ObserverType: "gauge"}, {StatsdType: "timing", ObserverType: "gauge"}},
 	}, r1)
+}
+
+func TestValidate(t *testing.T) {
+	type test struct {
+		name        string
+		cfg         *Config
+		expectedErr string
+	}
+
+	const (
+		negativeAggregationIntervalErr = "aggregation_interval must be a positive duration"
+		noObjectNameErr                = "must specify object id for all TimerHistogramMappings"
+		statsdTypeNotSupportErr        = "statsd_type is not supported: %s"
+		observerTypeNotSupportErr      = "observer_type is not supported: %s"
+	)
+
+	tests := []test{
+		{
+			name: "negativeAggregationInterval",
+			cfg: &Config{
+				AggregationInterval: -1,
+				TimerHistogramMapping: []protocol.TimerHistogramMapping{
+					{StatsdType: "timing", ObserverType: "gauge"},
+				},
+			},
+			expectedErr: negativeAggregationIntervalErr,
+		},
+		{
+			name: "emptyStatsdType",
+			cfg: &Config{
+				AggregationInterval: 10,
+				TimerHistogramMapping: []protocol.TimerHistogramMapping{
+					{ObserverType: "gauge"},
+				},
+			},
+			expectedErr: noObjectNameErr,
+		},
+		{
+			name: "emptyObserverType",
+			cfg: &Config{
+				AggregationInterval: 10,
+				TimerHistogramMapping: []protocol.TimerHistogramMapping{
+					{StatsdType: "timing"},
+				},
+			},
+			expectedErr: noObjectNameErr,
+		},
+		{
+			name: "StatsdTypeNotSupport",
+			cfg: &Config{
+				AggregationInterval: 10,
+				TimerHistogramMapping: []protocol.TimerHistogramMapping{
+					{StatsdType: "abc", ObserverType: "gauge"},
+				},
+			},
+			expectedErr: fmt.Sprintf(statsdTypeNotSupportErr, "abc"),
+		},
+		{
+			name: "ObserverTypeNotSupport",
+			cfg: &Config{
+				AggregationInterval: 10,
+				TimerHistogramMapping: []protocol.TimerHistogramMapping{
+					{StatsdType: "timer", ObserverType: "gauge1"},
+				},
+			},
+			expectedErr: fmt.Sprintf(observerTypeNotSupportErr, "gauge1"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			require.EqualError(t, test.cfg.validate(), test.expectedErr)
+		})
+	}
+
 }

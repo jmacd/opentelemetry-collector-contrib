@@ -55,7 +55,7 @@ const (
 
 // Config defines configuration for Resource processor.
 type Config struct {
-	*config.ProcessorSettings `mapstructure:"-"`
+	config.ProcessorSettings `mapstructure:",squash"` // squash ensures fields are correctly decoded in embedded struct
 
 	// Transform specifies a list of transforms on metrics with each transform focusing on one metric.
 	Transforms []Transform `mapstructure:"transforms"`
@@ -110,6 +110,10 @@ type FilterConfig struct {
 
 	// MatchType determines how the Include string is matched: <strict|regexp>.
 	MatchType MatchType `mapstructure:"match_type"`
+
+	// MatchLabels specifies the label set against which the metric filter will work.
+	// This field is optional.
+	MatchLabels map[string]string `mapstructure:"experimental_match_labels"`
 }
 
 // Operation defines the specific operation performed on the selected metrics.

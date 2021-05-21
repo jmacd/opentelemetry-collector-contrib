@@ -25,6 +25,8 @@ import (
 	"go.opentelemetry.io/collector/config/configtest"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.uber.org/zap"
+
+	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/awsutil"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -42,23 +44,26 @@ func TestLoadConfig(t *testing.T) {
 
 	assert.Equal(t, 3, len(cfg.Exporters))
 
-	r0 := cfg.Exporters["awsemf"]
-	assert.Equal(t, r0, factory.CreateDefaultConfig())
+	r0 := cfg.Exporters[config.NewID(typeStr)]
+	assert.Equal(t, factory.CreateDefaultConfig(), r0)
 
-	r1 := cfg.Exporters["awsemf/1"].(*Config)
-	r1.Validate()
+	r1 := cfg.Exporters[config.NewIDWithName(typeStr, "1")].(*Config)
+	assert.NoError(t, r1.Validate())
 	assert.Equal(t,
 		&Config{
-			ExporterSettings:                &config.ExporterSettings{TypeVal: config.Type(typeStr), NameVal: "awsemf/1"},
+			ExporterSettings: config.NewExporterSettings(config.NewIDWithName(typeStr, "1")),
+			AWSSessionSettings: awsutil.AWSSessionSettings{
+				NumberOfWorkers:       8,
+				Endpoint:              "",
+				RequestTimeoutSeconds: 30,
+				MaxRetries:            2,
+				NoVerifySSL:           false,
+				ProxyAddress:          "",
+				Region:                "us-west-2",
+				RoleARN:               "arn:aws:iam::123456789:role/monitoring-EKS-NodeInstanceRole",
+			},
 			LogGroupName:                    "",
 			LogStreamName:                   "",
-			Endpoint:                        "",
-			RequestTimeoutSeconds:           30,
-			MaxRetries:                      1,
-			NoVerifySSL:                     false,
-			ProxyAddress:                    "",
-			Region:                          "us-west-2",
-			RoleARN:                         "arn:aws:iam::123456789:role/monitoring-EKS-NodeInstanceRole",
 			DimensionRollupOption:           "ZeroAndSingleDimensionRollup",
 			OutputDestination:               "cloudwatch",
 			ParseJSONEncodedAttributeValues: make([]string, 0),
@@ -66,20 +71,23 @@ func TestLoadConfig(t *testing.T) {
 			MetricDescriptors:               []MetricDescriptor{},
 		}, r1)
 
-	r2 := cfg.Exporters["awsemf/resource_attr_to_label"].(*Config)
-	r2.Validate()
+	r2 := cfg.Exporters[config.NewIDWithName(typeStr, "resource_attr_to_label")].(*Config)
+	assert.NoError(t, r2.Validate())
 	assert.Equal(t, r2,
 		&Config{
-			ExporterSettings:                &config.ExporterSettings{TypeVal: config.Type(typeStr), NameVal: "awsemf/resource_attr_to_label"},
+			ExporterSettings: config.NewExporterSettings(config.NewIDWithName(typeStr, "resource_attr_to_label")),
+			AWSSessionSettings: awsutil.AWSSessionSettings{
+				NumberOfWorkers:       8,
+				Endpoint:              "",
+				RequestTimeoutSeconds: 30,
+				MaxRetries:            2,
+				NoVerifySSL:           false,
+				ProxyAddress:          "",
+				Region:                "",
+				RoleARN:               "",
+			},
 			LogGroupName:                    "",
 			LogStreamName:                   "",
-			Endpoint:                        "",
-			RequestTimeoutSeconds:           30,
-			MaxRetries:                      1,
-			NoVerifySSL:                     false,
-			ProxyAddress:                    "",
-			Region:                          "",
-			RoleARN:                         "",
 			DimensionRollupOption:           "ZeroAndSingleDimensionRollup",
 			OutputDestination:               "cloudwatch",
 			ResourceToTelemetrySettings:     exporterhelper.ResourceToTelemetrySettings{Enabled: true},
@@ -96,20 +104,22 @@ func TestConfigValidate(t *testing.T) {
 		{unit: "INVALID", metricName: "404"},
 		{unit: "Megabytes", metricName: "memory_usage"},
 	}
-	config := &Config{
-		ExporterSettings:            &config.ExporterSettings{TypeVal: config.Type(typeStr), NameVal: "awsemf/resource_attr_to_label"},
-		RequestTimeoutSeconds:       30,
-		MaxRetries:                  1,
+	cfg := &Config{
+		ExporterSettings: config.NewExporterSettings(config.NewIDWithName(typeStr, "1")),
+		AWSSessionSettings: awsutil.AWSSessionSettings{
+			RequestTimeoutSeconds: 30,
+			MaxRetries:            1,
+		},
 		DimensionRollupOption:       "ZeroAndSingleDimensionRollup",
 		ResourceToTelemetrySettings: exporterhelper.ResourceToTelemetrySettings{Enabled: true},
 		MetricDescriptors:           incorrectDescriptor,
 		logger:                      zap.NewNop(),
 	}
-	config.Validate()
+	assert.NoError(t, cfg.Validate())
 
-	assert.Equal(t, 2, len(config.MetricDescriptors))
+	assert.Equal(t, 2, len(cfg.MetricDescriptors))
 	assert.Equal(t, []MetricDescriptor{
 		{unit: "Count", metricName: "apiserver_total", overwrite: true},
 		{unit: "Megabytes", metricName: "memory_usage"},
-	}, config.MetricDescriptors)
+	}, cfg.MetricDescriptors)
 }

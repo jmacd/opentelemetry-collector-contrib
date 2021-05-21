@@ -25,6 +25,7 @@ import (
 	"go.opencensus.io/tag"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.opentelemetry.io/collector/exporter/otlpexporter"
@@ -49,8 +50,8 @@ func newLogsExporter(params component.ExporterCreateParams, cfg config.Exporter)
 	exporterFactory := otlpexporter.NewFactory()
 
 	tmplParams := component.ExporterCreateParams{
-		Logger:               params.Logger,
-		ApplicationStartInfo: params.ApplicationStartInfo,
+		Logger:    params.Logger,
+		BuildInfo: params.BuildInfo,
 	}
 
 	loadBalancer, err := newLoadBalancer(params, cfg, func(ctx context.Context, endpoint string) (component.Exporter, error) {
@@ -67,12 +68,12 @@ func newLogsExporter(params component.ExporterCreateParams, cfg config.Exporter)
 	}, nil
 }
 
-func (e *logExporterImp) Start(ctx context.Context, host component.Host) error {
-	if err := e.loadBalancer.Start(ctx, host); err != nil {
-		return err
-	}
+func (e *logExporterImp) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
+}
 
-	return nil
+func (e *logExporterImp) Start(ctx context.Context, host component.Host) error {
+	return e.loadBalancer.Start(ctx, host)
 }
 
 func (e *logExporterImp) Shutdown(context.Context) error {

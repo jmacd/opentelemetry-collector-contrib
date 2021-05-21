@@ -16,9 +16,12 @@ package kafkametricsreceiver
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Shopify/sarama"
+	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.opentelemetry.io/collector/consumer/simple"
 	"go.opentelemetry.io/collector/receiver/scraperhelper"
@@ -28,13 +31,23 @@ import (
 )
 
 type brokerScraper struct {
-	client sarama.Client
-	logger *zap.Logger
-	config Config
+	client       sarama.Client
+	logger       *zap.Logger
+	config       Config
+	saramaConfig *sarama.Config
 }
 
 func (s *brokerScraper) Name() string {
-	return "brokers"
+	return brokersScraperName
+}
+
+func (s *brokerScraper) start(context.Context, component.Host) error {
+	client, err := newSaramaClient(s.config.Brokers, s.saramaConfig)
+	if err != nil {
+		return fmt.Errorf("failed to create client while starting brokers scraper: %w", err)
+	}
+	s.client = client
+	return nil
 }
 
 func (s *brokerScraper) shutdown(context.Context) error {
@@ -57,20 +70,17 @@ func (s *brokerScraper) scrape(context.Context) (pdata.ResourceMetricsSlice, err
 	return metrics.Metrics.ResourceMetrics(), nil
 }
 
-func createBrokerScraper(_ context.Context, config Config, saramaConfig *sarama.Config, logger *zap.Logger) (scraperhelper.ResourceMetricsScraper, error) {
-	client, err := newSaramaClient(config.Brokers, saramaConfig)
-	if err != nil {
-		return nil, err
-	}
+func createBrokerScraper(_ context.Context, cfg Config, saramaConfig *sarama.Config, logger *zap.Logger) (scraperhelper.ResourceMetricsScraper, error) {
 	s := brokerScraper{
-		client: client,
-		logger: logger,
-		config: config,
+		logger:       logger,
+		config:       cfg,
+		saramaConfig: saramaConfig,
 	}
 	ms := scraperhelper.NewResourceMetricsScraper(
-		s.Name(),
+		config.NewID(config.Type(s.Name())),
 		s.scrape,
 		scraperhelper.WithShutdown(s.shutdown),
+		scraperhelper.WithStart(s.start),
 	)
 	return ms, nil
 }

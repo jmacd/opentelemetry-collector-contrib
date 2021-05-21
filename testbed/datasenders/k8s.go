@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.opentelemetry.io/collector/testbed/testbed"
 )
@@ -79,6 +80,10 @@ func NewFileLogK8sWriter(config string) *FileLogK8sWriter {
 	return f
 }
 
+func (f *FileLogK8sWriter) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
+}
+
 func (f *FileLogK8sWriter) Start() error {
 	return nil
 }
@@ -109,26 +114,27 @@ func (f *FileLogK8sWriter) convertLogToTextLine(lr pdata.LogRecord) []byte {
 	sb.WriteString(lr.SeverityText())
 	sb.WriteString(" ")
 
-	if lr.Body().Type() == pdata.AttributeValueSTRING {
+	if lr.Body().Type() == pdata.AttributeValueTypeString {
 		sb.WriteString(lr.Body().StringVal())
 	}
 
-	lr.Attributes().ForEach(func(k string, v pdata.AttributeValue) {
+	lr.Attributes().Range(func(k string, v pdata.AttributeValue) bool {
 		sb.WriteString(" ")
 		sb.WriteString(k)
 		sb.WriteString("=")
 		switch v.Type() {
-		case pdata.AttributeValueSTRING:
+		case pdata.AttributeValueTypeString:
 			sb.WriteString(v.StringVal())
-		case pdata.AttributeValueINT:
+		case pdata.AttributeValueTypeInt:
 			sb.WriteString(strconv.FormatInt(v.IntVal(), 10))
-		case pdata.AttributeValueDOUBLE:
+		case pdata.AttributeValueTypeDouble:
 			sb.WriteString(strconv.FormatFloat(v.DoubleVal(), 'f', -1, 64))
-		case pdata.AttributeValueBOOL:
+		case pdata.AttributeValueTypeBool:
 			sb.WriteString(strconv.FormatBool(v.BoolVal()))
 		default:
 			panic("missing case")
 		}
+		return true
 	})
 
 	return []byte(sb.String())

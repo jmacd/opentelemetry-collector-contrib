@@ -20,9 +20,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strconv"
 	"time"
 
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.opentelemetry.io/collector/testbed/testbed"
 )
@@ -61,7 +63,15 @@ func NewFluentBitFileLogWriter(host string, port int) *FluentBitFileLogWriter {
 	return f
 }
 
+func (f *FluentBitFileLogWriter) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
+}
+
 func (f *FluentBitFileLogWriter) Start() error {
+	if _, err := exec.LookPath("fluent-bit"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -101,19 +111,20 @@ func (f *FluentBitFileLogWriter) convertLogToJSON(lr pdata.LogRecord) []byte {
 	}
 	rec["log"] = lr.Body().StringVal()
 
-	lr.Attributes().ForEach(func(k string, v pdata.AttributeValue) {
+	lr.Attributes().Range(func(k string, v pdata.AttributeValue) bool {
 		switch v.Type() {
-		case pdata.AttributeValueSTRING:
+		case pdata.AttributeValueTypeString:
 			rec[k] = v.StringVal()
-		case pdata.AttributeValueINT:
+		case pdata.AttributeValueTypeInt:
 			rec[k] = strconv.FormatInt(v.IntVal(), 10)
-		case pdata.AttributeValueDOUBLE:
+		case pdata.AttributeValueTypeDouble:
 			rec[k] = strconv.FormatFloat(v.DoubleVal(), 'f', -1, 64)
-		case pdata.AttributeValueBOOL:
+		case pdata.AttributeValueTypeBool:
 			rec[k] = strconv.FormatBool(v.BoolVal())
 		default:
 			panic("missing case")
 		}
+		return true
 	})
 	b, err := json.Marshal(rec)
 	if err != nil {

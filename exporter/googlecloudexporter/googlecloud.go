@@ -23,6 +23,7 @@ import (
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	agentmetricspb "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1"
 	metricspb "github.com/census-instrumentation/opencensus-proto/gen-go/metrics/v1"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer/consumererror"
@@ -30,7 +31,7 @@ import (
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/translator/conventions"
 	"go.opentelemetry.io/collector/translator/internaldata"
-	traceexport "go.opentelemetry.io/otel/sdk/export/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 )
@@ -88,8 +89,8 @@ func generateClientOptions(cfg *Config) ([]option.ClientOption, error) {
 	return copts, nil
 }
 
-func newGoogleCloudTraceExporter(cfg *Config, params component.ExporterCreateParams) (component.TracesExporter, error) {
-	setVersionInUserAgent(cfg, params.ApplicationStartInfo.Version)
+func newGoogleCloudTracesExporter(cfg *Config, params component.ExporterCreateParams) (component.TracesExporter, error) {
+	setVersionInUserAgent(cfg, params.BuildInfo.Version)
 
 	topts := []cloudtrace.Option{
 		cloudtrace.WithProjectID(cfg.ProjectID),
@@ -109,7 +110,7 @@ func newGoogleCloudTraceExporter(cfg *Config, params component.ExporterCreatePar
 
 	tExp := &traceExporter{texporter: exp}
 
-	return exporterhelper.NewTraceExporter(
+	return exporterhelper.NewTracesExporter(
 		cfg,
 		params.Logger,
 		tExp.pushTraces,
@@ -122,7 +123,7 @@ func newGoogleCloudTraceExporter(cfg *Config, params component.ExporterCreatePar
 }
 
 func newGoogleCloudMetricsExporter(cfg *Config, params component.ExporterCreateParams) (component.MetricsExporter, error) {
-	setVersionInUserAgent(cfg, params.ApplicationStartInfo.Version)
+	setVersionInUserAgent(cfg, params.BuildInfo.Version)
 
 	// TODO:  For each ProjectID, create a different exporter
 	// or at least a unique Google Cloud client per ProjectID.
@@ -181,9 +182,17 @@ func newGoogleCloudMetricsExporter(cfg *Config, params component.ExporterCreateP
 
 // pushMetrics calls StackdriverExporter.PushMetricsProto on each element of the given metrics
 func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) error {
+	rms := m.ResourceMetrics()
+	mds := make([]*agentmetricspb.ExportMetricsServiceRequest, 0, rms.Len())
+	for i := 0; i < rms.Len(); i++ {
+		emsr := &agentmetricspb.ExportMetricsServiceRequest{}
+		emsr.Node, emsr.Resource, emsr.Metrics = internaldata.ResourceMetricsToOC(rms.At(i))
+		mds = append(mds, emsr)
+	}
 	// PushMetricsProto doesn't bundle subsequent calls, so we need to
 	// combine the data here to avoid generating too many RPC calls.
-	mds := exportAdditionalLabels(internaldata.MetricsToOC(m))
+	mds = exportAdditionalLabels(mds)
+
 	count := 0
 	for _, md := range mds {
 		count += len(md.Metrics)
@@ -209,7 +218,7 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 	return err
 }
 
-func exportAdditionalLabels(mds []internaldata.MetricsData) []internaldata.MetricsData {
+func exportAdditionalLabels(mds []*agentmetricspb.ExportMetricsServiceRequest) []*agentmetricspb.ExportMetricsServiceRequest {
 	for _, md := range mds {
 		if md.Resource == nil ||
 			md.Resource.Labels == nil ||
@@ -228,7 +237,7 @@ func exportAdditionalLabels(mds []internaldata.MetricsData) []internaldata.Metri
 func (te *traceExporter) pushTraces(ctx context.Context, td pdata.Traces) error {
 	var errs []error
 	resourceSpans := td.ResourceSpans()
-	spans := make([]*traceexport.SpanSnapshot, 0, td.SpanCount())
+	spans := make([]*sdktrace.SpanSnapshot, 0, td.SpanCount())
 	for i := 0; i < resourceSpans.Len(); i++ {
 		sd := pdataResourceSpansToOTSpanData(resourceSpans.At(i))
 		spans = append(spans, sd...)

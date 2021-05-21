@@ -26,10 +26,13 @@ import (
 	"github.com/google/uuid"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.uber.org/zap"
+
+	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/awsutil"
 )
 
 const (
@@ -66,13 +69,13 @@ func New(
 	expConfig.logger = logger
 
 	// create AWS session
-	awsConfig, session, err := GetAWSConfigSession(logger, &Conn{}, expConfig)
+	awsConfig, session, err := awsutil.GetAWSConfigSession(logger, &awsutil.Conn{}, &expConfig.AWSSessionSettings)
 	if err != nil {
 		return nil, err
 	}
 
 	// create CWLogs client with aws session config
-	svcStructuredLog := NewCloudWatchLogsClient(logger, awsConfig, params.ApplicationStartInfo, session)
+	svcStructuredLog := NewCloudWatchLogsClient(logger, awsConfig, params.BuildInfo, session)
 	collectorIdentifier, _ := uuid.NewRandom()
 
 	expConfig.Validate()
@@ -116,8 +119,9 @@ func (emf *emfExporter) pushMetricsData(_ context.Context, md pdata.Metrics) err
 		rm := rms.At(i)
 		am := rm.Resource().Attributes()
 		if am.Len() > 0 {
-			am.ForEach(func(k string, v pdata.AttributeValue) {
+			am.Range(func(k string, v pdata.AttributeValue) bool {
 				labels[k] = v.StringVal()
+				return true
 			})
 		}
 	}
@@ -224,6 +228,10 @@ func (emf *emfExporter) Shutdown(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (emf *emfExporter) Capabilities() consumer.Capabilities {
+	return consumer.Capabilities{MutatesData: false}
 }
 
 // Start

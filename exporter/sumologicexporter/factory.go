@@ -43,7 +43,7 @@ func createDefaultConfig() config.Exporter {
 	qs.Enabled = false
 
 	return &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 
 		CompressEncoding:   DefaultCompressEncoding,
 		MaxRequestBodySize: DefaultMaxRequestBodySize,
@@ -53,6 +53,7 @@ func createDefaultConfig() config.Exporter {
 		SourceName:         DefaultSourceName,
 		SourceHost:         DefaultSourceHost,
 		Client:             DefaultClient,
+		GraphiteTemplate:   DefaultGraphiteTemplate,
 
 		HTTPClientSettings: CreateDefaultHTTPClientSettings(),
 		RetrySettings:      exporterhelper.DefaultRetrySettings(),

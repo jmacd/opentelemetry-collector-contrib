@@ -18,10 +18,12 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	commonpb "github.com/census-instrumentation/opencensus-proto/gen-go/agent/common/v1"
+	agentmetricspb "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1"
 	metricspb "github.com/census-instrumentation/opencensus-proto/gen-go/metrics/v1"
 	resourcepb "github.com/census-instrumentation/opencensus-proto/gen-go/resource/v1"
 	"github.com/golang/protobuf/ptypes/timestamp"
@@ -74,7 +76,7 @@ func TestConsumeMetrics(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, exp)
 
-	mdata := internaldata.MetricsData{
+	mdata := agentmetricspb.ExportMetricsServiceRequest{
 		Node: &commonpb.Node{
 			ServiceInfo: &commonpb.ServiceInfo{Name: "test-emf"},
 			LibraryInfo: &commonpb.LibraryInfo{ExporterVersion: "SomeVersion"},
@@ -117,7 +119,7 @@ func TestConsumeMetrics(t *testing.T) {
 			},
 		},
 	}
-	md := internaldata.OCToMetrics(mdata)
+	md := internaldata.OCToMetrics(mdata.Node, mdata.Resource, mdata.Metrics)
 	require.Error(t, exp.ConsumeMetrics(ctx, md))
 	require.NoError(t, exp.Shutdown(ctx))
 }
@@ -134,7 +136,7 @@ func TestConsumeMetricsWithOutputDestination(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, exp)
 
-	mdata := internaldata.MetricsData{
+	mdata := agentmetricspb.ExportMetricsServiceRequest{
 		Node: &commonpb.Node{
 			ServiceInfo: &commonpb.ServiceInfo{Name: "test-emf"},
 			LibraryInfo: &commonpb.LibraryInfo{ExporterVersion: "SomeVersion"},
@@ -177,7 +179,7 @@ func TestConsumeMetricsWithOutputDestination(t *testing.T) {
 			},
 		},
 	}
-	md := internaldata.OCToMetrics(mdata)
+	md := internaldata.OCToMetrics(mdata.Node, mdata.Resource, mdata.Metrics)
 	require.NoError(t, exp.ConsumeMetrics(ctx, md))
 	require.NoError(t, exp.Shutdown(ctx))
 }
@@ -195,7 +197,7 @@ func TestConsumeMetricsWithLogGroupStreamConfig(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, exp)
 
-	mdata := internaldata.MetricsData{
+	mdata := agentmetricspb.ExportMetricsServiceRequest{
 		Node: &commonpb.Node{
 			ServiceInfo: &commonpb.ServiceInfo{Name: "test-emf"},
 			LibraryInfo: &commonpb.LibraryInfo{ExporterVersion: "SomeVersion"},
@@ -238,7 +240,7 @@ func TestConsumeMetricsWithLogGroupStreamConfig(t *testing.T) {
 			},
 		},
 	}
-	md := internaldata.OCToMetrics(mdata)
+	md := internaldata.OCToMetrics(mdata.Node, mdata.Resource, mdata.Metrics)
 	require.NoError(t, exp.Start(ctx, nil))
 	require.Error(t, exp.ConsumeMetrics(ctx, md))
 	require.NoError(t, exp.Shutdown(ctx))
@@ -262,7 +264,7 @@ func TestConsumeMetricsWithLogGroupStreamValidPlaceholder(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, exp)
 
-	mdata := internaldata.MetricsData{
+	mdata := agentmetricspb.ExportMetricsServiceRequest{
 		Node: &commonpb.Node{
 			ServiceInfo: &commonpb.ServiceInfo{Name: "test-emf"},
 			LibraryInfo: &commonpb.LibraryInfo{ExporterVersion: "SomeVersion"},
@@ -307,7 +309,7 @@ func TestConsumeMetricsWithLogGroupStreamValidPlaceholder(t *testing.T) {
 			},
 		},
 	}
-	md := internaldata.OCToMetrics(mdata)
+	md := internaldata.OCToMetrics(mdata.Node, mdata.Resource, mdata.Metrics)
 	require.NoError(t, exp.Start(ctx, nil))
 	require.Error(t, exp.ConsumeMetrics(ctx, md))
 	require.NoError(t, exp.Shutdown(ctx))
@@ -331,7 +333,7 @@ func TestConsumeMetricsWithOnlyLogStreamPlaceholder(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, exp)
 
-	mdata := internaldata.MetricsData{
+	mdata := agentmetricspb.ExportMetricsServiceRequest{
 		Node: &commonpb.Node{
 			ServiceInfo: &commonpb.ServiceInfo{Name: "test-emf"},
 			LibraryInfo: &commonpb.LibraryInfo{ExporterVersion: "SomeVersion"},
@@ -376,7 +378,7 @@ func TestConsumeMetricsWithOnlyLogStreamPlaceholder(t *testing.T) {
 			},
 		},
 	}
-	md := internaldata.OCToMetrics(mdata)
+	md := internaldata.OCToMetrics(mdata.Node, mdata.Resource, mdata.Metrics)
 	require.NoError(t, exp.Start(ctx, nil))
 	require.Error(t, exp.ConsumeMetrics(ctx, md))
 	require.NoError(t, exp.Shutdown(ctx))
@@ -400,7 +402,7 @@ func TestConsumeMetricsWithWrongPlaceholder(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, exp)
 
-	mdata := internaldata.MetricsData{
+	mdata := agentmetricspb.ExportMetricsServiceRequest{
 		Node: &commonpb.Node{
 			ServiceInfo: &commonpb.ServiceInfo{Name: "test-emf"},
 			LibraryInfo: &commonpb.LibraryInfo{ExporterVersion: "SomeVersion"},
@@ -445,7 +447,7 @@ func TestConsumeMetricsWithWrongPlaceholder(t *testing.T) {
 			},
 		},
 	}
-	md := internaldata.OCToMetrics(mdata)
+	md := internaldata.OCToMetrics(mdata.Node, mdata.Resource, mdata.Metrics)
 	require.NoError(t, exp.Start(ctx, nil))
 	require.Error(t, exp.ConsumeMetrics(ctx, md))
 	require.NoError(t, exp.Shutdown(ctx))
@@ -479,7 +481,7 @@ func TestPushMetricsDataWithErr(t *testing.T) {
 	exp.(*emfExporter).groupStreamToPusherMap = map[string]map[string]Pusher{}
 	exp.(*emfExporter).groupStreamToPusherMap["test-logGroupName"] = streamToPusherMap
 
-	mdata := internaldata.MetricsData{
+	mdata := agentmetricspb.ExportMetricsServiceRequest{
 		Node: &commonpb.Node{
 			ServiceInfo: &commonpb.ServiceInfo{Name: "test-emf"},
 			LibraryInfo: &commonpb.LibraryInfo{ExporterVersion: "SomeVersion"},
@@ -522,7 +524,7 @@ func TestPushMetricsDataWithErr(t *testing.T) {
 			},
 		},
 	}
-	md := internaldata.OCToMetrics(mdata)
+	md := internaldata.OCToMetrics(mdata.Node, mdata.Resource, mdata.Metrics)
 	assert.NotNil(t, exp.(*emfExporter).pushMetricsData(ctx, md))
 	assert.NotNil(t, exp.(*emfExporter).pushMetricsData(ctx, md))
 	assert.Nil(t, exp.(*emfExporter).pushMetricsData(ctx, md))
@@ -627,4 +629,20 @@ func TestNewEmfExporterWithoutConfig(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, exp)
 	assert.NotNil(t, expCfg.logger)
+}
+
+func stashEnv() []string {
+	env := os.Environ()
+	os.Clearenv()
+
+	return env
+}
+
+func popEnv(env []string) {
+	os.Clearenv()
+
+	for _, e := range env {
+		p := strings.SplitN(e, "=", 2)
+		os.Setenv(p[0], p[1])
+	}
 }

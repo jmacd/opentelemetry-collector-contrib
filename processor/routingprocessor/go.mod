@@ -1,6 +1,6 @@
 module github.com/open-telemetry/opentelemetry-collector-contrib/processor/routingprocessor
 
-go 1.14
+go 1.15
 
 require (
 	github.com/armon/go-metrics v0.3.3 // indirect
@@ -12,8 +12,8 @@ require (
 	github.com/onsi/gomega v1.10.2 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/stretchr/testify v1.7.0
-	go.opentelemetry.io/collector v0.24.0
+	go.opentelemetry.io/collector v0.27.1-0.20210520162255-f7674b2f593e
 	go.uber.org/zap v1.16.0
-	google.golang.org/grpc v1.36.1
+	google.golang.org/grpc v1.37.1
 	gopkg.in/ini.v1 v1.57.0 // indirect
 )

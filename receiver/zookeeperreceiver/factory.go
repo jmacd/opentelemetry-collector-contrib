@@ -44,10 +44,7 @@ func NewFactory() component.ReceiverFactory {
 func createDefaultConfig() config.Receiver {
 	return &Config{
 		ScraperControllerSettings: scraperhelper.ScraperControllerSettings{
-			ReceiverSettings: config.ReceiverSettings{
-				TypeVal: typeStr,
-				NameVal: typeStr,
-			},
+			ReceiverSettings:   config.NewReceiverSettings(config.NewID(typeStr)),
 			CollectionInterval: defaultCollectionInterval,
 		},
 		TCPAddr: confignet.TCPAddr{
@@ -76,7 +73,7 @@ func createMetricsReceiver(
 		consumer,
 		scraperhelper.AddResourceMetricsScraper(
 			scraperhelper.NewResourceMetricsScraper(
-				typeStr,
+				rConfig.ID(),
 				zms.scrape,
 				scraperhelper.WithShutdown(zms.shutdown),
 			),

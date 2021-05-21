@@ -20,6 +20,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/config/confignet"
+	"go.opentelemetry.io/collector/consumer/consumerhelper"
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 
@@ -38,14 +39,14 @@ func NewFactory() component.ExporterFactory {
 		typeStr,
 		createDefaultConfig,
 		exporterhelper.WithMetrics(createMetricsExporter),
-		exporterhelper.WithTraces(createTraceExporter),
+		exporterhelper.WithTraces(createTracesExporter),
 	)
 }
 
 // createDefaultConfig creates the default exporter configuration
 func createDefaultConfig() config.Exporter {
 	return &ddconfig.Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		API: ddconfig.APIConfig{
 			Key:  "$DD_API_KEY", // Must be set if using API
 			Site: "$DD_SITE",    // If not provided, set during config sanitization
@@ -75,6 +76,7 @@ func createDefaultConfig() config.Exporter {
 			TCPAddr: confignet.TCPAddr{
 				Endpoint: "$DD_APM_URL", // If not provided, set during config sanitization
 			},
+			IgnoreResources: []string{},
 		},
 
 		SendMetadata:        true,
@@ -97,7 +99,7 @@ func createMetricsExporter(
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
-	var pushMetricsFn exporterhelper.PushMetrics
+	var pushMetricsFn consumerhelper.ConsumeMetricsFunc
 
 	if cfg.OnlyMetadata {
 		pushMetricsFn = func(_ context.Context, md pdata.Metrics) error {
@@ -132,8 +134,8 @@ func createMetricsExporter(
 	)
 }
 
-// createTraceExporter creates a trace exporter based on this config.
-func createTraceExporter(
+// createTracesExporter creates a trace exporter based on this config.
+func createTracesExporter(
 	ctx context.Context,
 	params component.ExporterCreateParams,
 	c config.Exporter,
@@ -147,7 +149,7 @@ func createTraceExporter(
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
-	var pushTracesFn exporterhelper.PushTraces
+	var pushTracesFn consumerhelper.ConsumeTracesFunc
 
 	if cfg.OnlyMetadata {
 		pushTracesFn = func(_ context.Context, td pdata.Traces) error {
@@ -163,10 +165,10 @@ func createTraceExporter(
 			return nil
 		}
 	} else {
-		pushTracesFn = newTraceExporter(ctx, params, cfg).pushTraceData
+		pushTracesFn = newTracesExporter(ctx, params, cfg).pushTraceData
 	}
 
-	return exporterhelper.NewTraceExporter(
+	return exporterhelper.NewTracesExporter(
 		cfg,
 		params.Logger,
 		pushTracesFn,

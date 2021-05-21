@@ -36,9 +36,9 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sprocessor/kube"
 )
 
-func newTraceProcessor(cfg config.Processor, next consumer.Traces, options ...Option) (component.TracesProcessor, error) {
+func newTracesProcessor(cfg config.Processor, next consumer.Traces, options ...Option) (component.TracesProcessor, error) {
 	opts := append(options, withKubeClientProvider(newFakeClient))
-	return createTraceProcessorWithOptions(
+	return createTracesProcessorWithOptions(
 		context.Background(),
 		component.ProcessorCreateParams{Logger: zap.NewNop()},
 		cfg,
@@ -113,7 +113,7 @@ func newMultiTest(
 		nextLogs:    new(consumertest.LogsSink),
 	}
 
-	tp, err := newTraceProcessor(cfg, m.nextTrace, append(options, withExtractKubernetesProcessorInto(&m.kpTrace))...)
+	tp, err := newTracesProcessor(cfg, m.nextTrace, append(options, withExtractKubernetesProcessorInto(&m.kpTrace))...)
 	if errFunc == nil {
 		assert.NotNil(t, tp)
 		require.NoError(t, err)
@@ -231,45 +231,36 @@ type generateResourceFunc func(res pdata.Resource)
 
 func generateTraces(resourceFunc ...generateResourceFunc) pdata.Traces {
 	t := pdata.NewTraces()
-	rs := t.ResourceSpans()
-	rs.Resize(1)
-	rs.At(0).InstrumentationLibrarySpans().Resize(1)
-	rs.At(0).InstrumentationLibrarySpans().At(0).Spans().Resize(1)
+	rs := t.ResourceSpans().AppendEmpty()
 	for _, resFun := range resourceFunc {
-		res := rs.At(0).Resource()
+		res := rs.Resource()
 		resFun(res)
 	}
-	span := rs.At(0).InstrumentationLibrarySpans().At(0).Spans().At(0)
+	span := rs.InstrumentationLibrarySpans().AppendEmpty().Spans().AppendEmpty()
 	span.SetName("foobar")
 	return t
 }
 
 func generateMetrics(resourceFunc ...generateResourceFunc) pdata.Metrics {
 	m := pdata.NewMetrics()
-	ms := m.ResourceMetrics()
-	ms.Resize(1)
-	ms.At(0).InstrumentationLibraryMetrics().Resize(1)
-	ms.At(0).InstrumentationLibraryMetrics().At(0).Metrics().Resize(1)
+	ms := m.ResourceMetrics().AppendEmpty()
 	for _, resFun := range resourceFunc {
-		res := ms.At(0).Resource()
+		res := ms.Resource()
 		resFun(res)
 	}
-	metric := ms.At(0).InstrumentationLibraryMetrics().At(0).Metrics().At(0)
+	metric := ms.InstrumentationLibraryMetrics().AppendEmpty().Metrics().AppendEmpty()
 	metric.SetName("foobar")
 	return m
 }
 
 func generateLogs(resourceFunc ...generateResourceFunc) pdata.Logs {
 	l := pdata.NewLogs()
-	ls := l.ResourceLogs()
-	ls.Resize(1)
-	ls.At(0).InstrumentationLibraryLogs().Resize(1)
-	ls.At(0).InstrumentationLibraryLogs().At(0).Logs().Resize(1)
+	ls := l.ResourceLogs().AppendEmpty()
 	for _, resFun := range resourceFunc {
-		res := ls.At(0).Resource()
+		res := ls.Resource()
 		resFun(res)
 	}
-	log := ls.At(0).InstrumentationLibraryLogs().At(0).Logs().At(0)
+	log := ls.InstrumentationLibraryLogs().AppendEmpty().Logs().AppendEmpty()
 	log.SetName("foobar")
 	return l
 }
@@ -854,7 +845,7 @@ func TestPassthroughStart(t *testing.T) {
 	next := new(consumertest.TracesSink)
 	opts := []Option{WithPassthrough()}
 
-	p, err := newTraceProcessor(
+	p, err := newTracesProcessor(
 		NewFactory().CreateDefaultConfig(),
 		next,
 		opts...,
@@ -880,18 +871,18 @@ func TestRealClient(t *testing.T) {
 }
 
 func TestCapabilities(t *testing.T) {
-	p, err := newTraceProcessor(
+	p, err := newTracesProcessor(
 		NewFactory().CreateDefaultConfig(),
 		consumertest.NewNop(),
 	)
 	assert.NoError(t, err)
-	caps := p.GetCapabilities()
-	assert.True(t, caps.MutatesConsumedData)
+	caps := p.Capabilities()
+	assert.True(t, caps.MutatesData)
 }
 
 func TestStartStop(t *testing.T) {
 	var kp *kubernetesprocessor
-	p, err := newTraceProcessor(
+	p, err := newTracesProcessor(
 		NewFactory().CreateDefaultConfig(),
 		consumertest.NewNop(),
 		withExtractKubernetesProcessorInto(&kp),
@@ -914,6 +905,6 @@ func TestStartStop(t *testing.T) {
 func assertResourceHasStringAttribute(t *testing.T, r pdata.Resource, k, v string) {
 	got, ok := r.Attributes().Get(k)
 	assert.True(t, ok, fmt.Sprintf("resource does not contain attribute %s", k))
-	assert.EqualValues(t, pdata.AttributeValueSTRING, got.Type(), "attribute %s is not of type string", k)
+	assert.EqualValues(t, pdata.AttributeValueTypeString, got.Type(), "attribute %s is not of type string", k)
 	assert.EqualValues(t, v, got.StringVal(), "attribute %s is not equal to %s", k, v)
 }

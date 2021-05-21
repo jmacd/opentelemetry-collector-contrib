@@ -62,7 +62,7 @@ func TestFactory_CreateMetricsExporter(t *testing.T) {
 
 	creationParams := component.ExporterCreateParams{
 		Logger: zap.NewNop(),
-		ApplicationStartInfo: component.ApplicationStartInfo{
+		BuildInfo: component.BuildInfo{
 			Version: "0.0.0",
 		},
 	}
@@ -83,7 +83,7 @@ func TestFactory_CreateMetricsExporterInvalidConfig(t *testing.T) {
 	require.Nil(t, oexp)
 }
 
-func TestFactory_CreateTraceExporter(t *testing.T) {
+func TestFactory_CreateTracesExporter(t *testing.T) {
 	factory := NewFactoryWithTokenSourceGetter(mockTokenSourceGetter)
 	cfg := factory.CreateDefaultConfig().(*Config)
 	cfg.HTTPClientSettings.Endpoint = "https://" + testutil.GetAvailableLocalAddress(t)
@@ -95,7 +95,7 @@ func TestFactory_CreateTraceExporter(t *testing.T) {
 
 	creationParams := component.ExporterCreateParams{
 		Logger: zap.NewNop(),
-		ApplicationStartInfo: component.ApplicationStartInfo{
+		BuildInfo: component.BuildInfo{
 			Version: "0.0.0",
 		},
 	}
@@ -106,7 +106,7 @@ func TestFactory_CreateTraceExporter(t *testing.T) {
 	require.Equal(t, "opentelemetry-collector-contrib 0.0.0", cfg.Headers["User-Agent"])
 }
 
-func Test_Factory_CreateTraceExporterInvalidConfig(t *testing.T) {
+func Test_Factory_CreateTracesExporterInvalidConfig(t *testing.T) {
 	factory := NewFactoryWithTokenSourceGetter(mockTokenSourceGetter)
 	cfg := factory.CreateDefaultConfig().(*Config)
 
@@ -128,7 +128,7 @@ func TestFactory_CreateLogsExporter(t *testing.T) {
 
 	creationParams := component.ExporterCreateParams{
 		Logger: zap.NewNop(),
-		ApplicationStartInfo: component.ApplicationStartInfo{
+		BuildInfo: component.BuildInfo{
 			Version: "0.0.0",
 		},
 	}

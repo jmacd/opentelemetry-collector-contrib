@@ -48,27 +48,27 @@ func TestCreateMetricsExporterNoConfig(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestCreateTraceExporter(t *testing.T) {
+func TestCreateTracesExporter(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
 	cfg.Endpoint = "https://example.com:8088/services/collector"
 	cfg.Token = "1234-1234"
 
 	params := component.ExporterCreateParams{Logger: zap.NewNop()}
-	_, err := createTraceExporter(context.Background(), params, cfg)
+	_, err := createTracesExporter(context.Background(), params, cfg)
 	assert.NoError(t, err)
 }
 
-func TestCreateTraceExporterNoConfig(t *testing.T) {
+func TestCreateTracesExporterNoConfig(t *testing.T) {
 	params := component.ExporterCreateParams{Logger: zap.NewNop()}
-	_, err := createTraceExporter(context.Background(), params, nil)
+	_, err := createTracesExporter(context.Background(), params, nil)
 	assert.Error(t, err)
 }
 
-func TestCreateTraceExporterInvalidEndpoint(t *testing.T) {
+func TestCreateTracesExporterInvalidEndpoint(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
 	cfg.Endpoint = "urn:something:12345"
 	params := component.ExporterCreateParams{Logger: zap.NewNop()}
-	_, err := createTraceExporter(context.Background(), params, cfg)
+	_, err := createTracesExporter(context.Background(), params, cfg)
 	assert.Error(t, err)
 }
 
@@ -123,7 +123,7 @@ func TestCreateInstanceViaFactory(t *testing.T) {
 
 func TestFactory_CreateMetricsExporter(t *testing.T) {
 	config := &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		Token:            "testToken",
 		Endpoint:         "https://example.com:8000",
 	}
@@ -143,7 +143,7 @@ func TestFactory_CreateMetricsExporterFails(t *testing.T) {
 		{
 			name: "empty_endpoint",
 			config: &Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 				Token:            "token",
 			},
 			errorMessage: "failed to process \"splunk_hec\" config: requires a non-empty \"endpoint\"",
@@ -151,7 +151,7 @@ func TestFactory_CreateMetricsExporterFails(t *testing.T) {
 		{
 			name: "empty_token",
 			config: &Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 				Endpoint:         "https://example.com:8000",
 			},
 			errorMessage: "failed to process \"splunk_hec\" config: requires a non-empty \"token\"",

@@ -27,28 +27,32 @@ import (
 	"go.opentelemetry.io/collector/config/configcheck"
 	"go.opentelemetry.io/collector/config/configtest"
 	"go.uber.org/zap"
+
+	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/aws/awsutil"
 )
 
 func TestCreateDefaultConfig(t *testing.T) {
 	factory := NewFactory()
 	cfg := factory.CreateDefaultConfig()
 	assert.Equal(t, cfg, &Config{
-		ExporterSettings:      config.NewExporterSettings(typeStr),
-		NumberOfWorkers:       8,
-		Endpoint:              "",
-		RequestTimeoutSeconds: 30,
-		MaxRetries:            2,
-		NoVerifySSL:           false,
-		ProxyAddress:          "",
-		Region:                "",
-		LocalMode:             false,
-		ResourceARN:           "",
-		RoleARN:               "",
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
+		AWSSessionSettings: awsutil.AWSSessionSettings{
+			NumberOfWorkers:       8,
+			Endpoint:              "",
+			RequestTimeoutSeconds: 30,
+			MaxRetries:            2,
+			NoVerifySSL:           false,
+			ProxyAddress:          "",
+			Region:                "",
+			LocalMode:             false,
+			ResourceARN:           "",
+			RoleARN:               "",
+		},
 	}, "failed to create default config")
 	assert.NoError(t, configcheck.ValidateConfig(cfg))
 }
 
-func TestCreateTraceExporter(t *testing.T) {
+func TestCreateTracesExporter(t *testing.T) {
 	logger := zap.NewNop()
 
 	factories, err := componenttest.NopFactories()
@@ -61,7 +65,7 @@ func TestCreateTraceExporter(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	exporter, err := factory.CreateTracesExporter(ctx, component.ExporterCreateParams{Logger: logger}, cfg.Exporters["awsxray/customname"])
+	exporter, err := factory.CreateTracesExporter(ctx, component.ExporterCreateParams{Logger: logger}, cfg.Exporters[config.NewIDWithName(typeStr, "customname")])
 	assert.Nil(t, err)
 	assert.NotNil(t, exporter)
 }
@@ -79,7 +83,7 @@ func TestCreateMetricsExporter(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	exporter, err := factory.CreateMetricsExporter(ctx, component.ExporterCreateParams{Logger: logger}, cfg.Exporters["awsxray/customname"])
+	exporter, err := factory.CreateMetricsExporter(ctx, component.ExporterCreateParams{Logger: logger}, cfg.Exporters[config.NewIDWithName(typeStr, "customname")])
 	assert.NotNil(t, err)
 	assert.Nil(t, exporter)
 }

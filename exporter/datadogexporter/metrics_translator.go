@@ -20,7 +20,9 @@ import (
 	"strings"
 	"time"
 
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer/pdata"
+	"go.uber.org/zap"
 	"gopkg.in/zorkian/go-datadog-api.v2"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/datadogexporter/attributes"
@@ -33,12 +35,13 @@ import (
 // getTags maps a stringMap into a slice of Datadog tags
 func getTags(labels pdata.StringMap) []string {
 	tags := make([]string, 0, labels.Len())
-	labels.ForEach(func(key string, value string) {
+	labels.Range(func(key string, value string) bool {
 		if value == "" {
 			// Tags can't end with ":" so we replace empty values with "n/a"
 			value = "n/a"
 		}
 		tags = append(tags, fmt.Sprintf("%s:%s", key, value))
+		return true
 	})
 	return tags
 }
@@ -249,7 +252,7 @@ func mapHistogramMetrics(name string, slice pdata.HistogramDataPointSlice, bucke
 }
 
 // mapMetrics maps OTLP metrics into the DataDog format
-func mapMetrics(cfg config.MetricsConfig, prevPts *ttlmap.TTLMap, md pdata.Metrics) (series []datadog.Metric, droppedTimeSeries int) {
+func mapMetrics(logger *zap.Logger, cfg config.MetricsConfig, prevPts *ttlmap.TTLMap, fallbackHost string, md pdata.Metrics, buildInfo component.BuildInfo) (series []datadog.Metric, droppedTimeSeries int) {
 	pushTime := uint64(time.Now().UTC().UnixNano())
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
@@ -263,13 +266,14 @@ func mapMetrics(cfg config.MetricsConfig, prevPts *ttlmap.TTLMap, md pdata.Metri
 			attributeTags = attributes.TagsFromAttributes(rm.Resource().Attributes())
 		}
 
-		host, hostFromAttrs := metadata.HostnameFromAttributes(rm.Resource().Attributes())
+		host, ok := metadata.HostnameFromAttributes(rm.Resource().Attributes())
+		if !ok {
+			host = fallbackHost
+		}
 
 		// Report the host as running
-		runningMetric := metrics.DefaultMetrics("metrics", pushTime)
-		if hostFromAttrs {
-			runningMetric[0].Host = &host
-		}
+		runningMetric := metrics.DefaultMetrics("metrics", host, pushTime, buildInfo)
+
 		series = append(series, runningMetric...)
 
 		ilms := rm.InstrumentationLibraryMetrics()
@@ -280,8 +284,6 @@ func mapMetrics(cfg config.MetricsConfig, prevPts *ttlmap.TTLMap, md pdata.Metri
 				md := metricsArray.At(k)
 				var datapoints []datadog.Metric
 				switch md.DataType() {
-				case pdata.MetricDataTypeNone:
-					continue
 				case pdata.MetricDataTypeIntGauge:
 					datapoints = mapIntMetrics(md.Name(), md.IntGauge().DataPoints(), attributeTags)
 				case pdata.MetricDataTypeDoubleGauge:
@@ -302,13 +304,13 @@ func mapMetrics(cfg config.MetricsConfig, prevPts *ttlmap.TTLMap, md pdata.Metri
 					datapoints = mapIntHistogramMetrics(md.Name(), md.IntHistogram().DataPoints(), cfg.Buckets, attributeTags)
 				case pdata.MetricDataTypeHistogram:
 					datapoints = mapHistogramMetrics(md.Name(), md.Histogram().DataPoints(), cfg.Buckets, attributeTags)
+				default: // pdata.MetricDataTypeNone or any other not supported type
+					logger.Debug("Unknown or unsupported metric type", zap.String("metric name", md.Name()), zap.Any("data type", md.DataType()))
+					continue
 				}
 
-				// Try to get host from resource
-				if hostFromAttrs {
-					for i := range datapoints {
-						datapoints[i].SetHost(host)
-					}
+				for i := range datapoints {
+					datapoints[i].SetHost(host)
 				}
 
 				series = append(series, datapoints...)

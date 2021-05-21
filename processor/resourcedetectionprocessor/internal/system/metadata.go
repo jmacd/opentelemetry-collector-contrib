@@ -15,13 +15,18 @@
 package system
 
 import (
+	"os"
 	"runtime"
-	"strings"
 
 	"github.com/Showmax/go-fqdn"
+
+	"github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourcedetectionprocessor/internal"
 )
 
 type systemMetadata interface {
+	// Hostname returns the OS hostname
+	Hostname() (string, error)
+
 	// FQDN returns the fully qualified domain name
 	FQDN() (string, error)
 
@@ -32,9 +37,13 @@ type systemMetadata interface {
 type systemMetadataImpl struct{}
 
 func (*systemMetadataImpl) OSType() (string, error) {
-	return strings.ToUpper(runtime.GOOS), nil
+	return internal.GOOSToOSType(runtime.GOOS), nil
 }
 
 func (*systemMetadataImpl) FQDN() (string, error) {
 	return fqdn.FqdnHostname()
+}
+
+func (*systemMetadataImpl) Hostname() (string, error) {
+	return os.Hostname()
 }

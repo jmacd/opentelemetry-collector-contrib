@@ -70,7 +70,7 @@ linters-settings:
     disable:
       - fieldalignment
 
-  golint:
+  revive:
     # minimal confidence for issues, default is 0.8
     min-confidence: 0.8
   gofmt:
@@ -97,14 +97,14 @@ linters:
   disable:
     - errcheck
   enable:
+    - exportloopref
     - gofmt
     - goimports
-    - golint
     - gosec
     - govet
-    - staticcheck
     - misspell
-    - scopelint
+    - revive
+    - staticcheck
     - unconvert
     - unparam
 
@@ -112,9 +112,6 @@ issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
     # Exclude some linters from running on tests files.
-    - path: _test\.go
-      linters:
-        - scopelint
     - text: "G404:"
       linters:
         - gosec

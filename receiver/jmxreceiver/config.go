@@ -16,6 +16,7 @@ package jmxreceiver
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -70,6 +71,24 @@ type otlpExporterConfig struct {
 	Headers map[string]string `mapstructure:"headers"`
 }
 
+func (oec otlpExporterConfig) headersToString() string {
+	// sort for reliable testing
+	headers := make([]string, 0, len(oec.Headers))
+	for k := range oec.Headers {
+		headers = append(headers, k)
+	}
+	sort.Strings(headers)
+
+	headerString := ""
+	for _, k := range headers {
+		v := oec.Headers[k]
+		headerString += fmt.Sprintf("%s=%v,", k, v)
+	}
+	// remove trailing comma
+	headerString = headerString[0 : len(headerString)-1]
+	return headerString
+}
+
 func (c *Config) validate() error {
 	var missingFields []string
 	if c.Endpoint == "" {
@@ -79,7 +98,7 @@ func (c *Config) validate() error {
 		missingFields = append(missingFields, "`target_system` or `groovy_script`")
 	}
 	if missingFields != nil {
-		baseMsg := fmt.Sprintf("%v missing required field", c.Name())
+		baseMsg := fmt.Sprintf("%v missing required field", c.ID())
 		if len(missingFields) > 1 {
 			baseMsg += "s"
 		}
@@ -87,11 +106,11 @@ func (c *Config) validate() error {
 	}
 
 	if c.CollectionInterval < 0 {
-		return fmt.Errorf("%v `interval` must be positive: %vms", c.Name(), c.CollectionInterval.Milliseconds())
+		return fmt.Errorf("%v `interval` must be positive: %vms", c.ID(), c.CollectionInterval.Milliseconds())
 	}
 
 	if c.OTLPExporterConfig.Timeout < 0 {
-		return fmt.Errorf("%v `otlp.timeout` must be positive: %vms", c.Name(), c.OTLPExporterConfig.Timeout.Milliseconds())
+		return fmt.Errorf("%v `otlp.timeout` must be positive: %vms", c.ID(), c.OTLPExporterConfig.Timeout.Milliseconds())
 	}
 	return nil
 }

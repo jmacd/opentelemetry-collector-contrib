@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	commonpb "github.com/census-instrumentation/opencensus-proto/gen-go/agent/common/v1"
+	agentmetricspb "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1"
 	resourcepb "github.com/census-instrumentation/opencensus-proto/gen-go/resource/v1"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/consumer/pdata"
@@ -110,7 +111,7 @@ func TestGetNamespace(t *testing.T) {
 	defaultMetric := createMetricTestData()
 	testCases := []struct {
 		testName        string
-		metric          internaldata.MetricsData
+		metric          *agentmetricspb.ExportMetricsServiceRequest
 		configNamespace string
 		namespace       string
 	}{
@@ -128,7 +129,7 @@ func TestGetNamespace(t *testing.T) {
 		},
 		{
 			"empty namespace, no service namespace",
-			internaldata.MetricsData{
+			&agentmetricspb.ExportMetricsServiceRequest{
 				Resource: &resourcepb.Resource{
 					Labels: map[string]string{
 						conventions.AttributeServiceName: "myServiceName",
@@ -140,7 +141,7 @@ func TestGetNamespace(t *testing.T) {
 		},
 		{
 			"empty namespace, no service name",
-			internaldata.MetricsData{
+			&agentmetricspb.ExportMetricsServiceRequest{
 				Resource: &resourcepb.Resource{
 					Labels: map[string]string{
 						conventions.AttributeServiceNamespace: "myServiceNS",
@@ -154,7 +155,7 @@ func TestGetNamespace(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.testName, func(t *testing.T) {
-			rms := internaldata.OCToMetrics(tc.metric)
+			rms := internaldata.OCToMetrics(tc.metric.Node, tc.metric.Resource, tc.metric.Metrics)
 			rm := rms.ResourceMetrics().At(0)
 			namespace := getNamespace(&rm, tc.configNamespace)
 			assert.Equal(t, tc.namespace, namespace)
@@ -163,7 +164,7 @@ func TestGetNamespace(t *testing.T) {
 }
 
 func TestGetLogInfo(t *testing.T) {
-	metrics := []internaldata.MetricsData{
+	metrics := []*agentmetricspb.ExportMetricsServiceRequest{
 		{
 			Node: &commonpb.Node{
 				ServiceInfo: &commonpb.ServiceInfo{Name: "test-emf"},
@@ -171,9 +172,10 @@ func TestGetLogInfo(t *testing.T) {
 			},
 			Resource: &resourcepb.Resource{
 				Labels: map[string]string{
-					"aws.ecs.cluster.name": "test-cluster-name",
-					"aws.ecs.task.id":      "test-task-id",
-					"k8s.node.name":        "ip-192-168-58-245.ec2.internal",
+					"aws.ecs.cluster.name":          "test-cluster-name",
+					"aws.ecs.task.id":               "test-task-id",
+					"k8s.node.name":                 "ip-192-168-58-245.ec2.internal",
+					"aws.ecs.container.instance.id": "203e0410260d466bab7873bb4f317b4e",
 				},
 			},
 		},
@@ -184,17 +186,18 @@ func TestGetLogInfo(t *testing.T) {
 			},
 			Resource: &resourcepb.Resource{
 				Labels: map[string]string{
-					"ClusterName": "test-cluster-name",
-					"TaskId":      "test-task-id",
-					"NodeName":    "ip-192-168-58-245.ec2.internal",
+					"ClusterName":         "test-cluster-name",
+					"TaskId":              "test-task-id",
+					"NodeName":            "ip-192-168-58-245.ec2.internal",
+					"ContainerInstanceId": "203e0410260d466bab7873bb4f317b4e",
 				},
 			},
 		},
 	}
 
 	var rms []pdata.ResourceMetrics
-	for _, m := range metrics {
-		rms = append(rms, internaldata.OCToMetrics(m).ResourceMetrics().At(0))
+	for _, md := range metrics {
+		rms = append(rms, internaldata.OCToMetrics(md.Node, md.Resource, md.Metrics).ResourceMetrics().At(0))
 	}
 
 	testCases := []struct {
@@ -261,6 +264,15 @@ func TestGetLogInfo(t *testing.T) {
 			"{NodeName}",
 			"/aws/containerinsights/test-cluster-name/performance",
 			"ip-192-168-58-245.ec2.internal",
+		},
+		// test case for AWS ECS EC2 container insights usage
+		{
+			"empty namespace, config w/ pattern",
+			"",
+			"/aws/containerinsights/{ClusterName}/performance",
+			"instanceTelemetry/{ContainerInstanceId}",
+			"/aws/containerinsights/test-cluster-name/performance",
+			"instanceTelemetry/203e0410260d466bab7873bb4f317b4e",
 		},
 	}
 

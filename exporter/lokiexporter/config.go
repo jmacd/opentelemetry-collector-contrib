@@ -26,7 +26,7 @@ import (
 
 // Config defines configuration for Loki exporter.
 type Config struct {
-	*config.ExporterSettings      `mapstructure:"-"`
+	config.ExporterSettings       `mapstructure:",squash"`
 	confighttp.HTTPClientSettings `mapstructure:",squash"` // squash ensures fields are correctly decoded in embedded struct.
 	exporterhelper.QueueSettings  `mapstructure:"sending_queue"`
 	exporterhelper.RetrySettings  `mapstructure:"retry_on_failure"`
@@ -43,11 +43,7 @@ func (c *Config) validate() error {
 		return fmt.Errorf("\"endpoint\" must be a valid URL")
 	}
 
-	if err := c.Labels.validate(); err != nil {
-		return err
-	}
-
-	return nil
+	return c.Labels.validate()
 }
 
 // LabelsConfig defines the labels-related configuration

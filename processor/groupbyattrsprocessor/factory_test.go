@@ -32,7 +32,7 @@ func TestDefaultConfiguration(t *testing.T) {
 
 func TestCreateTestProcessor(t *testing.T) {
 	cfg := &Config{
-		ProcessorSettings: config.NewProcessorSettings(typeStr),
+		ProcessorSettings: config.NewProcessorSettings(config.NewID(typeStr)),
 		GroupByKeys:       []string{"foo"},
 	}
 
@@ -40,15 +40,15 @@ func TestCreateTestProcessor(t *testing.T) {
 		Logger: zap.NewNop(),
 	}
 
-	tp, err := createTraceProcessor(context.Background(), params, cfg, consumertest.NewNop())
+	tp, err := createTracesProcessor(context.Background(), params, cfg, consumertest.NewNop())
 	assert.NoError(t, err)
 	assert.NotNil(t, tp)
-	assert.Equal(t, true, tp.GetCapabilities().MutatesConsumedData)
+	assert.Equal(t, true, tp.Capabilities().MutatesData)
 
 	lp, err := createLogsProcessor(context.Background(), params, cfg, consumertest.NewNop())
 	assert.NoError(t, err)
 	assert.NotNil(t, lp)
-	assert.Equal(t, true, lp.GetCapabilities().MutatesConsumedData)
+	assert.Equal(t, true, lp.Capabilities().MutatesData)
 }
 
 func TestNoKeys(t *testing.T) {

@@ -63,7 +63,7 @@ func TestNew(t *testing.T) {
 		{
 			name: "bad config fails",
 			config: &Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 				APIURL:           "abc",
 			},
 			wantErr: true,
@@ -71,7 +71,7 @@ func TestNew(t *testing.T) {
 		{
 			name: "fails to create metrics converter",
 			config: &Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 				AccessToken:      "test",
 				Realm:            "realm",
 				ExcludeMetrics:   []dpfilters.MetricFilter{{}},
@@ -81,7 +81,7 @@ func TestNew(t *testing.T) {
 		{
 			name: "successfully create exporter",
 			config: &Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 				AccessToken:      "someToken",
 				Realm:            "xyz",
 				TimeoutSettings:  exporterhelper.TimeoutSettings{Timeout: 1 * time.Second},
@@ -91,7 +91,7 @@ func TestNew(t *testing.T) {
 		{
 			name: "create exporter with host metadata syncer",
 			config: &Config{
-				ExporterSettings: config.NewExporterSettings(typeStr),
+				ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 				AccessToken:      "someToken",
 				Realm:            "xyz",
 				TimeoutSettings:  exporterhelper.TimeoutSettings{Timeout: 1 * time.Second},
@@ -118,17 +118,13 @@ func TestNew(t *testing.T) {
 
 func TestConsumeMetrics(t *testing.T) {
 	smallBatch := pdata.NewMetrics()
-	smallBatch.ResourceMetrics().Resize(1)
-	rm := smallBatch.ResourceMetrics().At(0)
-	rm.InstrumentationLibraryMetrics().Resize(1)
-	ilm := rm.InstrumentationLibraryMetrics().At(0)
-	ilm.Metrics().Resize(1)
-	m := ilm.Metrics().At(0)
+	rm := smallBatch.ResourceMetrics().AppendEmpty()
+	ilm := rm.InstrumentationLibraryMetrics().AppendEmpty()
+	m := ilm.Metrics().AppendEmpty()
 
 	m.SetName("test_gauge")
 	m.SetDataType(pdata.MetricDataTypeDoubleGauge)
-	m.DoubleGauge().DataPoints().Resize(1)
-	dp := m.DoubleGauge().DataPoints().At(0)
+	dp := m.DoubleGauge().DataPoints().AppendEmpty()
 	dp.LabelsMap().InitFromMap(map[string]string{
 		"k0": "v0",
 		"k1": "v1",
@@ -250,8 +246,7 @@ func TestConsumeMetricsWithAccessTokenPassthrough(t *testing.T) {
 
 	validMetricsWithToken := func(includeToken bool, token string) pdata.Metrics {
 		out := pdata.NewMetrics()
-		out.ResourceMetrics().Resize(1)
-		rm := out.ResourceMetrics().At(0)
+		rm := out.ResourceMetrics().AppendEmpty()
 
 		if includeToken {
 			rm.Resource().Attributes().InitFromMap(map[string]pdata.AttributeValue{
@@ -259,16 +254,13 @@ func TestConsumeMetricsWithAccessTokenPassthrough(t *testing.T) {
 			})
 		}
 
-		rm.InstrumentationLibraryMetrics().Resize(1)
-		ilm := rm.InstrumentationLibraryMetrics().At(0)
-		ilm.Metrics().Resize(1)
-		m := ilm.Metrics().At(0)
+		ilm := rm.InstrumentationLibraryMetrics().AppendEmpty()
+		m := ilm.Metrics().AppendEmpty()
 
 		m.SetName("test_gauge")
 		m.SetDataType(pdata.MetricDataTypeDoubleGauge)
 
-		m.DoubleGauge().DataPoints().Resize(1)
-		dp := m.DoubleGauge().DataPoints().At(0)
+		dp := m.DoubleGauge().DataPoints().AppendEmpty()
 		dp.LabelsMap().InitFromMap(map[string]string{
 			"k0": "v0",
 			"k1": "v1",
@@ -326,18 +318,13 @@ func TestConsumeMetricsWithAccessTokenPassthrough(t *testing.T) {
 			accessTokenPassthrough: true,
 			metrics: func() pdata.Metrics {
 				out := pdata.NewMetrics()
-				out.ResourceMetrics().Resize(1)
-				rm := out.ResourceMetrics().At(0)
-
-				rm.InstrumentationLibraryMetrics().Resize(1)
-				ilm := rm.InstrumentationLibraryMetrics().At(0)
-				ilm.Metrics().Resize(1)
-				m := ilm.Metrics().At(0)
+				rm := out.ResourceMetrics().AppendEmpty()
+				ilm := rm.InstrumentationLibraryMetrics().AppendEmpty()
+				m := ilm.Metrics().AppendEmpty()
 
 				m.SetName("test_gauge")
 				m.SetDataType(pdata.MetricDataTypeDoubleGauge)
-				m.DoubleGauge().DataPoints().Resize(1)
-				dp := m.DoubleGauge().DataPoints().At(0)
+				dp := m.DoubleGauge().DataPoints().AppendEmpty()
 				dp.LabelsMap().InitFromMap(map[string]string{
 					"k0": "v0",
 					"k1": "v1",
@@ -462,7 +449,7 @@ func TestNewEventExporter(t *testing.T) {
 	assert.Nil(t, got)
 
 	cfg := &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		AccessToken:      "someToken",
 		IngestURL:        "asdf://:%",
 		TimeoutSettings:  exporterhelper.TimeoutSettings{Timeout: 1 * time.Second},
@@ -492,12 +479,7 @@ func TestNewEventExporter(t *testing.T) {
 
 func makeSampleResourceLogs() pdata.Logs {
 	out := pdata.NewLogs()
-	out.ResourceLogs().Resize(1)
-	out.ResourceLogs().At(0).InstrumentationLibraryLogs().Resize(1)
-
-	logSlice := out.ResourceLogs().At(0).InstrumentationLibraryLogs().At(0).Logs()
-	logSlice.Resize(1)
-	l := logSlice.At(0)
+	l := out.ResourceLogs().AppendEmpty().InstrumentationLibraryLogs().AppendEmpty().Logs().AppendEmpty()
 
 	l.SetName("shutdown")
 	l.SetTimestamp(pdata.Timestamp(1000))
@@ -631,7 +613,7 @@ func TestConsumeLogsDataWithAccessTokenPassthrough(t *testing.T) {
 
 	newLogData := func(includeToken bool) pdata.Logs {
 		out := makeSampleResourceLogs()
-		out.ResourceLogs().Append(makeSampleResourceLogs().ResourceLogs().At(0))
+		makeSampleResourceLogs().ResourceLogs().At(0).CopyTo(out.ResourceLogs().AppendEmpty())
 
 		if includeToken {
 			out.ResourceLogs().At(0).Resource().Attributes().InsertString("com.splunk.signalfx.access_token", fromLabels)
@@ -718,24 +700,19 @@ func generateLargeDPBatch() pdata.Metrics {
 	ts := time.Now()
 	for i := 0; i < 6500; i++ {
 		rm := md.ResourceMetrics().At(i)
-
-		rm.InstrumentationLibraryMetrics().Resize(1)
-		ilm := rm.InstrumentationLibraryMetrics().At(0)
-		ilm.Metrics().Resize(1)
-		m := ilm.Metrics().At(0)
+		ilm := rm.InstrumentationLibraryMetrics().AppendEmpty()
+		m := ilm.Metrics().AppendEmpty()
 
 		m.SetName("test_" + strconv.Itoa(i))
 		m.SetDataType(pdata.MetricDataTypeIntGauge)
 
-		dp := pdata.NewIntDataPoint()
+		dp := m.IntGauge().DataPoints().AppendEmpty()
 		dp.SetTimestamp(pdata.TimestampFromTime(ts))
 		dp.LabelsMap().InitFromMap(map[string]string{
 			"k0": "v0",
 			"k1": "v1",
 		})
 		dp.SetValue(int64(i))
-
-		m.IntGauge().DataPoints().Append(dp)
 	}
 
 	return md
@@ -743,9 +720,7 @@ func generateLargeDPBatch() pdata.Metrics {
 
 func generateLargeEventBatch() pdata.Logs {
 	out := pdata.NewLogs()
-	out.ResourceLogs().Resize(1)
-	out.ResourceLogs().At(0).InstrumentationLibraryLogs().Resize(1)
-	logs := out.ResourceLogs().At(0).InstrumentationLibraryLogs().At(0).Logs()
+	logs := out.ResourceLogs().AppendEmpty().InstrumentationLibraryLogs().AppendEmpty().Logs()
 
 	batchSize := 65000
 	logs.Resize(batchSize)
@@ -1030,8 +1005,9 @@ func TestConsumeMetadata(t *testing.T) {
 func BenchmarkExporterConsumeData(b *testing.B) {
 	batchSize := 1000
 	metrics := pdata.NewMetrics()
+	tmd := testMetricsData()
 	for i := 0; i < batchSize; i++ {
-		metrics.ResourceMetrics().Append(testMetricsData())
+		tmd.CopyTo(metrics.ResourceMetrics().AppendEmpty())
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

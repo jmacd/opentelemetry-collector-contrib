@@ -29,7 +29,7 @@ import (
 
 const typeStr = "syslog"
 
-// NewFactory creates a factory for filelog receiver
+// NewFactory creates a factory for syslog receiver
 func NewFactory() component.ReceiverFactory {
 	return stanza.NewFactory(ReceiverType{})
 }
@@ -47,11 +47,8 @@ func (f ReceiverType) Type() config.Type {
 func (f ReceiverType) CreateDefaultConfig() config.Receiver {
 	return &SysLogConfig{
 		BaseConfig: stanza.BaseConfig{
-			ReceiverSettings: config.ReceiverSettings{
-				TypeVal: config.Type(typeStr),
-				NameVal: typeStr,
-			},
-			Operators: stanza.OperatorConfigs{},
+			ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
+			Operators:        stanza.OperatorConfigs{},
 		},
 		Input: stanza.InputConfig{},
 	}

@@ -30,32 +30,29 @@ import (
 
 func createSimpleLogData(numberOfLogs int) pdata.Logs {
 	logs := pdata.NewLogs()
-	logs.ResourceLogs().Resize(2)
-	rl := logs.ResourceLogs().At(0)
-	rl.InstrumentationLibraryLogs().Resize(2)
-	ill := rl.InstrumentationLibraryLogs().At(0)
+	logs.ResourceLogs().AppendEmpty() // Add an empty ResourceLogs
+	rl := logs.ResourceLogs().AppendEmpty()
+	rl.InstrumentationLibraryLogs().AppendEmpty() // Add an empty InstrumentationLibraryLogs
+	ill := rl.InstrumentationLibraryLogs().AppendEmpty()
 
 	for i := 0; i < numberOfLogs; i++ {
 		ts := pdata.Timestamp(int64(i) * time.Millisecond.Nanoseconds())
-		logRecord := pdata.NewLogRecord()
+		logRecord := ill.Logs().AppendEmpty()
 		logRecord.Body().SetStringVal("mylog")
 		logRecord.Attributes().InsertString(conventions.AttributeServiceName, "myapp")
 		logRecord.Attributes().InsertString("my-label", "myapp-type")
 		logRecord.Attributes().InsertString(conventions.AttributeHostName, "myhost")
 		logRecord.Attributes().InsertString("custom", "custom")
 		logRecord.SetTimestamp(ts)
-
-		ill.Logs().Append(logRecord)
 	}
-	nilRecord := pdata.NewLogRecord()
-	ill.Logs().Append(nilRecord)
+	ill.Logs().AppendEmpty()
 
 	return logs
 }
 
 func TestNewLogsExporter(t *testing.T) {
 	got, err := newLogsExporter(zap.NewNop(), &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		Endpoint:         "us-west-1.log.aliyuncs.com",
 		Project:          "demo-project",
 		Logstore:         "demo-logstore",
@@ -71,7 +68,7 @@ func TestNewLogsExporter(t *testing.T) {
 
 func TestSTSTokenExporter(t *testing.T) {
 	got, err := newLogsExporter(zap.NewNop(), &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		Endpoint:         "us-west-1.log.aliyuncs.com",
 		Project:          "demo-project",
 		Logstore:         "demo-logstore",

@@ -36,14 +36,14 @@ func NewFactory() component.ExporterFactory {
 	return exporterhelper.NewFactory(
 		typeStr,
 		createDefaultConfig,
-		exporterhelper.WithTraces(createTraceExporter),
+		exporterhelper.WithTraces(createTracesExporter),
 		exporterhelper.WithMetrics(createMetricsExporter),
 		exporterhelper.WithLogs(createLogsExporter))
 }
 
 func createDefaultConfig() config.Exporter {
 	return &Config{
-		ExporterSettings: config.NewExporterSettings(typeStr),
+		ExporterSettings: config.NewExporterSettings(config.NewID(typeStr)),
 		TimeoutSettings: exporterhelper.TimeoutSettings{
 			Timeout: defaultHTTPTimeout,
 		},
@@ -55,7 +55,7 @@ func createDefaultConfig() config.Exporter {
 	}
 }
 
-func createTraceExporter(
+func createTracesExporter(
 	_ context.Context,
 	params component.ExporterCreateParams,
 	config config.Exporter,
@@ -65,12 +65,12 @@ func createTraceExporter(
 	}
 	expCfg := config.(*Config)
 
-	exp, err := createExporter(expCfg, params.Logger)
+	exp, err := createExporter(expCfg, params.Logger, &params.BuildInfo)
 	if err != nil {
 		return nil, err
 	}
 
-	return exporterhelper.NewTraceExporter(
+	return exporterhelper.NewTracesExporter(
 		expCfg,
 		params.Logger,
 		exp.pushTraceData,
@@ -92,7 +92,7 @@ func createMetricsExporter(
 	}
 	expCfg := config.(*Config)
 
-	exp, err := createExporter(expCfg, params.Logger)
+	exp, err := createExporter(expCfg, params.Logger, &params.BuildInfo)
 
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ func createLogsExporter(
 	}
 	expCfg := config.(*Config)
 
-	exp, err := createExporter(expCfg, params.Logger)
+	exp, err := createExporter(expCfg, params.Logger, &params.BuildInfo)
 
 	if err != nil {
 		return nil, err

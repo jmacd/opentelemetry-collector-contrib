@@ -25,11 +25,11 @@ import (
 )
 
 var (
-	JSONHeaders map[string]string = map[string]string{
+	JSONHeaders = map[string]string{
 		"Content-Type":     "application/json",
 		"Content-Encoding": "gzip",
 	}
-	ProtobufHeaders map[string]string = map[string]string{
+	ProtobufHeaders = map[string]string{
 		"Content-Type":     "application/x-protobuf",
 		"Content-Encoding": "identity",
 	}
@@ -60,14 +60,14 @@ func SetExtraHeaders(h http.Header, extras map[string]string) {
 	}
 }
 
-func UserAgent(startInfo component.ApplicationStartInfo) string {
-	return fmt.Sprintf("%s/%s", startInfo.ExeName, startInfo.Version)
+func UserAgent(buildInfo component.BuildInfo) string {
+	return fmt.Sprintf("%s/%s", buildInfo.Command, buildInfo.Version)
 }
 
 // SetDDHeaders sets the Datadog-specific headers
-func SetDDHeaders(reqHeader http.Header, startInfo component.ApplicationStartInfo, apiKey string) {
+func SetDDHeaders(reqHeader http.Header, buildInfo component.BuildInfo, apiKey string) {
 	reqHeader.Set("DD-Api-Key", apiKey)
-	reqHeader.Set("User-Agent", UserAgent(startInfo))
+	reqHeader.Set("User-Agent", UserAgent(buildInfo))
 }
 
 // DoWithRetries repeats a fallible action up to `maxRetries` times

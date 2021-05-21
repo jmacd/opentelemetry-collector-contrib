@@ -37,13 +37,15 @@ import (
 )
 
 const (
-	stringAttrName = "stringAttrName"
-	intAttrName    = "intAttrName"
-	doubleAttrName = "doubleAttrName"
-	boolAttrName   = "boolAttrName"
-	nullAttrName   = "nullAttrName"
-	mapAttrName    = "mapAttrName"
-	arrayAttrName  = "arrayAttrName"
+	stringAttrName     = "stringAttrName"
+	intAttrName        = "intAttrName"
+	doubleAttrName     = "doubleAttrName"
+	boolAttrName       = "boolAttrName"
+	nullAttrName       = "nullAttrName"
+	mapAttrName        = "mapAttrName"
+	arrayAttrName      = "arrayAttrName"
+	notInSpanAttrName0 = "shouldBeInMetric"
+	notInSpanAttrName1 = "shouldNotBeInMetric"
 
 	sampleLatency         = 11
 	sampleLatencyDuration = sampleLatency * time.Millisecond
@@ -51,9 +53,10 @@ const (
 
 // metricID represents the minimum attributes that uniquely identifies a metric in our tests.
 type metricID struct {
-	service   string
-	operation string
-	kind      string
+	service    string
+	operation  string
+	kind       string
+	statusCode string
 }
 
 type metricDataPoint interface {
@@ -87,9 +90,9 @@ func TestProcessorStart(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			// Prepare
-			exporters := map[config.DataType]map[config.NamedEntity]component.Exporter{
+			exporters := map[config.DataType]map[config.ComponentID]component.Exporter{
 				config.MetricsDataType: {
-					otlpConfig: tc.exporter,
+					otlpConfig.ID(): tc.exporter,
 				},
 			}
 			mhost := &mocks.Host{}
@@ -142,11 +145,11 @@ func TestProcessorCapabilities(t *testing.T) {
 	next := new(consumertest.TracesSink)
 	p, err := newProcessor(zap.NewNop(), cfg, next)
 	assert.NoError(t, err)
-	caps := p.GetCapabilities()
+	caps := p.Capabilities()
 
 	// Verify
 	assert.NotNil(t, p)
-	assert.Equal(t, false, caps.MutatesConsumedData)
+	assert.Equal(t, false, caps.MutatesData)
 }
 
 func TestProcessorConsumeTracesErrors(t *testing.T) {
@@ -262,6 +265,7 @@ func BenchmarkProcessorConsumeTraces(b *testing.B) {
 }
 
 func newProcessorImp(mexp *mocks.MetricsExporter, tcon *mocks.TracesConsumer, defaultNullValue *string) *processorImp {
+	defaultNotInSpanAttrVal := "defaultNotInSpanAttrVal"
 	return &processorImp{
 		logger:          zap.NewNop(),
 		metricsExporter: mexp,
@@ -282,6 +286,10 @@ func newProcessorImp(mexp *mocks.MetricsExporter, tcon *mocks.TracesConsumer, de
 			{mapAttrName, nil},
 			{arrayAttrName, nil},
 			{nullAttrName, defaultNullValue},
+			// Add a default value for an attribute that doesn't exist in a span
+			{notInSpanAttrName0, &defaultNotInSpanAttrVal},
+			// Leave the default value unset to test that this dimension should not be added to the metric.
+			{notInSpanAttrName1, nil},
 		},
 		metricKeyToDimensions: make(map[metricKey]dimKV),
 	}
@@ -365,7 +373,17 @@ func verifyConsumeMetricsInput(input pdata.Metrics, t *testing.T) bool {
 
 func verifyMetricLabels(dp metricDataPoint, t *testing.T, seenMetricIDs map[metricID]bool) {
 	mID := metricID{}
-	dp.LabelsMap().ForEach(func(k string, v string) {
+	wantDimensions := map[string]string{
+		stringAttrName:     "stringAttrValue",
+		intAttrName:        "99",
+		doubleAttrName:     "99.99",
+		boolAttrName:       "true",
+		nullAttrName:       "",
+		arrayAttrName:      "[]",
+		mapAttrName:        "{}",
+		notInSpanAttrName0: "defaultNotInSpanAttrVal",
+	}
+	dp.LabelsMap().Range(func(k string, v string) bool {
 		switch k {
 		case serviceNameKey:
 			mID.service = v
@@ -373,18 +391,18 @@ func verifyMetricLabels(dp metricDataPoint, t *testing.T, seenMetricIDs map[metr
 			mID.operation = v
 		case spanKindKey:
 			mID.kind = v
-		case stringAttrName:
-			assert.Equal(t, "stringAttrValue", v)
-		case intAttrName:
-			assert.Equal(t, "99", v)
-		case doubleAttrName:
-			assert.Equal(t, "99.99", v)
-		case boolAttrName:
-			assert.Equal(t, "true", v)
-		case nullAttrName:
-			assert.Empty(t, v)
+		case statusCodeKey:
+			mID.statusCode = v
+		case notInSpanAttrName1:
+			assert.Fail(t, notInSpanAttrName1+" should not be in this metric")
+		default:
+			assert.Equal(t, wantDimensions[k], v)
+			delete(wantDimensions, k)
 		}
+		return true
 	})
+	assert.Empty(t, wantDimensions, "Did not see all expected dimensions in metric. Missing: ", wantDimensions)
+
 	// Service/operation/kind should be a unique metric.
 	assert.False(t, seenMetricIDs[mID])
 	seenMetricIDs[mID] = true
@@ -397,58 +415,50 @@ func verifyMetricLabels(dp metricDataPoint, t *testing.T, seenMetricIDs map[metr
 func buildSampleTrace() pdata.Traces {
 	traces := pdata.NewTraces()
 
-	serviceASpans := buildServiceSpans(
+	initServiceSpans(
 		serviceSpans{
 			serviceName: "service-a",
 			spans: []span{
 				{
 					operation:  "/ping",
-					kind:       pdata.SpanKindSERVER,
+					kind:       pdata.SpanKindServer,
 					statusCode: pdata.StatusCodeOk,
 				},
 				{
 					operation:  "/ping",
-					kind:       pdata.SpanKindCLIENT,
+					kind:       pdata.SpanKindClient,
 					statusCode: pdata.StatusCodeOk,
 				},
 			},
-		})
-	serviceBSpans := buildServiceSpans(
+		}, traces.ResourceSpans().AppendEmpty())
+	initServiceSpans(
 		serviceSpans{
 			serviceName: "service-b",
 			spans: []span{
 				{
 					operation:  "/ping",
-					kind:       pdata.SpanKindSERVER,
+					kind:       pdata.SpanKindServer,
 					statusCode: pdata.StatusCodeError,
 				},
 			},
-		})
-	ignoredSpans := buildServiceSpans(serviceSpans{})
-	traces.ResourceSpans().Append(serviceASpans)
-	traces.ResourceSpans().Append(serviceBSpans)
-	traces.ResourceSpans().Append(ignoredSpans)
+		}, traces.ResourceSpans().AppendEmpty())
+	initServiceSpans(serviceSpans{}, traces.ResourceSpans().AppendEmpty())
 	return traces
 }
 
-func buildServiceSpans(serviceSpans serviceSpans) pdata.ResourceSpans {
-	spans := pdata.NewResourceSpans()
-
+func initServiceSpans(serviceSpans serviceSpans, spans pdata.ResourceSpans) {
 	if serviceSpans.serviceName != "" {
 		spans.Resource().Attributes().
 			InsertString(conventions.AttributeServiceName, serviceSpans.serviceName)
 	}
 
-	ils := pdata.NewInstrumentationLibrarySpans()
+	ils := spans.InstrumentationLibrarySpans().AppendEmpty()
 	for _, span := range serviceSpans.spans {
-		ils.Spans().Append(buildSpan(span))
+		initSpan(span, ils.Spans().AppendEmpty())
 	}
-	spans.InstrumentationLibrarySpans().Append(ils)
-	return spans
 }
 
-func buildSpan(span span) pdata.Span {
-	s := pdata.NewSpan()
+func initSpan(span span, s pdata.Span) {
 	s.SetName(span.operation)
 	s.SetKind(span.kind)
 	s.Status().SetCode(span.statusCode)
@@ -462,13 +472,12 @@ func buildSpan(span span) pdata.Span {
 	s.Attributes().InsertNull(nullAttrName)
 	s.Attributes().Insert(mapAttrName, pdata.NewAttributeValueMap())
 	s.Attributes().Insert(arrayAttrName, pdata.NewAttributeValueArray())
-	return s
 }
 
 func newOTLPExporters(t *testing.T) (*otlpexporter.Config, component.MetricsExporter, component.TracesExporter) {
 	otlpExpFactory := otlpexporter.NewFactory()
 	otlpConfig := &otlpexporter.Config{
-		ExporterSettings: config.NewExporterSettings("otlp"),
+		ExporterSettings: config.NewExporterSettings(config.NewID("otlp")),
 		GRPCClientSettings: configgrpc.GRPCClientSettings{
 			Endpoint: "example.com:1234",
 		},

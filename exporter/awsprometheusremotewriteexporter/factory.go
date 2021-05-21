@@ -17,9 +17,13 @@ package awsprometheusremotewriteexporter
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"net/http"
+	"os"
+	"runtime"
+	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	prw "go.opentelemetry.io/collector/exporter/prometheusremotewriteexporter"
@@ -50,25 +54,20 @@ func (af *awsFactory) CreateDefaultConfig() config.Exporter {
 		Config: *af.ExporterFactory.CreateDefaultConfig().(*prw.Config),
 		AuthConfig: AuthConfig{
 			Region:  "",
-			Service: "",
+			Service: defaultAMPSigV4Service,
 			RoleArn: "",
 		},
 	}
 
-	cfg.TypeVal = typeStr
-	cfg.NameVal = typeStr
-
+	cfg.ExporterSettings = config.NewExporterSettings(config.NewID(typeStr))
 	cfg.HTTPClientSettings.CustomRoundTripper = func(next http.RoundTripper) (http.RoundTripper, error) {
-		if !isAuthConfigValid(cfg.AuthConfig) {
-			return nil, errors.New("invalid authentication configuration")
+		extras := []string{runtime.Version(), runtime.GOOS, runtime.GOARCH}
+		if v := os.Getenv("AWS_EXECUTION_ENV"); v != "" {
+			extras = append(extras, v)
 		}
-
-		return newSigningRoundTripper(cfg.AuthConfig, next)
+		runtimeInfo := fmt.Sprintf("%s/%s (%s)", aws.SDKName, aws.SDKVersion, strings.Join(extras, "; "))
+		return newSigningRoundTripper(cfg, next, runtimeInfo)
 	}
 
 	return cfg
-}
-
-func isAuthConfigValid(params AuthConfig) bool {
-	return !(params.Region != "" && params.Service == "" || params.Region == "" && params.Service != "")
 }

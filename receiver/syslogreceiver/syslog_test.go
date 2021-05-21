@@ -52,7 +52,7 @@ func testSyslog(t *testing.T, cfg *SysLogConfig) {
 	sink := new(consumertest.LogsSink)
 	rcvr, err := f.CreateLogsReceiver(context.Background(), params, cfg, sink)
 	require.NoError(t, err)
-	require.NoError(t, rcvr.Start(context.Background(), &testHost{t: t}))
+	require.NoError(t, rcvr.Start(context.Background(), componenttest.NewNopHost()))
 
 	var conn net.Conn
 	if cfg.Input["tcp"] != nil {
@@ -100,19 +100,17 @@ func TestLoadConfig(t *testing.T) {
 	require.NotNil(t, cfg)
 
 	assert.Equal(t, len(cfg.Receivers), 1)
-	assert.Equal(t, testdataConfigYamlAsMap(), cfg.Receivers["syslog"])
+	assert.Equal(t, testdataConfigYamlAsMap(), cfg.Receivers[config.NewID(typeStr)])
 }
 
 func testdataConfigYamlAsMap() *SysLogConfig {
 	return &SysLogConfig{
 		BaseConfig: stanza.BaseConfig{
-			ReceiverSettings: config.ReceiverSettings{
-				TypeVal: "syslog",
-				NameVal: "syslog",
-			},
-			Operators: stanza.OperatorConfigs{},
+			ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
+			Operators:        stanza.OperatorConfigs{},
 			Converter: stanza.ConverterConfig{
 				FlushInterval: 100 * time.Millisecond,
+				WorkerCount:   1,
 			},
 		},
 		Input: stanza.InputConfig{
@@ -127,13 +125,11 @@ func testdataConfigYamlAsMap() *SysLogConfig {
 func testdataUDPConfig() *SysLogConfig {
 	return &SysLogConfig{
 		BaseConfig: stanza.BaseConfig{
-			ReceiverSettings: config.ReceiverSettings{
-				TypeVal: "syslog",
-				NameVal: "syslog",
-			},
-			Operators: stanza.OperatorConfigs{},
+			ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
+			Operators:        stanza.OperatorConfigs{},
 			Converter: stanza.ConverterConfig{
 				FlushInterval: 100 * time.Millisecond,
+				WorkerCount:   1,
 			},
 		},
 		Input: stanza.InputConfig{
@@ -153,11 +149,8 @@ func TestDecodeInputConfigFailure(t *testing.T) {
 	factory := NewFactory()
 	badCfg := &SysLogConfig{
 		BaseConfig: stanza.BaseConfig{
-			ReceiverSettings: config.ReceiverSettings{
-				TypeVal: "syslog",
-				NameVal: "syslog",
-			},
-			Operators: stanza.OperatorConfigs{},
+			ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
+			Operators:        stanza.OperatorConfigs{},
 		},
 		Input: stanza.InputConfig{
 			"tcp": map[string]interface{}{
@@ -175,16 +168,4 @@ func expectNLogs(sink *consumertest.LogsSink, expected int) func() bool {
 	return func() bool {
 		return sink.LogRecordsCount() == expected
 	}
-}
-
-type testHost struct {
-	component.Host
-	t *testing.T
-}
-
-var _ component.Host = (*testHost)(nil)
-
-// ReportFatalError causes the test to be run to fail.
-func (h *testHost) ReportFatalError(err error) {
-	h.t.Fatalf("receiver reported a fatal error: %v", err)
 }

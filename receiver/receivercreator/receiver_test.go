@@ -30,8 +30,7 @@ import (
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/config/configcheck"
-	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/consumer/pdata"
+	"go.opentelemetry.io/collector/consumer/consumertest"
 	"go.opentelemetry.io/collector/translator/internaldata"
 	"go.uber.org/zap"
 	zapObserver "go.uber.org/zap/zaptest/observer"
@@ -44,19 +43,6 @@ func TestCreateDefaultConfig(t *testing.T) {
 	cfg := factory.CreateDefaultConfig()
 	assert.NotNil(t, cfg, "failed to create default config")
 	assert.NoError(t, configcheck.ValidateConfig(cfg))
-}
-
-type mockMetricsConsumer struct {
-	Metrics      []pdata.Metrics
-	TotalMetrics int
-}
-
-var _ consumer.Metrics = &mockMetricsConsumer{}
-
-func (p *mockMetricsConsumer) ConsumeMetrics(ctx context.Context, md pdata.Metrics) error {
-	p.Metrics = append(p.Metrics, md)
-	p.TotalMetrics += md.MetricCount()
-	return nil
 }
 
 type mockObserver struct {
@@ -80,16 +66,13 @@ var _ observer.Observable = (*mockObserver)(nil)
 
 func TestMockedEndToEnd(t *testing.T) {
 	host, cfg := exampleCreatorFactory(t)
-	host.extensions = map[config.NamedEntity]component.Extension{
-		&config.ExtensionSettings{
-			TypeVal: "mock_observer",
-			NameVal: "mock_observer",
-		}: &mockObserver{},
+	host.extensions = map[config.ComponentID]component.Extension{
+		config.NewID("mock_observer"): &mockObserver{},
 	}
-	dynCfg := cfg.Receivers["receiver_creator/1"]
+	dynCfg := cfg.Receivers[config.NewIDWithName(typeStr, "1")]
 	factory := NewFactory()
 	params := component.ReceiverCreateParams{Logger: zap.NewNop()}
-	mockConsumer := &mockMetricsConsumer{}
+	mockConsumer := new(consumertest.MetricsSink)
 	rcvr, err := factory.CreateMetricsReceiver(context.Background(), params, dynCfg, mockConsumer)
 	require.NoError(t, err)
 	dyn := rcvr.(*receiverCreator)
@@ -111,8 +94,8 @@ func TestMockedEndToEnd(t *testing.T) {
 	// Test that we can send metrics.
 	for _, receiver := range dyn.observerHandler.receiversByEndpointID.Values() {
 		example := receiver.(*nopWithEndpointReceiver)
-		md := internaldata.OCToMetrics(internaldata.MetricsData{
-			Node: &commonpb.Node{
+		md := internaldata.OCToMetrics(
+			&commonpb.Node{
 				ServiceInfo: &commonpb.ServiceInfo{Name: "dynamictest"},
 				LibraryInfo: &commonpb.LibraryInfo{},
 				Identifier:  &commonpb.ProcessIdentifier{},
@@ -120,8 +103,8 @@ func TestMockedEndToEnd(t *testing.T) {
 					"attr": "1",
 				},
 			},
-			Resource: &resourcepb.Resource{Type: "test"},
-			Metrics: []*metricspb.Metric{
+			&resourcepb.Resource{Type: "test"},
+			[]*metricspb.Metric{
 				{
 					MetricDescriptor: &metricspb.MetricDescriptor{
 						Name:        "my-metric",
@@ -136,13 +119,12 @@ func TestMockedEndToEnd(t *testing.T) {
 						},
 					},
 				},
-			},
-		})
+			})
 		assert.NoError(t, example.ConsumeMetrics(context.Background(), md))
 	}
 
 	// TODO: Will have to rework once receivers are started asynchronously to Start().
-	assert.Len(t, mockConsumer.Metrics, 1)
+	assert.Len(t, mockConsumer.AllMetrics(), 1)
 }
 
 func TestLoggingHost(t *testing.T) {

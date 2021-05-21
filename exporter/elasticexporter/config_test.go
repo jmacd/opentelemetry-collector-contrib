@@ -46,12 +46,14 @@ func TestLoadConfig(t *testing.T) {
 
 	assert.Equal(t, len(cfg.Exporters), 2)
 
-	r0 := cfg.Exporters["elastic"]
-	assert.Equal(t, r0, factory.CreateDefaultConfig())
+	defaultCfg := factory.CreateDefaultConfig()
+	defaultCfg.(*Config).APMServerURL = "https://elastic.example.com"
+	r0 := cfg.Exporters[config.NewID(typeStr)]
+	assert.Equal(t, r0, defaultCfg)
 
-	r1 := cfg.Exporters["elastic/customname"].(*Config)
+	r1 := cfg.Exporters[config.NewIDWithName(typeStr, "customname")]
 	assert.Equal(t, r1, &Config{
-		ExporterSettings: &config.ExporterSettings{TypeVal: config.Type(typeStr), NameVal: "elastic/customname"},
+		ExporterSettings: config.NewExporterSettings(config.NewIDWithName(typeStr, "customname")),
 		APMServerURL:     "https://elastic.example.com",
 		APIKey:           "RTNxMjlXNEJt",
 		SecretToken:      "hunter2",
@@ -105,11 +107,7 @@ func testAuth(t *testing.T, apiKey, secretToken, expectedAuthorization string) {
 	assert.NotNil(t, te, "failed to create trace exporter")
 
 	traces := pdata.NewTraces()
-	resourceSpans := traces.ResourceSpans()
-	resourceSpans.Resize(1)
-	resourceSpans.At(0).InstrumentationLibrarySpans().Resize(1)
-	resourceSpans.At(0).InstrumentationLibrarySpans().At(0).Spans().Resize(1)
-	span := resourceSpans.At(0).InstrumentationLibrarySpans().At(0).Spans().At(0)
+	span := traces.ResourceSpans().AppendEmpty().InstrumentationLibrarySpans().AppendEmpty().Spans().AppendEmpty()
 	span.SetName("foobar")
 	assert.NoError(t, te.ConsumeTraces(context.Background(), traces))
 }

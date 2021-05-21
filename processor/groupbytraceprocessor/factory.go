@@ -29,14 +29,15 @@ import (
 const (
 	// typeStr is the value of "type" for this processor in the configuration.
 	typeStr config.Type = "groupbytrace"
+
+	defaultWaitDuration   = time.Second
+	defaultNumTraces      = 1_000_000
+	defaultNumWorkers     = 1
+	defaultDiscardOrphans = false
+	defaultStoreOnDisk    = false
 )
 
 var (
-	defaultWaitDuration   = time.Second
-	defaultNumTraces      = 1_000_000
-	defaultDiscardOrphans = false
-	defaultStoreOnDisk    = false
-
 	errDiskStorageNotSupported    = fmt.Errorf("option 'disk storage' not supported in this release")
 	errDiscardOrphansNotSupported = fmt.Errorf("option 'discard orphans' not supported in this release")
 )
@@ -49,14 +50,15 @@ func NewFactory() component.ProcessorFactory {
 	return processorhelper.NewFactory(
 		typeStr,
 		createDefaultConfig,
-		processorhelper.WithTraces(createTraceProcessor))
+		processorhelper.WithTraces(createTracesProcessor))
 }
 
 // createDefaultConfig creates the default configuration for the processor.
 func createDefaultConfig() config.Processor {
 	return &Config{
-		ProcessorSettings: config.NewProcessorSettings(typeStr),
+		ProcessorSettings: config.NewProcessorSettings(config.NewID(typeStr)),
 		NumTraces:         defaultNumTraces,
+		NumWorkers:        defaultNumWorkers,
 		WaitDuration:      defaultWaitDuration,
 
 		// not supported for now
@@ -65,8 +67,8 @@ func createDefaultConfig() config.Processor {
 	}
 }
 
-// createTraceProcessor creates a trace processor based on this config.
-func createTraceProcessor(
+// createTracesProcessor creates a trace processor based on this config.
+func createTracesProcessor(
 	_ context.Context,
 	params component.ProcessorCreateParams,
 	cfg config.Processor,

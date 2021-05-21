@@ -36,7 +36,7 @@ func TestCreateDefaultConfig(t *testing.T) {
 	assert.NoError(t, configcheck.ValidateConfig(cfg))
 }
 
-func TestCreateTraceExporter(t *testing.T) {
+func TestCreateTracesExporter(t *testing.T) {
 	logger := zap.NewNop()
 
 	factories, err := componenttest.NopFactories()
@@ -49,7 +49,7 @@ func TestCreateTraceExporter(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	exporter, err := factory.CreateTracesExporter(ctx, component.ExporterCreateParams{Logger: logger}, cfg.Exporters["awsemf/1"])
+	exporter, err := factory.CreateTracesExporter(ctx, component.ExporterCreateParams{Logger: logger}, cfg.Exporters[config.NewIDWithName(typeStr, "1")])
 	assert.NotNil(t, err)
 	assert.Nil(t, exporter)
 }
@@ -67,7 +67,7 @@ func TestCreateMetricsExporter(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	exporter, err := factory.CreateMetricsExporter(ctx, component.ExporterCreateParams{Logger: logger}, cfg.Exporters["awsemf/1"])
+	exporter, err := factory.CreateMetricsExporter(ctx, component.ExporterCreateParams{Logger: logger}, cfg.Exporters[config.NewIDWithName(typeStr, "1")])
 	assert.Nil(t, err)
 	assert.NotNil(t, exporter)
 }

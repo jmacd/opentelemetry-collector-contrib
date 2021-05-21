@@ -31,16 +31,39 @@ var (
 )
 
 func getSupportedTypes() []string {
-	return []string{"c", "g"}
+	return []string{"c", "g", "h", "ms"}
 }
 
-const TagMetricType = "metric_type"
+const (
+	tagMetricType   = "metric_type"
+	statsdCounter   = "c"
+	statsdGauge     = "g"
+	statsdHistogram = "h"
+	statsdTiming    = "ms"
+)
+
+type TimerHistogramMapping struct {
+	StatsdType   string `mapstructure:"statsd_type"`
+	ObserverType string `mapstructure:"observer_type"`
+}
 
 // StatsDParser supports the Parse method for parsing StatsD messages with Tags.
 type StatsDParser struct {
-	gauges           map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics
-	counters         map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics
-	enableMetricType bool
+	gauges                 map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics
+	counters               map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics
+	summaries              map[statsDMetricdescription]summaryMetric
+	timersAndDistributions []pdata.InstrumentationLibraryMetrics
+	enableMetricType       bool
+	observeTimer           string
+	observeHistogram       string
+}
+
+type summaryMetric struct {
+	name          string
+	summaryPoints []float64
+	labelKeys     []string
+	labelValues   []string
+	timeNow       time.Time
 }
 
 type statsDMetric struct {
@@ -61,30 +84,49 @@ type statsDMetricdescription struct {
 	labels           attribute.Distinct
 }
 
-func (p *StatsDParser) Initialize(enableMetricType bool) error {
+func (p *StatsDParser) Initialize(enableMetricType bool, sendTimerHistogram []TimerHistogramMapping) error {
 	p.gauges = make(map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics)
 	p.counters = make(map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics)
+	p.timersAndDistributions = make([]pdata.InstrumentationLibraryMetrics, 0)
+	p.summaries = make(map[statsDMetricdescription]summaryMetric)
+
 	p.enableMetricType = enableMetricType
+	for _, eachMap := range sendTimerHistogram {
+		switch eachMap.StatsdType {
+		case "histogram":
+			p.observeHistogram = eachMap.ObserverType
+		case "timer", "timing":
+			p.observeTimer = eachMap.ObserverType
+		}
+	}
 	return nil
 }
 
 // get the metrics preparing for flushing and reset the state
 func (p *StatsDParser) GetMetrics() pdata.Metrics {
 	metrics := pdata.NewMetrics()
-	metrics.ResourceMetrics().Resize(1)
-	metrics.ResourceMetrics().At(0).InstrumentationLibraryMetrics().Resize(0)
+	rm := metrics.ResourceMetrics().AppendEmpty()
 
 	for _, metric := range p.gauges {
-		metrics.ResourceMetrics().At(0).InstrumentationLibraryMetrics().Append(metric)
+		rm.InstrumentationLibraryMetrics().Append(metric)
 	}
 
 	for _, metric := range p.counters {
-		metrics.ResourceMetrics().At(0).InstrumentationLibraryMetrics().Append(metric)
+		rm.InstrumentationLibraryMetrics().Append(metric)
+	}
+
+	for _, metric := range p.timersAndDistributions {
+		rm.InstrumentationLibraryMetrics().Append(metric)
+	}
+
+	for _, summaryMetric := range p.summaries {
+		metrics.ResourceMetrics().At(0).InstrumentationLibraryMetrics().Append(buildSummaryMetric(summaryMetric))
 	}
 
 	p.gauges = make(map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics)
 	p.counters = make(map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics)
-
+	p.timersAndDistributions = make([]pdata.InstrumentationLibraryMetrics, 0)
+	p.summaries = make(map[statsDMetricdescription]summaryMetric)
 	return metrics
 }
 
@@ -99,7 +141,7 @@ func (p *StatsDParser) Aggregate(line string) error {
 		return err
 	}
 	switch parsedMetric.description.statsdMetricType {
-	case "g":
+	case statsdGauge:
 		_, ok := p.gauges[parsedMetric.description]
 		if !ok {
 			p.gauges[parsedMetric.description] = buildGaugeMetric(parsedMetric, timeNowFunc())
@@ -113,7 +155,7 @@ func (p *StatsDParser) Aggregate(line string) error {
 			}
 		}
 
-	case "c":
+	case statsdCounter:
 		_, ok := p.counters[parsedMetric.description]
 		if !ok {
 			p.counters[parsedMetric.description] = buildCounterMetric(parsedMetric, timeNowFunc())
@@ -121,6 +163,58 @@ func (p *StatsDParser) Aggregate(line string) error {
 			savedValue := p.counters[parsedMetric.description].Metrics().At(0).IntSum().DataPoints().At(0).Value()
 			parsedMetric.intvalue = parsedMetric.intvalue + savedValue
 			p.counters[parsedMetric.description] = buildCounterMetric(parsedMetric, timeNowFunc())
+		}
+
+	case statsdHistogram:
+		switch p.observeHistogram {
+		case "gauge":
+			p.timersAndDistributions = append(p.timersAndDistributions, buildGaugeMetric(parsedMetric, timeNowFunc()))
+		case "summary":
+			eachSummaryMetric, ok := p.summaries[parsedMetric.description]
+			if !ok {
+				p.summaries[parsedMetric.description] = summaryMetric{
+					name:          parsedMetric.description.name,
+					summaryPoints: []float64{parsedMetric.floatvalue},
+					labelKeys:     parsedMetric.labelKeys,
+					labelValues:   parsedMetric.labelValues,
+					timeNow:       timeNowFunc(),
+				}
+			} else {
+				points := eachSummaryMetric.summaryPoints
+				p.summaries[parsedMetric.description] = summaryMetric{
+					name:          parsedMetric.description.name,
+					summaryPoints: append(points, parsedMetric.floatvalue),
+					labelKeys:     parsedMetric.labelKeys,
+					labelValues:   parsedMetric.labelValues,
+					timeNow:       timeNowFunc(),
+				}
+			}
+		}
+
+	case statsdTiming:
+		switch p.observeTimer {
+		case "gauge":
+			p.timersAndDistributions = append(p.timersAndDistributions, buildGaugeMetric(parsedMetric, timeNowFunc()))
+		case "summary":
+			eachSummaryMetric, ok := p.summaries[parsedMetric.description]
+			if !ok {
+				p.summaries[parsedMetric.description] = summaryMetric{
+					name:          parsedMetric.description.name,
+					summaryPoints: []float64{parsedMetric.floatvalue},
+					labelKeys:     parsedMetric.labelKeys,
+					labelValues:   parsedMetric.labelValues,
+					timeNow:       timeNowFunc(),
+				}
+			} else {
+				points := eachSummaryMetric.summaryPoints
+				p.summaries[parsedMetric.description] = summaryMetric{
+					name:          parsedMetric.description.name,
+					summaryPoints: append(points, parsedMetric.floatvalue),
+					labelKeys:     parsedMetric.labelKeys,
+					labelValues:   parsedMetric.labelValues,
+					timeNow:       timeNowFunc(),
+				}
+			}
 		}
 	}
 
@@ -153,7 +247,7 @@ func parseMessageToMetric(line string, enableMetricType bool) (statsDMetric, err
 	}
 
 	result.description.statsdMetricType = parts[1]
-	if !contains(getSupportedTypes(), result.description.statsdMetricType) {
+	if !Contains(getSupportedTypes(), result.description.statsdMetricType) {
 		return result, fmt.Errorf("unsupported metric type: %s", result.description.statsdMetricType)
 	}
 
@@ -193,13 +287,13 @@ func parseMessageToMetric(line string, enableMetricType bool) (statsDMetric, err
 		}
 	}
 	switch result.description.statsdMetricType {
-	case "g":
+	case statsdGauge:
 		f, err := strconv.ParseFloat(result.value, 64)
 		if err != nil {
 			return result, fmt.Errorf("gauge: parse metric value string: %s", result.value)
 		}
 		result.floatvalue = f
-	case "c":
+	case statsdCounter:
 		f, err := strconv.ParseFloat(result.value, 64)
 		if err != nil {
 			return result, fmt.Errorf("counter: parse metric value string: %s", result.value)
@@ -209,6 +303,15 @@ func parseMessageToMetric(line string, enableMetricType bool) (statsDMetric, err
 			i = int64(f / result.sampleRate)
 		}
 		result.intvalue = i
+	case statsdHistogram, statsdTiming:
+		f, err := strconv.ParseFloat(result.value, 64)
+		if err != nil {
+			return result, fmt.Errorf("timing/histogram: parse metric value string: %s", result.value)
+		}
+		if 0 < result.sampleRate && result.sampleRate < 1 {
+			f = f / result.sampleRate
+		}
+		result.floatvalue = f
 	}
 
 	// add metric_type dimension for all metrics
@@ -216,15 +319,19 @@ func parseMessageToMetric(line string, enableMetricType bool) (statsDMetric, err
 	if enableMetricType {
 		var metricType = ""
 		switch result.description.statsdMetricType {
-		case "g":
+		case statsdGauge:
 			metricType = "gauge"
-		case "c":
+		case statsdCounter:
 			metricType = "counter"
+		case statsdTiming:
+			metricType = "timing"
+		case statsdHistogram:
+			metricType = "histogram"
 		}
-		result.labelKeys = append(result.labelKeys, TagMetricType)
+		result.labelKeys = append(result.labelKeys, tagMetricType)
 		result.labelValues = append(result.labelValues, metricType)
 
-		kvs = append(kvs, attribute.String(TagMetricType, metricType))
+		kvs = append(kvs, attribute.String(tagMetricType, metricType))
 	}
 
 	if len(kvs) != 0 {
@@ -233,13 +340,4 @@ func parseMessageToMetric(line string, enableMetricType bool) (statsDMetric, err
 	}
 
 	return result, nil
-}
-
-func contains(slice []string, element string) bool {
-	for _, val := range slice {
-		if val == element {
-			return true
-		}
-	}
-	return false
 }

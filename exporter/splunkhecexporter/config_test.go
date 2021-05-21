@@ -27,6 +27,7 @@ import (
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/config/configtest"
+	"go.opentelemetry.io/collector/config/configtls"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.uber.org/zap"
 )
@@ -36,13 +37,13 @@ func TestLoadConfig(t *testing.T) {
 	assert.Nil(t, err)
 
 	factory := NewFactory()
-	factories.Exporters[config.Type(typeStr)] = factory
+	factories.Exporters[typeStr] = factory
 	cfg, err := configtest.LoadConfigFile(t, path.Join(".", "testdata", "config.yaml"), factories)
 
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
 
-	e0 := cfg.Exporters["splunk_hec"]
+	e0 := cfg.Exporters[config.NewID(typeStr)]
 
 	// Endpoint and Token do not have a default value so set them directly.
 	defaultCfg := factory.CreateDefaultConfig().(*Config)
@@ -50,19 +51,16 @@ func TestLoadConfig(t *testing.T) {
 	defaultCfg.Endpoint = "https://splunk:8088/services/collector"
 	assert.Equal(t, defaultCfg, e0)
 
-	expectedName := "splunk_hec/allsettings"
-
-	e1 := cfg.Exporters[expectedName]
+	e1 := cfg.Exporters[config.NewIDWithName(typeStr, "allsettings")]
 	expectedCfg := Config{
-		ExporterSettings: &config.ExporterSettings{
-			TypeVal: config.Type(typeStr),
-			NameVal: expectedName,
-		},
+		ExporterSettings:     config.NewExporterSettings(config.NewIDWithName(typeStr, "allsettings")),
 		Token:                "00000000-0000-0000-0000-0000000000000",
 		Endpoint:             "https://splunk:8088/services/collector",
 		Source:               "otel",
 		SourceType:           "otel",
 		Index:                "metrics",
+		SplunkAppName:        "OpenTelemetry-Collector Splunk Exporter",
+		SplunkAppVersion:     "v0.0.1",
 		MaxConnections:       100,
 		MaxContentLengthLogs: 2 * 1024 * 1024,
 		TimeoutSettings: exporterhelper.TimeoutSettings{
@@ -78,6 +76,15 @@ func TestLoadConfig(t *testing.T) {
 			Enabled:      true,
 			NumConsumers: 2,
 			QueueSize:    10,
+		},
+		TLSSetting: configtls.TLSClientSetting{
+			TLSSetting: configtls.TLSSetting{
+				CAFile:   "",
+				CertFile: "",
+				KeyFile:  "",
+			},
+			Insecure:           true,
+			InsecureSkipVerify: false,
 		},
 	}
 	assert.Equal(t, &expectedCfg, e1)
