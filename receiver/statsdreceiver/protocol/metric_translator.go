@@ -91,3 +91,23 @@ func buildSummaryMetric(summaryMetric summaryMetric) pdata.InstrumentationLibrar
 	return ilm
 
 }
+
+func buildHistogramMetric(histogramMetric histogramMetric) pdata.InstrumentationLibraryMetrics {
+	ilm := pdata.NewInstrumentationLibraryMetrics()
+	nm := ilm.Metrics().AppendEmpty()
+	nm.SetName(histogramMetric.name)
+	nm.SetDataType(pdata.MetricDataTypeHistogram)
+
+	dp := nm.ExponentialHistogram().DataPoints().AppendEmpty()
+
+	// TODO: set temporality
+	
+	histogramMetric.histo.MoveToDataPoint(dp)
+
+	dp.SetTimestamp(pdata.TimestampFromTime(histogramMetric.timeNow))
+	for i, key := range histogramMetric.labelKeys {
+		dp.Attributes().InsertString(key, histogramMetric.labelValues[i])
+	}
+
+	return ilm
+}

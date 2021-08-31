@@ -39,7 +39,7 @@ func (c *Config) validate() error {
 
 	var errors []error
 	supportedStatsdType := []string{"timing", "timer", "histogram"}
-	supportedObserverType := []string{"gauge", "summary"}
+	supportedObserverType := []string{"gauge", "summary", "histogram"}
 
 	if c.AggregationInterval <= 0 {
 		errors = append(errors, fmt.Errorf("aggregation_interval must be a positive duration"))

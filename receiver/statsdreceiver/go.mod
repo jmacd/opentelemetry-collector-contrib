@@ -2,6 +2,12 @@ module github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsd
 
 go 1.17
 
+replace go.opentelemetry.io/collector => ../../../collector
+
+replace go.opentelemetry.io/collector/model => ../../../collector/model
+
+replace go.opentelemetry.io/collector/model/conversion => ../../../collector/model/conversion
+
 require (
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.0.0-00010101000000-000000000000

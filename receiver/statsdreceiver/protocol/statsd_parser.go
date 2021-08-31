@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/model/pdata/histogram"
 	"go.opentelemetry.io/otel/attribute"
 )
 
@@ -40,6 +41,8 @@ const (
 	statsdGauge     = "g"
 	statsdHistogram = "h"
 	statsdTiming    = "ms"
+
+	histogramExponentialScale = 4 // 2**(scale) values between [1,2)
 )
 
 type TimerHistogramMapping struct {
@@ -52,6 +55,7 @@ type StatsDParser struct {
 	gauges                 map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics
 	counters               map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics
 	summaries              map[statsDMetricdescription]summaryMetric
+	histograms             map[statsDMetricdescription]histogramMetric
 	timersAndDistributions []pdata.InstrumentationLibraryMetrics
 	enableMetricType       bool
 	isMonotonicCounter     bool
@@ -65,6 +69,14 @@ type summaryMetric struct {
 	labelKeys     []string
 	labelValues   []string
 	timeNow       time.Time
+}
+
+type histogramMetric struct {
+	name        string
+	labelKeys   []string
+	labelValues []string
+	histo       *histogram.Exponential
+	timeNow     time.Time
 }
 
 type statsDMetric struct {
@@ -90,6 +102,7 @@ func (p *StatsDParser) Initialize(enableMetricType bool, isMonotonicCounter bool
 	p.counters = make(map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics)
 	p.timersAndDistributions = make([]pdata.InstrumentationLibraryMetrics, 0)
 	p.summaries = make(map[statsDMetricdescription]summaryMetric)
+	p.histograms = make(map[statsDMetricdescription]histogramMetric)
 
 	p.enableMetricType = enableMetricType
 	p.isMonotonicCounter = isMonotonicCounter
@@ -126,10 +139,16 @@ func (p *StatsDParser) GetMetrics() pdata.Metrics {
 		buildSummaryMetric(summaryMetric).CopyTo(tgt)
 	}
 
+	for _, histogramMetric := range p.histograms {
+		tgt := metrics.ResourceMetrics().At(0).InstrumentationLibraryMetrics().AppendEmpty()
+		buildHistogramMetric(histogramMetric).CopyTo(tgt)
+	}
+
 	p.gauges = make(map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics)
 	p.counters = make(map[statsDMetricdescription]pdata.InstrumentationLibraryMetrics)
 	p.timersAndDistributions = make([]pdata.InstrumentationLibraryMetrics, 0)
 	p.summaries = make(map[statsDMetricdescription]summaryMetric)
+	p.histograms = make(map[statsDMetricdescription]histogramMetric)
 	return metrics
 }
 
@@ -157,6 +176,7 @@ func (p *StatsDParser) Aggregate(line string) error {
 				p.gauges[parsedMetric.description] = buildGaugeMetric(parsedMetric, timeNowFunc())
 			}
 		}
+		return nil
 
 	case statsdCounter:
 		_, ok := p.counters[parsedMetric.description]
@@ -167,58 +187,54 @@ func (p *StatsDParser) Aggregate(line string) error {
 			parsedMetric.intvalue = parsedMetric.intvalue + savedValue
 			p.counters[parsedMetric.description] = buildCounterMetric(parsedMetric, p.isMonotonicCounter, timeNowFunc())
 		}
+		return nil
+	}
 
+	handleAs := "histogram"
+	switch parsedMetric.description.statsdMetricType {
 	case statsdHistogram:
-		switch p.observeHistogram {
-		case "gauge":
-			p.timersAndDistributions = append(p.timersAndDistributions, buildGaugeMetric(parsedMetric, timeNowFunc()))
-		case "summary":
-			eachSummaryMetric, ok := p.summaries[parsedMetric.description]
-			if !ok {
-				p.summaries[parsedMetric.description] = summaryMetric{
-					name:          parsedMetric.description.name,
-					summaryPoints: []float64{parsedMetric.floatvalue},
-					labelKeys:     parsedMetric.labelKeys,
-					labelValues:   parsedMetric.labelValues,
-					timeNow:       timeNowFunc(),
-				}
-			} else {
-				points := eachSummaryMetric.summaryPoints
-				p.summaries[parsedMetric.description] = summaryMetric{
-					name:          parsedMetric.description.name,
-					summaryPoints: append(points, parsedMetric.floatvalue),
-					labelKeys:     parsedMetric.labelKeys,
-					labelValues:   parsedMetric.labelValues,
-					timeNow:       timeNowFunc(),
-				}
+		handleAs = p.observeHistogram
+	case statsdTiming:
+		handleAs = p.observeTimer
+	}
+	switch handleAs {
+	case "gauge":
+		p.timersAndDistributions = append(p.timersAndDistributions,
+			buildGaugeMetric(parsedMetric, timeNowFunc()),
+		)
+	case "summary":
+		var points []float64
+		if eachSummaryMetric, ok := p.summaries[parsedMetric.description]; ok {
+			points = eachSummaryMetric.summaryPoints
+		}
+		// Note: Summary does not handle sampleRate correctly. TODO: fix.
+		points = append(points, parsedMetric.floatvalue)
+		p.summaries[parsedMetric.description] = summaryMetric{
+			name:          parsedMetric.description.name,
+			summaryPoints: points,
+			labelKeys:     parsedMetric.labelKeys,
+			labelValues:   parsedMetric.labelValues,
+			timeNow:       timeNowFunc(),
+		}
+	case "histogram":
+		histo, ok := p.histograms[parsedMetric.description]
+		if !ok {
+			histo = histogramMetric{
+				name:        parsedMetric.description.name,
+				histo:       histogram.NewExponential(histogramExponentialScale),
+				labelKeys:   parsedMetric.labelKeys,
+				labelValues: parsedMetric.labelValues,
+				timeNow:     timeNowFunc(),
 			}
+			p.histograms[parsedMetric.description] = histo
 		}
 
-	case statsdTiming:
-		switch p.observeTimer {
-		case "gauge":
-			p.timersAndDistributions = append(p.timersAndDistributions, buildGaugeMetric(parsedMetric, timeNowFunc()))
-		case "summary":
-			eachSummaryMetric, ok := p.summaries[parsedMetric.description]
-			if !ok {
-				p.summaries[parsedMetric.description] = summaryMetric{
-					name:          parsedMetric.description.name,
-					summaryPoints: []float64{parsedMetric.floatvalue},
-					labelKeys:     parsedMetric.labelKeys,
-					labelValues:   parsedMetric.labelValues,
-					timeNow:       timeNowFunc(),
-				}
-			} else {
-				points := eachSummaryMetric.summaryPoints
-				p.summaries[parsedMetric.description] = summaryMetric{
-					name:          parsedMetric.description.name,
-					summaryPoints: append(points, parsedMetric.floatvalue),
-					labelKeys:     parsedMetric.labelKeys,
-					labelValues:   parsedMetric.labelValues,
-					timeNow:       timeNowFunc(),
-				}
-			}
+		count := uint64(1)
+		if 0 < parsedMetric.sampleRate && parsedMetric.sampleRate < 1 {
+			count = uint64(1 / parsedMetric.sampleRate)
 		}
+
+		histo.histo.Update(parsedMetric.floatvalue, count)
 	}
 
 	return nil
@@ -260,7 +276,10 @@ func parseMessageToMetric(line string, enableMetricType bool) (statsDMetric, err
 	var sortable attribute.Sortable
 
 	for _, part := range additionalParts {
-		// TODO: Sample rate doesn't currently have a place to go in the protocol
+		// Note: Sample rate:
+		// - ignored for Gauges
+		// - multiplied into Counter values
+		// - tracked manually for histogram and summary
 		if strings.HasPrefix(part, "@") {
 			sampleRateStr := strings.TrimPrefix(part, "@")
 
@@ -310,9 +329,6 @@ func parseMessageToMetric(line string, enableMetricType bool) (statsDMetric, err
 		f, err := strconv.ParseFloat(result.value, 64)
 		if err != nil {
 			return result, fmt.Errorf("timing/histogram: parse metric value string: %s", result.value)
-		}
-		if 0 < result.sampleRate && result.sampleRate < 1 {
-			f = f / result.sampleRate
 		}
 		result.floatvalue = f
 	}
