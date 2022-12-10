@@ -1,0 +1,1964 @@
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC
+2022/12/07 16:17:07 Starting mock backend...
+2022/12/07 16:17:07 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:17:07 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent1753640398.yaml]
+2022/12/07 16:17:07 Agent running, pid=88915
+2022/12/07 16:17:10 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/07 16:17:10 cannot get process memory for 88915: no such process
+2022/12/07 16:17:10 cannot get process times for 88915: no such process
+2022/12/07 16:17:13 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/07 16:17:13 cannot get process memory for 88915: no such process
+2022/12/07 16:17:13 cannot get process times for 88915: no such process
+2022/12/07 16:17:16 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/07 16:17:16 cannot get process memory for 88915: no such process
+2022/12/07 16:17:16 cannot get process times for 88915: no such process
+    test_case.go:362: Time out waiting for connection to tcp:127.0.0.1:63001
+2022/12/07 16:17:18 Starting load generator at 10000 items/sec.
+2022/12/07 16:17:18 Cannot send traces: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:63001: connect: connection refused"
+2022/12/07 16:17:19 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17300 items | Received:         0 items (0/sec)
+2022/12/07 16:17:19 cannot get process memory for 88915: no such process
+2022/12/07 16:17:19 cannot get process times for 88915: no such process
+2022/12/07 16:17:22 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     47200 items | Received:         0 items (0/sec)
+2022/12/07 16:17:22 cannot get process memory for 88915: no such process
+2022/12/07 16:17:22 cannot get process times for 88915: no such process
+2022/12/07 16:17:25 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     77300 items | Received:         0 items (0/sec)
+2022/12/07 16:17:25 cannot get process memory for 88915: no such process
+2022/12/07 16:17:25 cannot get process times for 88915: no such process
+2022/12/07 16:17:28 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    107300 items | Received:         0 items (0/sec)
+2022/12/07 16:17:28 cannot get process memory for 88915: no such process
+2022/12/07 16:17:28 cannot get process times for 88915: no such process
+2022/12/07 16:17:31 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    137300 items | Received:         0 items (0/sec)
+2022/12/07 16:17:31 cannot get process memory for 88915: no such process
+2022/12/07 16:17:31 cannot get process times for 88915: no such process
+2022/12/07 16:17:33 Stopped generator. Sent:    150000 items
+2022/12/07 16:17:34 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/07 16:17:34 cannot get process memory for 88915: no such process
+2022/12/07 16:17:34 cannot get process times for 88915: no such process
+2022/12/07 16:17:37 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/07 16:17:37 cannot get process memory for 88915: no such process
+2022/12/07 16:17:37 cannot get process times for 88915: no such process
+2022/12/07 16:17:40 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/07 16:17:40 cannot get process memory for 88915: no such process
+2022/12/07 16:17:40 cannot get process times for 88915: no such process
+    test_case.go:362: Time out waiting for all data items received
+2022/12/07 16:17:43 Get "http://127.0.0.1:63013/metrics": dial tcp 127.0.0.1:63013: connect: connection refused
+    test_case.go:378: Get "http://127.0.0.1:63013/metrics": dial tcp 127.0.0.1:63013: connect: connection refused
+2022/12/07 16:17:43 Gracefully terminating Agent pid=88915, sending SIGTEM...
+2022/12/07 16:17:43 Agent process stopped, exit code=1
+2022/12/07 16:17:43 Agent execution failed: exit status 1
+2022/12/07 16:17:43 exit status 1
+2022/12/07 16:17:43 Stopping process monitor.
+    test_case.go:378: exit status 1
+2022/12/07 16:17:43 Stopping mock backend...
+2022/12/07 16:17:43 Stopped backend. Received:         0 items (0/sec)
+--- FAIL: TestTrace10kSPS (35.53s)
+    --- FAIL: TestTrace10kSPS/OTLP-gRPC (35.53s)
+panic: close of closed channel [recovered]
+	panic: close of closed channel
+
+goroutine 168 [running]:
+testing.tRunner.func1.2({0x10772b380, 0x107d626c0})
+	/usr/local/go/src/testing/testing.go:1396 +0x1c8
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:1399 +0x378
+panic({0x10772b380, 0x107d626c0})
+	/usr/local/go/src/runtime/panic.go:884 +0x204
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed.(*TestCase).indicateError(0x140004f2000, {0x107d6c3c0, 0x14001052180})
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/testbed/test_case.go:383 +0xec
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed.(*TestCase).StopAgent(0x140004f2000)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/testbed/test_case.go:255 +0x3f4
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests.Scenario10kItemsPerSecond(0x14000103520, {0x131b95370, 0x1400040f2c0}, {0x107d911c0, 0x1400040f3e0}, {0x4be143c?, 0x1?, 0x1bf4da4e7753c?, 0x37d4e478?}, {0x107d81de0, ...}, ...)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/scenarios.go:196 +0x374
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests.TestTrace10kSPS.func1(0x1400045c648?)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/trace_test.go:133 +0x58
+testing.tRunner(0x14000103520, 0x1400045c738)
+	/usr/local/go/src/testing/testing.go:1446 +0x10c
+created by testing.(*T).Run
+	/usr/local/go/src/testing/testing.go:1493 +0x300
+exit status 2
+FAIL	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	36.330s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC
+2022/12/07 16:19:25 Starting mock backend...
+2022/12/07 16:19:25 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:19:25 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent2419782816.yaml]
+2022/12/07 16:19:25 Agent running, pid=90157
+2022/12/07 16:19:25 Starting load generator at 10000 items/sec.
+2022/12/07 16:19:28 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28300 items | Received:    27,800 items (9,265/sec)
+2022/12/07 16:19:31 Agent RAM (RES):  74 MiB, CPU: 7.8% | Sent:     58300 items | Received:    57,900 items (9,649/sec)
+2022/12/07 16:19:34 Agent RAM (RES):  74 MiB, CPU: 4.9% | Sent:     88300 items | Received:    88,000 items (9,777/sec)
+2022/12/07 16:19:37 Agent RAM (RES):  75 MiB, CPU: 4.8% | Sent:    118300 items | Received:   118,000 items (9,833/sec)
+2022/12/07 16:19:40 Agent RAM (RES):  75 MiB, CPU: 4.9% | Sent:    148200 items | Received:   148,000 items (9,866/sec)
+2022/12/07 16:19:40 Stopped generator. Sent:    149800 items
+2022/12/07 16:19:40 Gracefully terminating Agent pid=90157, sending SIGTEM...
+2022/12/07 16:19:40 Stopping process monitor.
+2022/12/07 16:19:40 Agent process stopped, exit code=0
+2022/12/07 16:19:40 Sent and received data matches.
+2022/12/07 16:19:40 Stopping mock backend...
+2022/12/07 16:19:40 Stopped backend. Received:   149,800 items (9,852/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzip
+2022/12/07 16:19:40 Starting mock backend...
+2022/12/07 16:19:40 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:19:40 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent4191007360.yaml]
+2022/12/07 16:19:40 Agent running, pid=90255
+2022/12/07 16:19:40 Starting load generator at 10000 items/sec.
+2022/12/07 16:19:43 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/07 16:19:46 Agent RAM (RES):  74 MiB, CPU: 8.2% | Sent:     59100 items | Received:    57,800 items (9,632/sec)
+2022/12/07 16:19:49 Agent RAM (RES):  67 MiB, CPU: 6.5% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/07 16:19:52 Agent RAM (RES):  68 MiB, CPU: 5.8% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/07 16:19:55 Agent RAM (RES):  68 MiB, CPU: 6.1% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/07 16:19:55 Stopped generator. Sent:    149900 items
+2022/12/07 16:19:55 Gracefully terminating Agent pid=90255, sending SIGTEM...
+2022/12/07 16:19:55 Stopping process monitor.
+2022/12/07 16:19:55 Agent process stopped, exit code=0
+2022/12/07 16:19:55 Sent and received data matches.
+2022/12/07 16:19:55 Stopping mock backend...
+2022/12/07 16:19:55 Stopped backend. Received:   149,900 items (9,845/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/12/07 16:19:55 Starting mock backend...
+2022/12/07 16:19:55 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:19:55 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent2634571167.yaml]
+2022/12/07 16:19:55 Agent running, pid=90434
+2022/12/07 16:19:55 Starting load generator at 10000 items/sec.
+2022/12/07 16:19:58 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,200/sec)
+2022/12/07 16:20:01 Agent RAM (RES):  64 MiB, CPU: 6.1% | Sent:     59100 items | Received:    57,700 items (9,617/sec)
+2022/12/07 16:20:04 Agent RAM (RES):  65 MiB, CPU: 4.4% | Sent:     89100 items | Received:    87,800 items (9,755/sec)
+2022/12/07 16:20:07 Agent RAM (RES):  66 MiB, CPU: 4.2% | Sent:    119100 items | Received:   117,900 items (9,825/sec)
+2022/12/07 16:20:10 Agent RAM (RES):  66 MiB, CPU: 4.1% | Sent:    149100 items | Received:   147,900 items (9,860/sec)
+2022/12/07 16:20:10 Stopped generator. Sent:    149900 items
+2022/12/07 16:20:10 Gracefully terminating Agent pid=90434, sending SIGTEM...
+2022/12/07 16:20:10 Stopping process monitor.
+2022/12/07 16:20:10 Agent process stopped, exit code=0
+2022/12/07 16:20:10 Sent and received data matches.
+2022/12/07 16:20:10 Stopping mock backend...
+2022/12/07 16:20:10 Stopped backend. Received:   149,900 items (9,914/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/12/07 16:20:10 Starting mock backend...
+2022/12/07 16:20:10 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:20:10 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent1428174269.yaml]
+2022/12/07 16:20:10 Agent running, pid=90531
+2022/12/07 16:20:10 Starting load generator at 10000 items/sec.
+2022/12/07 16:20:13 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,199/sec)
+2022/12/07 16:20:16 Agent RAM (RES):  66 MiB, CPU: 7.3% | Sent:     59100 items | Received:    57,700 items (9,616/sec)
+2022/12/07 16:20:19 Agent RAM (RES):  68 MiB, CPU: 5.6% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/07 16:20:22 Agent RAM (RES):  68 MiB, CPU: 5.6% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/07 16:20:25 Agent RAM (RES):  69 MiB, CPU: 5.9% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/07 16:20:25 Stopped generator. Sent:    149900 items
+2022/12/07 16:20:25 Gracefully terminating Agent pid=90531, sending SIGTEM...
+2022/12/07 16:20:25 Stopping process monitor.
+2022/12/07 16:20:25 Agent process stopped, exit code=0
+2022/12/07 16:20:25 Sent and received data matches.
+2022/12/07 16:20:25 Stopping mock backend...
+2022/12/07 16:20:25 Stopped backend. Received:   149,900 items (9,860/sec)
+--- PASS: TestTrace10kSPS (60.78s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC (15.21s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzip (15.24s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP (15.12s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.21s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	61.579s
+# github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed
+../testbed/validator.go:73:25: tc.receivedStats undefined (type *TestCase has no field or method receivedStats)
+FAIL	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests [build failed]
+# github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed
+../testbed/validator.go:73:25: tc.receivedStats undefined (type *TestCase has no field or method receivedStats)
+FAIL	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests [build failed]
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC
+2022/12/07 16:30:22 Starting mock backend...
+2022/12/07 16:30:22 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:30:22 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent3369455956.yaml]
+2022/12/07 16:30:22 Agent running, pid=98278
+2022/12/07 16:30:23 Starting load generator at 10000 items/sec.
+2022/12/07 16:30:25 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17100 items | Received:    15,400 items (5,133/sec)
+2022/12/07 16:30:28 Agent RAM (RES):  71 MiB, CPU: 5.7% | Sent:     47100 items | Received:    45,400 items (7,566/sec)
+2022/12/07 16:30:31 Agent RAM (RES):  75 MiB, CPU: 4.7% | Sent:     77100 items | Received:    75,500 items (8,388/sec)
+2022/12/07 16:30:34 Agent RAM (RES):  76 MiB, CPU: 5.2% | Sent:    107100 items | Received:   105,500 items (8,791/sec)
+2022/12/07 16:30:37 Agent RAM (RES):  79 MiB, CPU: 5.0% | Sent:    137100 items | Received:   135,600 items (9,040/sec)
+2022/12/07 16:30:38 Stopped generator. Sent:    150000 items
+Updated otelcol_exporter_recv_bytes_total {0 0 152 0}
+Updated otelcol_exporter_sent_bytes_total {2.248579e+07 0 152 0}
+Updated otelcol_receiver_recv_wire_bytes_total {0 0 0 46500}
+Updated otelcol_exporter_sent_wire_bytes_total {2.248579e+07 2.248617e+07 152 0}
+Updated otelcol_receiver_recv_bytes_total {0 0 3000 46500}
+Updated otelcol_exporter_recv_wire_bytes_total {2.248579e+07 2.248617e+07 152 532}
+Updated otelcol_receiver_sent_bytes_total {2.248579e+07 0 3000 46500}
+Updated otelcol_receiver_sent_wire_bytes_total {2.248579e+07 1.349985e+06 3000 46500}
+2022/12/07 16:30:39 Gracefully terminating Agent pid=98278, sending SIGTEM...
+2022/12/07 16:30:39 Stopping process monitor.
+2022/12/07 16:30:39 Agent process stopped, exit code=0
+2022/12/07 16:30:39 Sent and received data matches.
+2022/12/07 16:30:39 Stopping mock backend...
+2022/12/07 16:30:39 Stopped backend. Received:   150,000 items (9,022/sec)
+HERE &{2.248579e+07 2.248617e+07 152 532} &{2.248579e+07 1.349985e+06 3000 46500}
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzip
+2022/12/07 16:30:39 Starting mock backend...
+2022/12/07 16:30:39 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:30:39 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent2278805683.yaml]
+2022/12/07 16:30:39 Agent running, pid=98370
+2022/12/07 16:30:39 Starting load generator at 10000 items/sec.
+2022/12/07 16:30:42 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/07 16:30:45 Agent RAM (RES):  72 MiB, CPU: 7.8% | Sent:     59100 items | Received:    57,600 items (9,599/sec)
+2022/12/07 16:30:48 Agent RAM (RES):  73 MiB, CPU: 5.9% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/07 16:30:51 Agent RAM (RES):  73 MiB, CPU: 5.7% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/07 16:30:54 Agent RAM (RES):  74 MiB, CPU: 5.7% | Sent:    149100 items | Received:   147,800 items (9,853/sec)
+2022/12/07 16:30:54 Stopped generator. Sent:    150000 items
+Updated otelcol_receiver_recv_bytes_total {0 0 3000 0}
+Updated otelcol_receiver_sent_wire_bytes_total {0 1.349068e+06 3000 0}
+Updated otelcol_exporter_recv_bytes_total {0 0 152 0}
+Updated otelcol_receiver_recv_wire_bytes_total {0 1.349068e+06 3000 46500}
+Updated otelcol_exporter_recv_wire_bytes_total {0 0 152 2356}
+Updated otelcol_exporter_sent_bytes_total {2.248579e+07 0 152 2356}
+Updated otelcol_exporter_sent_wire_bytes_total {2.248579e+07 1.092701e+06 152 2356}
+Updated otelcol_receiver_sent_bytes_total {2.248579e+07 1.349068e+06 3000 46500}
+2022/12/07 16:30:54 Gracefully terminating Agent pid=98370, sending SIGTEM...
+2022/12/07 16:30:54 Stopping process monitor.
+2022/12/07 16:30:54 Agent process stopped, exit code=0
+2022/12/07 16:30:54 Sent and received data matches.
+2022/12/07 16:30:54 Stopping mock backend...
+2022/12/07 16:30:54 Stopped backend. Received:   150,000 items (9,671/sec)
+HERE &{2.248579e+07 1.092701e+06 152 2356} &{2.248579e+07 1.349068e+06 3000 46500}
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/12/07 16:30:54 Starting mock backend...
+2022/12/07 16:30:54 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:30:54 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent3935877601.yaml]
+2022/12/07 16:30:54 Agent running, pid=98544
+2022/12/07 16:30:54 Starting load generator at 10000 items/sec.
+2022/12/07 16:30:57 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,199/sec)
+2022/12/07 16:31:00 Agent RAM (RES):  64 MiB, CPU: 5.6% | Sent:     59100 items | Received:    57,700 items (9,616/sec)
+2022/12/07 16:31:03 Agent RAM (RES):  65 MiB, CPU: 3.7% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/07 16:31:06 Agent RAM (RES):  66 MiB, CPU: 3.7% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/07 16:31:09 Agent RAM (RES):  66 MiB, CPU: 3.9% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/07 16:31:09 Stopped generator. Sent:    150000 items
+2022/12/07 16:31:09 Gracefully terminating Agent pid=98544, sending SIGTEM...
+2022/12/07 16:31:09 Stopping process monitor.
+2022/12/07 16:31:09 Agent process stopped, exit code=0
+2022/12/07 16:31:09 Sent and received data matches.
+2022/12/07 16:31:09 Stopping mock backend...
+2022/12/07 16:31:09 Stopped backend. Received:   150,000 items (9,724/sec)
+HERE &{0 0 0 0} &{0 0 0 0}
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/12/07 16:31:09 Starting mock backend...
+2022/12/07 16:31:09 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:31:09 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent2319004843.yaml]
+2022/12/07 16:31:09 Agent running, pid=98634
+2022/12/07 16:31:10 Starting load generator at 10000 items/sec.
+2022/12/07 16:31:12 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,232/sec)
+2022/12/07 16:31:15 Agent RAM (RES):  65 MiB, CPU: 7.5% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/07 16:31:18 Agent RAM (RES):  66 MiB, CPU: 5.2% | Sent:     89100 items | Received:    87,800 items (9,755/sec)
+2022/12/07 16:31:21 Agent RAM (RES):  67 MiB, CPU: 5.4% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/07 16:31:24 Agent RAM (RES):  67 MiB, CPU: 5.0% | Sent:    149100 items | Received:   148,000 items (9,866/sec)
+2022/12/07 16:31:25 Stopped generator. Sent:    150000 items
+2022/12/07 16:31:25 Gracefully terminating Agent pid=98634, sending SIGTEM...
+2022/12/07 16:31:25 Stopping process monitor.
+2022/12/07 16:31:25 Agent process stopped, exit code=0
+2022/12/07 16:31:25 Sent and received data matches.
+2022/12/07 16:31:25 Stopping mock backend...
+2022/12/07 16:31:25 Stopped backend. Received:   150,000 items (9,665/sec)
+HERE &{0 0 0 0} &{0 0 0 0}
+--- PASS: TestTrace10kSPS (63.09s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC (16.63s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzip (15.51s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP (15.43s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.52s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	64.003s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC
+2022/12/07 16:50:57 Starting mock backend...
+2022/12/07 16:50:57 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:50:57 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent55799016.yaml]
+2022/12/07 16:50:57 Agent running, pid=11336
+2022/12/07 16:50:57 Starting load generator at 10000 items/sec.
+2022/12/07 16:51:00 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28200 items | Received:    27,800 items (9,307/sec)
+2022/12/07 16:51:03 Agent RAM (RES):  71 MiB, CPU: 8.5% | Sent:     58200 items | Received:    57,800 items (9,654/sec)
+2022/12/07 16:51:06 Agent RAM (RES):  73 MiB, CPU: 4.7% | Sent:     88200 items | Received:    87,900 items (9,780/sec)
+2022/12/07 16:51:09 Agent RAM (RES):  73 MiB, CPU: 4.6% | Sent:    118200 items | Received:   118,000 items (9,844/sec)
+2022/12/07 16:51:12 Agent RAM (RES):  75 MiB, CPU: 4.6% | Sent:    148200 items | Received:   148,000 items (9,875/sec)
+2022/12/07 16:51:12 Stopped generator. Sent:    150000 items
+2022/12/07 16:51:12 Gracefully terminating Agent pid=11336, sending SIGTEM...
+2022/12/07 16:51:12 Stopping process monitor.
+2022/12/07 16:51:12 Agent process stopped, exit code=0
+2022/12/07 16:51:12 Sent and received data matches.
+2022/12/07 16:51:12 Stopping mock backend...
+2022/12/07 16:51:12 Stopped backend. Received:   150,000 items (9,814/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzip
+2022/12/07 16:51:12 Starting mock backend...
+2022/12/07 16:51:12 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:51:12 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent2333389756.yaml]
+2022/12/07 16:51:12 Agent running, pid=11488
+2022/12/07 16:51:12 Starting load generator at 10000 items/sec.
+2022/12/07 16:51:15 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/07 16:51:18 Agent RAM (RES):  71 MiB, CPU: 7.8% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/07 16:51:21 Agent RAM (RES):  72 MiB, CPU: 5.7% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/07 16:51:24 Agent RAM (RES):  73 MiB, CPU: 6.0% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/07 16:51:27 Agent RAM (RES):  74 MiB, CPU: 5.7% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/07 16:51:27 Stopped generator. Sent:    149900 items
+2022/12/07 16:51:27 Gracefully terminating Agent pid=11488, sending SIGTEM...
+2022/12/07 16:51:27 Stopping process monitor.
+2022/12/07 16:51:27 Agent process stopped, exit code=0
+2022/12/07 16:51:27 Sent and received data matches.
+2022/12/07 16:51:27 Stopping mock backend...
+2022/12/07 16:51:27 Stopped backend. Received:   149,900 items (9,873/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/12/07 16:51:27 Starting mock backend...
+2022/12/07 16:51:27 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:51:27 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent1309957787.yaml]
+2022/12/07 16:51:27 Agent running, pid=11598
+2022/12/07 16:51:27 Starting load generator at 10000 items/sec.
+2022/12/07 16:51:30 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,199/sec)
+2022/12/07 16:51:33 Agent RAM (RES):  64 MiB, CPU: 5.7% | Sent:     59100 items | Received:    57,700 items (9,617/sec)
+2022/12/07 16:51:36 Agent RAM (RES):  65 MiB, CPU: 3.6% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/07 16:51:39 Agent RAM (RES):  65 MiB, CPU: 3.8% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/07 16:51:42 Agent RAM (RES):  66 MiB, CPU: 3.7% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/07 16:51:42 Stopped generator. Sent:    149900 items
+2022/12/07 16:51:42 Gracefully terminating Agent pid=11598, sending SIGTEM...
+2022/12/07 16:51:42 Stopping process monitor.
+2022/12/07 16:51:43 Agent process stopped, exit code=0
+2022/12/07 16:51:43 Sent and received data matches.
+2022/12/07 16:51:43 Stopping mock backend...
+2022/12/07 16:51:43 Stopped backend. Received:   149,900 items (9,861/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/12/07 16:51:43 Starting mock backend...
+2022/12/07 16:51:43 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 16:51:43 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent277492191.yaml]
+2022/12/07 16:51:43 Agent running, pid=11692
+2022/12/07 16:51:43 Starting load generator at 10000 items/sec.
+2022/12/07 16:51:46 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/07 16:51:49 Agent RAM (RES):  66 MiB, CPU: 7.0% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/07 16:51:52 Agent RAM (RES):  67 MiB, CPU: 4.9% | Sent:     89100 items | Received:    87,700 items (9,743/sec)
+2022/12/07 16:51:55 Agent RAM (RES):  67 MiB, CPU: 5.2% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/07 16:51:58 Agent RAM (RES):  67 MiB, CPU: 5.3% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/07 16:51:58 Stopped generator. Sent:    149900 items
+2022/12/07 16:51:58 Gracefully terminating Agent pid=11692, sending SIGTEM...
+2022/12/07 16:51:58 Stopping process monitor.
+2022/12/07 16:51:58 Agent process stopped, exit code=0
+2022/12/07 16:51:58 Sent and received data matches.
+2022/12/07 16:51:58 Stopping mock backend...
+2022/12/07 16:51:58 Stopped backend. Received:   149,900 items (9,816/sec)
+--- PASS: TestTrace10kSPS (60.99s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC (15.30s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzip (15.19s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP (15.20s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.27s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	62.053s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC
+2022/12/07 17:00:47 Starting mock backend...
+2022/12/07 17:00:47 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 17:00:47 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent1635287722.yaml]
+2022/12/07 17:00:47 Agent running, pid=16403
+2022/12/07 17:00:47 Starting load generator at 10000 items/sec.
+2022/12/07 17:00:50 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     26700 items | Received:    24,900 items (8,302/sec)
+2022/12/07 17:00:53 Agent RAM (RES):  75 MiB, CPU: 7.1% | Sent:     56700 items | Received:    55,000 items (9,168/sec)
+2022/12/07 17:00:56 Agent RAM (RES):  77 MiB, CPU: 4.8% | Sent:     86700 items | Received:    85,000 items (9,445/sec)
+2022/12/07 17:00:59 Agent RAM (RES):  77 MiB, CPU: 4.4% | Sent:    116700 items | Received:   115,100 items (9,592/sec)
+2022/12/07 17:01:02 Agent RAM (RES):  77 MiB, CPU: 4.6% | Sent:    146700 items | Received:   145,100 items (9,673/sec)
+2022/12/07 17:01:02 Stopped generator. Sent:    149900 items
+2022/12/07 17:01:03 Gracefully terminating Agent pid=16403, sending SIGTEM...
+2022/12/07 17:01:03 Stopping process monitor.
+2022/12/07 17:01:03 Agent process stopped, exit code=0
+2022/12/07 17:01:03 Sent and received data matches.
+2022/12/07 17:01:03 Stopping mock backend...
+2022/12/07 17:01:03 Stopped backend. Received:   149,900 items (9,667/sec)
+EXPORTED &{2.247078e+07 2.247116e+07 152 532}
+RECEIVED &{2.247078e+07 1.346331e+06 2998 46469} :  46469 / 2998  =  15.5
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzip
+2022/12/07 17:01:03 Starting mock backend...
+2022/12/07 17:01:03 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 17:01:03 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent548310599.yaml]
+2022/12/07 17:01:03 Agent running, pid=16493
+2022/12/07 17:01:03 Starting load generator at 10000 items/sec.
+2022/12/07 17:01:06 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/07 17:01:09 Agent RAM (RES):  71 MiB, CPU: 7.6% | Sent:     59100 items | Received:    57,600 items (9,598/sec)
+2022/12/07 17:01:12 Agent RAM (RES):  74 MiB, CPU: 5.9% | Sent:     89100 items | Received:    87,700 items (9,743/sec)
+2022/12/07 17:01:15 Agent RAM (RES):  74 MiB, CPU: 5.5% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/07 17:01:18 Agent RAM (RES):  75 MiB, CPU: 5.6% | Sent:    149100 items | Received:   147,800 items (9,852/sec)
+2022/12/07 17:01:18 Stopped generator. Sent:    150000 items
+2022/12/07 17:01:18 Gracefully terminating Agent pid=16493, sending SIGTEM...
+2022/12/07 17:01:18 Stopping process monitor.
+2022/12/07 17:01:18 Agent process stopped, exit code=0
+2022/12/07 17:01:18 Sent and received data matches.
+2022/12/07 17:01:18 Stopping mock backend...
+2022/12/07 17:01:18 Stopped backend. Received:   150,000 items (9,726/sec)
+EXPORTED &{2.248579e+07 1.091443e+06 152 2356}
+RECEIVED &{2.248579e+07 1.34804e+06 3000 46500} :  46500 / 3000  =  15.5
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/12/07 17:01:18 Starting mock backend...
+2022/12/07 17:01:18 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 17:01:18 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent4111270569.yaml]
+2022/12/07 17:01:18 Agent running, pid=16665
+2022/12/07 17:01:18 Starting load generator at 10000 items/sec.
+2022/12/07 17:01:21 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29500 items | Received:    28,000 items (9,331/sec)
+2022/12/07 17:01:24 Agent RAM (RES):  64 MiB, CPU: 5.7% | Sent:     59500 items | Received:    58,100 items (9,682/sec)
+2022/12/07 17:01:27 Agent RAM (RES):  65 MiB, CPU: 3.6% | Sent:     89500 items | Received:    88,100 items (9,788/sec)
+2022/12/07 17:01:30 Agent RAM (RES):  65 MiB, CPU: 3.6% | Sent:    119500 items | Received:   118,200 items (9,849/sec)
+2022/12/07 17:01:33 Agent RAM (RES):  65 MiB, CPU: 3.8% | Sent:    149500 items | Received:   148,300 items (9,886/sec)
+2022/12/07 17:01:33 Stopped generator. Sent:    149900 items
+2022/12/07 17:01:33 Gracefully terminating Agent pid=16665, sending SIGTEM...
+2022/12/07 17:01:33 Stopping process monitor.
+2022/12/07 17:01:33 Agent process stopped, exit code=0
+2022/12/07 17:01:33 Sent and received data matches.
+2022/12/07 17:01:33 Stopping mock backend...
+2022/12/07 17:01:33 Stopped backend. Received:   149,900 items (9,929/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/12/07 17:01:33 Starting mock backend...
+2022/12/07 17:01:33 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/07 17:01:33 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent1232312378.yaml]
+2022/12/07 17:01:33 Agent running, pid=16753
+2022/12/07 17:01:33 Starting load generator at 10000 items/sec.
+2022/12/07 17:01:36 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29500 items | Received:    28,000 items (9,332/sec)
+2022/12/07 17:01:39 Agent RAM (RES):  67 MiB, CPU: 6.6% | Sent:     59500 items | Received:    58,100 items (9,683/sec)
+2022/12/07 17:01:42 Agent RAM (RES):  68 MiB, CPU: 5.1% | Sent:     89500 items | Received:    88,100 items (9,788/sec)
+2022/12/07 17:01:45 Agent RAM (RES):  68 MiB, CPU: 4.9% | Sent:    119500 items | Received:   118,200 items (9,849/sec)
+2022/12/07 17:01:48 Agent RAM (RES):  68 MiB, CPU: 5.0% | Sent:    149500 items | Received:   148,300 items (9,886/sec)
+2022/12/07 17:01:48 Stopped generator. Sent:    150000 items
+2022/12/07 17:01:48 Gracefully terminating Agent pid=16753, sending SIGTEM...
+2022/12/07 17:01:48 Stopping process monitor.
+2022/12/07 17:01:48 Agent process stopped, exit code=0
+2022/12/07 17:01:48 Sent and received data matches.
+2022/12/07 17:01:48 Stopping mock backend...
+2022/12/07 17:01:48 Stopped backend. Received:   150,000 items (9,881/sec)
+--- PASS: TestTrace10kSPS (61.22s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC (15.51s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzip (15.42s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP (15.10s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.19s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	62.250s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC
+2022/12/08 09:20:17 Starting mock backend...
+2022/12/08 09:20:17 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:20:17 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent4275333936.yaml]
+2022/12/08 09:20:17 Agent running, pid=6905
+2022/12/08 09:20:17 Starting load generator at 10000 items/sec.
+2022/12/08 09:20:20 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28300 items | Received:    27,900 items (9,298/sec)
+2022/12/08 09:20:23 Agent RAM (RES):  73 MiB, CPU: 8.1% | Sent:     58300 items | Received:    58,000 items (9,665/sec)
+2022/12/08 09:20:26 Agent RAM (RES):  74 MiB, CPU: 4.9% | Sent:     88300 items | Received:    88,000 items (9,777/sec)
+2022/12/08 09:20:29 Agent RAM (RES):  75 MiB, CPU: 5.2% | Sent:    118300 items | Received:   118,100 items (9,841/sec)
+2022/12/08 09:20:32 Agent RAM (RES):  75 MiB, CPU: 4.6% | Sent:    148300 items | Received:   148,200 items (9,879/sec)
+2022/12/08 09:20:32 Stopped generator. Sent:    149900 items
+NOTE otelcol_exporter_recv_wire_bytes_total 525
+NOTE otelcol_exporter_sent_wire_bytes_total 2.2471155e+07
+NOTE otelcol_receiver_recv_bytes_total 2.247078e+07
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_receiver_recv_wire_bytes_total 1.349082e+06
+NOTE otelcol_receiver_sent_bytes_total 2998
+NOTE otelcol_exporter_sent_bytes_total 2.247078e+07
+NOTE otelcol_receiver_sent_wire_bytes_total 46469
+2022/12/08 09:20:32 Gracefully terminating Agent pid=6905, sending SIGTEM...
+2022/12/08 09:20:32 Stopping process monitor.
+2022/12/08 09:20:32 Agent process stopped, exit code=0
+2022/12/08 09:20:32 Sent and received data matches.
+2022/12/08 09:20:32 Stopping mock backend...
+2022/12/08 09:20:32 Stopped backend. Received:   149,900 items (9,789/sec)
+EXPORTED &{2.247078e+07 2.2471155e+07 150 525}
+RECEIVED &{2998 46469 2.247078e+07 1.349082e+06} :  1.349082e+06 / 2.247078e+07  =  0.06003716826919226
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzip
+2022/12/08 09:20:32 Starting mock backend...
+2022/12/08 09:20:32 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:20:32 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent897034111.yaml]
+2022/12/08 09:20:32 Agent running, pid=7005
+2022/12/08 09:20:32 Starting load generator at 10000 items/sec.
+2022/12/08 09:20:35 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,232/sec)
+2022/12/08 09:20:38 Agent RAM (RES):  73 MiB, CPU: 7.7% | Sent:     59100 items | Received:    57,700 items (9,616/sec)
+2022/12/08 09:20:41 Agent RAM (RES):  75 MiB, CPU: 6.3% | Sent:     89100 items | Received:    87,800 items (9,755/sec)
+2022/12/08 09:20:44 Agent RAM (RES):  75 MiB, CPU: 5.7% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/08 09:20:47 Agent RAM (RES):  76 MiB, CPU: 6.0% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/08 09:20:47 Stopped generator. Sent:    149900 items
+NOTE otelcol_receiver_recv_bytes_total 2.247078e+07
+NOTE otelcol_receiver_sent_bytes_total 2998
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_exporter_sent_bytes_total 2.247078e+07
+NOTE otelcol_exporter_recv_wire_bytes_total 2325
+NOTE otelcol_exporter_sent_wire_bytes_total 1.092099e+06
+NOTE otelcol_receiver_recv_wire_bytes_total 1.348707e+06
+NOTE otelcol_receiver_sent_wire_bytes_total 46469
+2022/12/08 09:20:47 Gracefully terminating Agent pid=7005, sending SIGTEM...
+2022/12/08 09:20:47 Stopping process monitor.
+2022/12/08 09:20:47 Agent process stopped, exit code=0
+2022/12/08 09:20:47 Sent and received data matches.
+2022/12/08 09:20:47 Stopping mock backend...
+2022/12/08 09:20:47 Stopped backend. Received:   149,900 items (9,869/sec)
+EXPORTED &{2.247078e+07 1.092099e+06 150 2325}
+RECEIVED &{2998 46469 2.247078e+07 1.348707e+06} :  1.348707e+06 / 2.247078e+07  =  0.06002047992993568
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/12/08 09:20:47 Starting mock backend...
+2022/12/08 09:20:47 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:20:47 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent4235676869.yaml]
+2022/12/08 09:20:47 Agent running, pid=7176
+2022/12/08 09:20:47 Starting load generator at 10000 items/sec.
+2022/12/08 09:20:50 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/08 09:20:53 Agent RAM (RES):  65 MiB, CPU: 5.7% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/08 09:20:56 Agent RAM (RES):  65 MiB, CPU: 4.0% | Sent:     89100 items | Received:    87,800 items (9,755/sec)
+2022/12/08 09:20:59 Agent RAM (RES):  65 MiB, CPU: 3.9% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/08 09:21:02 Agent RAM (RES):  65 MiB, CPU: 4.2% | Sent:    149100 items | Received:   148,000 items (9,866/sec)
+2022/12/08 09:21:02 Stopped generator. Sent:    150000 items
+2022/12/08 09:21:02 Gracefully terminating Agent pid=7176, sending SIGTEM...
+2022/12/08 09:21:02 Stopping process monitor.
+2022/12/08 09:21:02 Agent process stopped, exit code=0
+2022/12/08 09:21:02 Sent and received data matches.
+2022/12/08 09:21:02 Stopping mock backend...
+2022/12/08 09:21:02 Stopped backend. Received:   150,000 items (9,871/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/12/08 09:21:02 Starting mock backend...
+2022/12/08 09:21:02 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:21:02 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent2821337501.yaml]
+2022/12/08 09:21:02 Agent running, pid=7264
+2022/12/08 09:21:02 Starting load generator at 10000 items/sec.
+2022/12/08 09:21:05 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/08 09:21:08 Agent RAM (RES):  66 MiB, CPU: 7.0% | Sent:     59100 items | Received:    57,700 items (9,616/sec)
+2022/12/08 09:21:11 Agent RAM (RES):  66 MiB, CPU: 5.1% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/08 09:21:14 Agent RAM (RES):  67 MiB, CPU: 4.9% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/08 09:21:17 Agent RAM (RES):  67 MiB, CPU: 5.2% | Sent:    149100 items | Received:   148,000 items (9,866/sec)
+2022/12/08 09:21:17 Stopped generator. Sent:    150000 items
+2022/12/08 09:21:17 Gracefully terminating Agent pid=7264, sending SIGTEM...
+2022/12/08 09:21:17 Stopping process monitor.
+2022/12/08 09:21:18 Agent process stopped, exit code=0
+2022/12/08 09:21:18 Sent and received data matches.
+2022/12/08 09:21:18 Stopping mock backend...
+2022/12/08 09:21:18 Stopped backend. Received:   150,000 items (9,809/sec)
+--- PASS: TestTrace10kSPS (61.01s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC (15.31s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzip (15.20s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP (15.20s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.29s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	61.814s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC
+2022/12/08 09:45:13 Starting mock backend...
+2022/12/08 09:45:13 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:45:13 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent2335708094.yaml]
+2022/12/08 09:45:13 Agent running, pid=20614
+2022/12/08 09:45:14 Starting load generator at 10000 items/sec.
+2022/12/08 09:45:16 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28300 items | Received:    27,800 items (9,266/sec)
+2022/12/08 09:45:19 Agent RAM (RES):  70 MiB, CPU: 7.7% | Sent:     58300 items | Received:    57,900 items (9,649/sec)
+2022/12/08 09:45:22 Agent RAM (RES):  73 MiB, CPU: 4.8% | Sent:     88300 items | Received:    87,900 items (9,766/sec)
+2022/12/08 09:45:25 Agent RAM (RES):  74 MiB, CPU: 4.6% | Sent:    118300 items | Received:   118,000 items (9,833/sec)
+2022/12/08 09:45:28 Agent RAM (RES):  74 MiB, CPU: 4.8% | Sent:    148300 items | Received:   148,100 items (9,873/sec)
+2022/12/08 09:45:29 Stopped generator. Sent:    150000 items
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_exporter_sent_wire_bytes_total 2.2486165e+07
+NOTE otelcol_receiver_recv_wire_bytes_total 1.350741e+06
+NOTE otelcol_exporter_recv_wire_bytes_total 525
+NOTE otelcol_receiver_sent_bytes_total 3000
+NOTE otelcol_exporter_sent_bytes_total 2.248579e+07
+NOTE otelcol_receiver_sent_wire_bytes_total 46500
+NOTE otelcol_receiver_recv_bytes_total 2.248579e+07
+2022/12/08 09:45:29 Gracefully terminating Agent pid=20614, sending SIGTEM...
+2022/12/08 09:45:29 Stopping process monitor.
+2022/12/08 09:45:29 Agent process stopped, exit code=0
+2022/12/08 09:45:29 Sent and received data matches.
+2022/12/08 09:45:29 Stopping mock backend...
+2022/12/08 09:45:29 Stopped backend. Received:   150,000 items (9,814/sec)
+IOCOMP 2.248669e+07 1.397241e+06 16.093637389684385
+EXPORTED &{2.248579e+07 2.2486165e+07 150 525} 2.2486165e+07 2.248579e+07 1.0000166771992445
+RECEIVED &{3000 46500 2.248579e+07 1.350741e+06} :  1.350741e+06 / 2.248579e+07  =  0.06007087142590943
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzip
+2022/12/08 09:45:29 Starting mock backend...
+2022/12/08 09:45:29 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:45:29 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent3888024772.yaml]
+2022/12/08 09:45:29 Agent running, pid=20709
+2022/12/08 09:45:29 Starting load generator at 10000 items/sec.
+2022/12/08 09:45:32 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,199/sec)
+2022/12/08 09:45:35 Agent RAM (RES):  73 MiB, CPU: 7.8% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/08 09:45:38 Agent RAM (RES):  74 MiB, CPU: 5.7% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/08 09:45:41 Agent RAM (RES):  75 MiB, CPU: 5.6% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/08 09:45:44 Agent RAM (RES):  76 MiB, CPU: 5.9% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/08 09:45:44 Stopped generator. Sent:    149900 items
+NOTE otelcol_exporter_sent_bytes_total 2.247078e+07
+NOTE otelcol_receiver_recv_wire_bytes_total 1.347424e+06
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_receiver_recv_bytes_total 2.247078e+07
+NOTE otelcol_receiver_sent_wire_bytes_total 46469
+NOTE otelcol_exporter_sent_wire_bytes_total 1.090857e+06
+NOTE otelcol_exporter_recv_wire_bytes_total 2325
+NOTE otelcol_receiver_sent_bytes_total 2998
+2022/12/08 09:45:44 Gracefully terminating Agent pid=20709, sending SIGTEM...
+2022/12/08 09:45:44 Stopping process monitor.
+2022/12/08 09:45:44 Agent process stopped, exit code=0
+2022/12/08 09:45:44 Sent and received data matches.
+2022/12/08 09:45:44 Stopping mock backend...
+2022/12/08 09:45:44 Stopped backend. Received:   149,900 items (9,876/sec)
+IOCOMP 1.093182e+06 1.393893e+06 0.7842653632667643
+EXPORTED &{2.247078e+07 1.090857e+06 150 2325} 1.090857e+06 2.247078e+07 0.04854557785711043
+RECEIVED &{2998 46469 2.247078e+07 1.347424e+06} :  1.347424e+06 / 2.247078e+07  =  0.05996338355855916
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/12/08 09:45:44 Starting mock backend...
+2022/12/08 09:45:44 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:45:44 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent1440093160.yaml]
+2022/12/08 09:45:44 Agent running, pid=20881
+2022/12/08 09:45:44 Starting load generator at 10000 items/sec.
+2022/12/08 09:45:47 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/08 09:45:50 Agent RAM (RES):  64 MiB, CPU: 5.6% | Sent:     59100 items | Received:    57,700 items (9,616/sec)
+2022/12/08 09:45:53 Agent RAM (RES):  65 MiB, CPU: 3.8% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/08 09:45:56 Agent RAM (RES):  65 MiB, CPU: 3.7% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/08 09:45:59 Agent RAM (RES):  65 MiB, CPU: 3.7% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/08 09:45:59 Stopped generator. Sent:    149900 items
+2022/12/08 09:45:59 Gracefully terminating Agent pid=20881, sending SIGTEM...
+2022/12/08 09:45:59 Stopping process monitor.
+2022/12/08 09:45:59 Agent process stopped, exit code=0
+2022/12/08 09:45:59 Sent and received data matches.
+2022/12/08 09:45:59 Stopping mock backend...
+2022/12/08 09:45:59 Stopped backend. Received:   149,900 items (9,895/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/12/08 09:45:59 Starting mock backend...
+2022/12/08 09:45:59 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:45:59 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent351056605.yaml]
+2022/12/08 09:45:59 Agent running, pid=20970
+2022/12/08 09:45:59 Starting load generator at 10000 items/sec.
+2022/12/08 09:46:02 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29500 items | Received:    28,000 items (9,332/sec)
+2022/12/08 09:46:05 Agent RAM (RES):  65 MiB, CPU: 6.6% | Sent:     59500 items | Received:    58,100 items (9,682/sec)
+2022/12/08 09:46:08 Agent RAM (RES):  67 MiB, CPU: 4.9% | Sent:     89500 items | Received:    88,100 items (9,788/sec)
+2022/12/08 09:46:11 Agent RAM (RES):  67 MiB, CPU: 4.8% | Sent:    119500 items | Received:   118,200 items (9,849/sec)
+2022/12/08 09:46:14 Agent RAM (RES):  68 MiB, CPU: 5.2% | Sent:    149500 items | Received:   148,300 items (9,886/sec)
+2022/12/08 09:46:14 Stopped generator. Sent:    150000 items
+2022/12/08 09:46:14 Gracefully terminating Agent pid=20970, sending SIGTEM...
+2022/12/08 09:46:14 Stopping process monitor.
+2022/12/08 09:46:14 Agent process stopped, exit code=0
+2022/12/08 09:46:14 Sent and received data matches.
+2022/12/08 09:46:14 Stopping mock backend...
+2022/12/08 09:46:14 Stopped backend. Received:   150,000 items (9,910/sec)
+--- PASS: TestTrace10kSPS (60.76s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC (15.29s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzip (15.18s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP (15.15s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.14s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	61.573s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut
+2022/12/08 09:57:35 Starting mock backend...
+2022/12/08 09:57:35 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:57:35 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent3237619920.yaml]
+2022/12/08 09:57:35 Agent running, pid=28699
+2022/12/08 09:57:38 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/08 09:57:38 cannot get process memory for 28699: no such process
+2022/12/08 09:57:38 cannot get process times for 28699: no such process
+2022/12/08 09:57:41 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/08 09:57:41 cannot get process memory for 28699: no such process
+2022/12/08 09:57:41 cannot get process times for 28699: no such process
+2022/12/08 09:57:44 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/08 09:57:44 cannot get process memory for 28699: no such process
+2022/12/08 09:57:44 cannot get process times for 28699: no such process
+    test_case.go:363: Time out waiting for connection to tcp:127.0.0.1:58564
+2022/12/08 09:57:45 Starting load generator at 10000 items/sec.
+2022/12/08 09:57:45 Cannot send traces: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:58564: connect: connection refused"
+2022/12/08 09:57:47 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17300 items | Received:         0 items (0/sec)
+2022/12/08 09:57:47 cannot get process memory for 28699: no such process
+2022/12/08 09:57:47 cannot get process times for 28699: no such process
+2022/12/08 09:57:50 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     47300 items | Received:         0 items (0/sec)
+2022/12/08 09:57:50 cannot get process memory for 28699: no such process
+2022/12/08 09:57:50 cannot get process times for 28699: no such process
+2022/12/08 09:57:53 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     77300 items | Received:         0 items (0/sec)
+2022/12/08 09:57:53 cannot get process memory for 28699: no such process
+2022/12/08 09:57:53 cannot get process times for 28699: no such process
+2022/12/08 09:57:56 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    107300 items | Received:         0 items (0/sec)
+2022/12/08 09:57:56 cannot get process memory for 28699: no such process
+2022/12/08 09:57:56 cannot get process times for 28699: no such process
+2022/12/08 09:57:59 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    137300 items | Received:         0 items (0/sec)
+2022/12/08 09:57:59 cannot get process memory for 28699: no such process
+2022/12/08 09:57:59 cannot get process times for 28699: no such process
+2022/12/08 09:58:00 Stopped generator. Sent:    150000 items
+2022/12/08 09:58:02 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/08 09:58:02 cannot get process memory for 28699: no such process
+2022/12/08 09:58:02 cannot get process times for 28699: no such process
+2022/12/08 09:58:05 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/08 09:58:05 cannot get process memory for 28699: no such process
+2022/12/08 09:58:05 cannot get process times for 28699: no such process
+2022/12/08 09:58:08 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/08 09:58:08 cannot get process memory for 28699: no such process
+2022/12/08 09:58:08 cannot get process times for 28699: no such process
+    test_case.go:363: Time out waiting for all data items received
+2022/12/08 09:58:11 Get "http://127.0.0.1:58580/metrics": dial tcp 127.0.0.1:58580: connect: connection refused
+    test_case.go:379: Get "http://127.0.0.1:58580/metrics": dial tcp 127.0.0.1:58580: connect: connection refused
+2022/12/08 09:58:11 Gracefully terminating Agent pid=28699, sending SIGTEM...
+2022/12/08 09:58:11 Stopping process monitor.
+2022/12/08 09:58:11 Agent process stopped, exit code=1
+2022/12/08 09:58:11 Agent execution failed: exit status 1
+2022/12/08 09:58:11 exit status 1
+    test_case.go:379: exit status 1
+2022/12/08 09:58:11 Stopping mock backend...
+2022/12/08 09:58:11 Stopped backend. Received:         0 items (0/sec)
+--- FAIL: TestTrace10kSPS (35.53s)
+    --- FAIL: TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut (35.52s)
+panic: close of closed channel [recovered]
+	panic: close of closed channel
+
+goroutine 148 [running]:
+testing.tRunner.func1.2({0x1053cb400, 0x105a02760})
+	/usr/local/go/src/testing/testing.go:1396 +0x1c8
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:1399 +0x378
+panic({0x1053cb400, 0x105a02760})
+	/usr/local/go/src/runtime/panic.go:884 +0x204
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed.(*TestCase).indicateError(0x1400051e400, {0x105a0c460, 0x14000ee63e0})
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/testbed/test_case.go:384 +0xec
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed.(*TestCase).StopAgent(0x1400051e400)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/testbed/test_case.go:256 +0x474
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests.Scenario10kItemsPerSecond(0x1400048bba0, {0x12f726aa8, 0x140007fd9e0}, {0x105a31260, 0x140007fdb00}, {0x2880dac?, 0x1?, 0x1cd36f64116ac?, 0x202f6cf8?}, {0x105a21e80, ...}, ...)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/scenarios.go:196 +0x374
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests.TestTrace10kSPS.func1(0x0?)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/trace_test.go:161 +0x58
+testing.tRunner(0x1400048bba0, 0x140008f0948)
+	/usr/local/go/src/testing/testing.go:1446 +0x10c
+created by testing.(*T).Run
+	/usr/local/go/src/testing/testing.go:1493 +0x300
+exit status 2
+FAIL	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	36.326s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut
+2022/12/08 09:58:44 Starting mock backend...
+2022/12/08 09:58:44 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:58:44 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent2507729559.yaml]
+2022/12/08 09:58:44 Agent running, pid=29346
+2022/12/08 09:58:44 Starting load generator at 10000 items/sec.
+2022/12/08 09:58:47 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28300 items | Received:    27,800 items (9,265/sec)
+2022/12/08 09:58:50 Agent RAM (RES):  73 MiB, CPU: 8.2% | Sent:     58200 items | Received:    57,800 items (9,632/sec)
+2022/12/08 09:58:53 Agent RAM (RES):  76 MiB, CPU: 6.4% | Sent:     88200 items | Received:    87,800 items (9,755/sec)
+2022/12/08 09:58:56 Agent RAM (RES):  66 MiB, CPU: 4.7% | Sent:    118200 items | Received:   117,900 items (9,824/sec)
+2022/12/08 09:58:59 Agent RAM (RES):  67 MiB, CPU: 4.6% | Sent:    148200 items | Received:   148,000 items (9,866/sec)
+2022/12/08 09:58:59 Stopped generator. Sent:    149800 items
+NOTE otelcol_receiver_sent_bytes_total 2996
+NOTE otelcol_receiver_sent_wire_bytes_total 46438
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_exporter_sent_bytes_total 2.245577e+07
+NOTE otelcol_receiver_recv_wire_bytes_total 1.357054e+06
+NOTE otelcol_exporter_recv_wire_bytes_total 525
+NOTE otelcol_exporter_sent_wire_bytes_total 2.2456145e+07
+NOTE otelcol_receiver_recv_bytes_total 2.245577e+07
+2022/12/08 09:58:59 Gracefully terminating Agent pid=29346, sending SIGTEM...
+2022/12/08 09:58:59 Stopping process monitor.
+2022/12/08 09:58:59 Agent process stopped, exit code=0
+2022/12/08 09:58:59 Sent and received data matches.
+2022/12/08 09:58:59 Stopping mock backend...
+2022/12/08 09:58:59 Stopped backend. Received:   149,800 items (9,854/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut
+2022/12/08 09:58:59 Starting mock backend...
+2022/12/08 09:58:59 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:58:59 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent1090362992.yaml]
+2022/12/08 09:58:59 Agent running, pid=29471
+2022/12/08 09:58:59 Starting load generator at 10000 items/sec.
+2022/12/08 09:59:02 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/08 09:59:05 Agent RAM (RES):  66 MiB, CPU: 6.0% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/08 09:59:08 Agent RAM (RES):  67 MiB, CPU: 3.7% | Sent:     89100 items | Received:    87,700 items (9,743/sec)
+2022/12/08 09:59:11 Agent RAM (RES):  67 MiB, CPU: 3.8% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/08 09:59:14 Agent RAM (RES):  67 MiB, CPU: 3.8% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/08 09:59:14 Stopped generator. Sent:    149900 items
+NOTE otelcol_receiver_sent_wire_bytes_total 10493
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_receiver_sent_bytes_total 2998
+NOTE otelcol_receiver_recv_wire_bytes_total 2.2478275e+07
+NOTE otelcol_exporter_sent_bytes_total 2.247078e+07
+NOTE otelcol_exporter_sent_wire_bytes_total 2.2471155e+07
+NOTE otelcol_receiver_recv_bytes_total 2.247078e+07
+NOTE otelcol_exporter_recv_wire_bytes_total 525
+2022/12/08 09:59:14 Gracefully terminating Agent pid=29471, sending SIGTEM...
+2022/12/08 09:59:14 Stopping process monitor.
+2022/12/08 09:59:14 Agent process stopped, exit code=0
+2022/12/08 09:59:14 Sent and received data matches.
+2022/12/08 09:59:14 Stopping mock backend...
+2022/12/08 09:59:14 Stopped backend. Received:   149,900 items (9,925/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut
+2022/12/08 09:59:14 Starting mock backend...
+2022/12/08 09:59:14 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:59:14 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent3314082475.yaml]
+2022/12/08 09:59:14 Agent running, pid=29647
+2022/12/08 09:59:14 Starting load generator at 10000 items/sec.
+2022/12/08 09:59:17 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29600 items | Received:    28,000 items (9,330/sec)
+2022/12/08 09:59:20 Agent RAM (RES):  73 MiB, CPU: 7.5% | Sent:     59500 items | Received:    58,000 items (9,665/sec)
+2022/12/08 09:59:23 Agent RAM (RES):  75 MiB, CPU: 5.7% | Sent:     89500 items | Received:    88,100 items (9,788/sec)
+2022/12/08 09:59:26 Agent RAM (RES):  76 MiB, CPU: 5.8% | Sent:    119500 items | Received:   118,200 items (9,849/sec)
+2022/12/08 09:59:29 Agent RAM (RES):  76 MiB, CPU: 5.5% | Sent:    149500 items | Received:   148,200 items (9,879/sec)
+2022/12/08 09:59:29 Stopped generator. Sent:    149900 items
+NOTE otelcol_receiver_sent_wire_bytes_total 46469
+NOTE otelcol_receiver_recv_wire_bytes_total 1.348286e+06
+NOTE otelcol_exporter_sent_bytes_total 2.247078e+07
+NOTE otelcol_receiver_sent_bytes_total 2998
+NOTE otelcol_exporter_sent_wire_bytes_total 1.091275e+06
+NOTE otelcol_receiver_recv_bytes_total 2.247078e+07
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_exporter_recv_wire_bytes_total 2325
+2022/12/08 09:59:29 Gracefully terminating Agent pid=29647, sending SIGTEM...
+2022/12/08 09:59:29 Stopping process monitor.
+2022/12/08 09:59:30 Agent process stopped, exit code=0
+2022/12/08 09:59:30 Sent and received data matches.
+2022/12/08 09:59:30 Stopping mock backend...
+2022/12/08 09:59:30 Stopped backend. Received:   149,900 items (9,877/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut
+2022/12/08 09:59:30 Starting mock backend...
+2022/12/08 09:59:30 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:59:30 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent3874390977.yaml]
+2022/12/08 09:59:30 Agent running, pid=29738
+2022/12/08 09:59:30 Starting load generator at 10000 items/sec.
+2022/12/08 09:59:33 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/08 09:59:36 Agent RAM (RES):  70 MiB, CPU: 6.9% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/08 09:59:39 Agent RAM (RES):  73 MiB, CPU: 4.9% | Sent:     89100 items | Received:    87,700 items (9,743/sec)
+2022/12/08 09:59:42 Agent RAM (RES):  73 MiB, CPU: 4.7% | Sent:    119000 items | Received:   117,700 items (9,807/sec)
+2022/12/08 09:59:45 Agent RAM (RES):  74 MiB, CPU: 5.1% | Sent:    149000 items | Received:   147,800 items (9,853/sec)
+2022/12/08 09:59:45 Stopped generator. Sent:    149800 items
+NOTE otelcol_exporter_recv_wire_bytes_total 2325
+NOTE otelcol_receiver_recv_bytes_total 2.245577e+07
+NOTE otelcol_receiver_sent_bytes_total 2996
+NOTE otelcol_exporter_sent_bytes_total 2.245577e+07
+NOTE otelcol_receiver_recv_wire_bytes_total 2.246326e+07
+NOTE otelcol_receiver_sent_wire_bytes_total 10486
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_exporter_sent_wire_bytes_total 1.092295e+06
+2022/12/08 09:59:45 Gracefully terminating Agent pid=29738, sending SIGTEM...
+2022/12/08 09:59:45 Stopping process monitor.
+2022/12/08 09:59:45 Agent process stopped, exit code=0
+2022/12/08 09:59:45 Sent and received data matches.
+2022/12/08 09:59:45 Stopping mock backend...
+2022/12/08 09:59:45 Stopped backend. Received:   149,800 items (9,803/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/12/08 09:59:45 Starting mock backend...
+2022/12/08 09:59:45 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 09:59:45 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent2992515552.yaml]
+2022/12/08 09:59:45 Agent running, pid=29916
+2022/12/08 09:59:45 Starting load generator at 10000 items/sec.
+2022/12/08 09:59:48 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/08 09:59:51 Agent RAM (RES):  64 MiB, CPU: 5.5% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/08 09:59:54 Agent RAM (RES):  65 MiB, CPU: 3.9% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/08 09:59:57 Agent RAM (RES):  65 MiB, CPU: 3.6% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/08 10:00:00 Agent RAM (RES):  66 MiB, CPU: 3.6% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/08 10:00:00 Stopped generator. Sent:    150000 items
+2022/12/08 10:00:00 Gracefully terminating Agent pid=29916, sending SIGTEM...
+2022/12/08 10:00:00 Stopping process monitor.
+2022/12/08 10:00:00 Agent process stopped, exit code=0
+2022/12/08 10:00:00 Sent and received data matches.
+2022/12/08 10:00:00 Stopping mock backend...
+2022/12/08 10:00:00 Stopped backend. Received:   150,000 items (9,726/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/12/08 10:00:00 Starting mock backend...
+2022/12/08 10:00:00 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 10:00:00 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent421879363.yaml]
+2022/12/08 10:00:00 Agent running, pid=30003
+2022/12/08 10:00:00 Starting load generator at 10000 items/sec.
+2022/12/08 10:00:03 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/08 10:00:06 Agent RAM (RES):  66 MiB, CPU: 6.5% | Sent:     59100 items | Received:    57,700 items (9,616/sec)
+2022/12/08 10:00:09 Agent RAM (RES):  67 MiB, CPU: 5.0% | Sent:     89100 items | Received:    87,700 items (9,743/sec)
+2022/12/08 10:00:12 Agent RAM (RES):  67 MiB, CPU: 4.7% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/08 10:00:15 Agent RAM (RES):  67 MiB, CPU: 5.2% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/08 10:00:15 Stopped generator. Sent:    150000 items
+2022/12/08 10:00:16 Gracefully terminating Agent pid=30003, sending SIGTEM...
+2022/12/08 10:00:16 Stopping process monitor.
+2022/12/08 10:00:16 Agent process stopped, exit code=0
+2022/12/08 10:00:16 Sent and received data matches.
+2022/12/08 10:00:16 Stopping mock backend...
+2022/12/08 10:00:16 Stopped backend. Received:   150,000 items (9,671/sec)
+--- PASS: TestTrace10kSPS (91.71s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut (15.20s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut (15.11s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut (15.18s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut (15.28s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP (15.42s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.51s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	92.512s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut
+2022/12/08 10:07:36 Starting mock backend...
+2022/12/08 10:07:36 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 10:07:36 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent979045240.yaml]
+2022/12/08 10:07:36 Agent running, pid=34318
+2022/12/08 10:07:37 Starting load generator at 10000 items/sec.
+2022/12/08 10:07:39 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28300 items | Received:    27,800 items (9,265/sec)
+2022/12/08 10:07:42 Agent RAM (RES):  74 MiB, CPU: 7.4% | Sent:     58300 items | Received:    57,800 items (9,632/sec)
+2022/12/08 10:07:45 Agent RAM (RES):  75 MiB, CPU: 4.5% | Sent:     88300 items | Received:    88,000 items (9,777/sec)
+2022/12/08 10:07:48 Agent RAM (RES):  75 MiB, CPU: 4.9% | Sent:    118300 items | Received:   118,000 items (9,833/sec)
+2022/12/08 10:07:51 Agent RAM (RES):  77 MiB, CPU: 4.9% | Sent:    148300 items | Received:   148,100 items (9,873/sec)
+2022/12/08 10:07:52 Stopped generator. Sent:    149900 items
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_exporter_sent_bytes_total 2.247078e+07
+NOTE otelcol_receiver_sent_bytes_total 2998
+NOTE otelcol_exporter_sent_wire_bytes_total 2.2471155e+07
+NOTE otelcol_receiver_recv_bytes_total 2.247078e+07
+NOTE otelcol_receiver_recv_wire_bytes_total 1.3491e+06
+NOTE otelcol_receiver_sent_wire_bytes_total 46469
+NOTE otelcol_exporter_recv_wire_bytes_total 525
+2022/12/08 10:07:52 Gracefully terminating Agent pid=34318, sending SIGTEM...
+2022/12/08 10:07:52 Stopping process monitor.
+2022/12/08 10:07:52 Agent process stopped, exit code=0
+2022/12/08 10:07:52 Sent and received data matches.
+2022/12/08 10:07:52 Stopping mock backend...
+2022/12/08 10:07:52 Stopped backend. Received:   149,900 items (9,805/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut
+2022/12/08 10:07:52 Starting mock backend...
+2022/12/08 10:07:52 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 10:07:52 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent3672827119.yaml]
+2022/12/08 10:07:52 Agent running, pid=34408
+2022/12/08 10:07:52 Starting load generator at 10000 items/sec.
+2022/12/08 10:07:55 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29200 items | Received:    27,600 items (9,197/sec)
+2022/12/08 10:07:58 Agent RAM (RES):  65 MiB, CPU: 5.6% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/08 10:08:01 Agent RAM (RES):  66 MiB, CPU: 3.9% | Sent:     89200 items | Received:    87,700 items (9,743/sec)
+2022/12/08 10:08:04 Agent RAM (RES):  66 MiB, CPU: 3.6% | Sent:    119100 items | Received:   117,800 items (9,815/sec)
+2022/12/08 10:08:07 Agent RAM (RES):  67 MiB, CPU: 3.9% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/08 10:08:07 Stopped generator. Sent:    149900 items
+NOTE otelcol_exporter_recv_wire_bytes_total 525
+NOTE otelcol_receiver_recv_bytes_total 2.247078e+07
+NOTE otelcol_exporter_sent_bytes_total 2.247078e+07
+NOTE otelcol_receiver_sent_wire_bytes_total 10493
+NOTE otelcol_receiver_recv_wire_bytes_total 2.2478275e+07
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_exporter_sent_wire_bytes_total 2.2471155e+07
+NOTE otelcol_receiver_sent_bytes_total 2998
+2022/12/08 10:08:07 Gracefully terminating Agent pid=34408, sending SIGTEM...
+2022/12/08 10:08:07 Stopping process monitor.
+2022/12/08 10:08:07 Agent process stopped, exit code=0
+2022/12/08 10:08:07 Sent and received data matches.
+2022/12/08 10:08:07 Stopping mock backend...
+2022/12/08 10:08:07 Stopped backend. Received:   149,900 items (9,926/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut
+2022/12/08 10:08:07 Starting mock backend...
+2022/12/08 10:08:07 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 10:08:07 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent2409959830.yaml]
+2022/12/08 10:08:07 Agent running, pid=34582
+2022/12/08 10:08:07 Starting load generator at 10000 items/sec.
+2022/12/08 10:08:10 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/08 10:08:13 Agent RAM (RES):  73 MiB, CPU: 7.3% | Sent:     59100 items | Received:    57,600 items (9,599/sec)
+2022/12/08 10:08:16 Agent RAM (RES):  75 MiB, CPU: 5.5% | Sent:     89100 items | Received:    87,700 items (9,743/sec)
+2022/12/08 10:08:19 Agent RAM (RES):  76 MiB, CPU: 5.8% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/08 10:08:22 Agent RAM (RES):  76 MiB, CPU: 6.4% | Sent:    149100 items | Received:   147,800 items (9,852/sec)
+2022/12/08 10:08:22 Stopped generator. Sent:    150000 items
+NOTE otelcol_receiver_sent_bytes_total 3000
+NOTE otelcol_exporter_recv_bytes_total 152
+NOTE otelcol_receiver_recv_wire_bytes_total 1.348269e+06
+NOTE otelcol_exporter_sent_wire_bytes_total 1.09178e+06
+NOTE otelcol_receiver_recv_bytes_total 2.248579e+07
+NOTE otelcol_receiver_sent_wire_bytes_total 46500
+NOTE otelcol_exporter_recv_wire_bytes_total 2356
+NOTE otelcol_exporter_sent_bytes_total 2.248579e+07
+2022/12/08 10:08:22 Gracefully terminating Agent pid=34582, sending SIGTEM...
+2022/12/08 10:08:22 Stopping process monitor.
+2022/12/08 10:08:22 Agent process stopped, exit code=0
+2022/12/08 10:08:22 Sent and received data matches.
+2022/12/08 10:08:22 Stopping mock backend...
+2022/12/08 10:08:22 Stopped backend. Received:   150,000 items (9,727/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut
+2022/12/08 10:08:22 Starting mock backend...
+2022/12/08 10:08:22 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 10:08:22 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent808013629.yaml]
+2022/12/08 10:08:22 Agent running, pid=34671
+2022/12/08 10:08:22 Starting load generator at 10000 items/sec.
+2022/12/08 10:08:25 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/08 10:08:28 Agent RAM (RES):  71 MiB, CPU: 6.5% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/08 10:08:31 Agent RAM (RES):  75 MiB, CPU: 5.2% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/08 10:08:34 Agent RAM (RES):  76 MiB, CPU: 4.7% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/08 10:08:37 Agent RAM (RES):  77 MiB, CPU: 4.6% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/08 10:08:37 Stopped generator. Sent:    149900 items
+NOTE otelcol_exporter_sent_bytes_total 2.247078e+07
+NOTE otelcol_receiver_sent_bytes_total 2998
+NOTE otelcol_exporter_recv_wire_bytes_total 2325
+NOTE otelcol_exporter_recv_bytes_total 150
+NOTE otelcol_receiver_recv_bytes_total 2.247078e+07
+NOTE otelcol_receiver_recv_wire_bytes_total 2.2478275e+07
+NOTE otelcol_exporter_sent_wire_bytes_total 1.090807e+06
+NOTE otelcol_receiver_sent_wire_bytes_total 10493
+2022/12/08 10:08:37 Gracefully terminating Agent pid=34671, sending SIGTEM...
+2022/12/08 10:08:37 Stopping process monitor.
+2022/12/08 10:08:37 Agent process stopped, exit code=0
+2022/12/08 10:08:37 Sent and received data matches.
+2022/12/08 10:08:37 Stopping mock backend...
+2022/12/08 10:08:37 Stopped backend. Received:   149,900 items (9,888/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut
+2022/12/08 10:08:37 Starting mock backend...
+2022/12/08 10:08:37 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 10:08:37 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut/agent.log
+COMMAND IS /Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64 [--feature-gates=telemetry.useOtelForInternalMetrics --config /var/folders/hp/8_6w4qns7g79tww_56kst5nh0000gp/T/agent3172098327.yaml]
+2022/12/08 10:08:37 Agent running, pid=34842
+2022/12/08 10:08:37 Starting load generator at 10000 items/sec.
+2022/12/08 10:08:40 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/08 10:08:43 Agent RAM (RES):  96 MiB, CPU: 6.3% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/08 10:08:43 Performance error: RAM consumption is 127 MiB, max expected is 100 MiB
+2022/12/08 10:08:43 Gracefully terminating Agent pid=34842, sending SIGTEM...
+2022/12/08 10:08:43 Agent process stopped, exit code=0
+2022/12/08 10:08:43 RAM consumption is 127 MiB, max expected is 100 MiB
+    test_case.go:379: RAM consumption is 127 MiB, max expected is 100 MiB
+2022/12/08 10:08:43 Stopped generator. Sent:     59200 items
+2022/12/08 10:08:43 Get "http://127.0.0.1:59178/metrics": dial tcp 127.0.0.1:59178: connect: connection refused
+    test_case.go:379: Get "http://127.0.0.1:59178/metrics": dial tcp 127.0.0.1:59178: connect: connection refused
+2022/12/08 10:08:43 Stopping mock backend...
+2022/12/08 10:08:43 Stopped backend. Received:    59,200 items (9,853/sec)
+--- FAIL: TestTrace10kSPS (67.00s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut (15.29s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut (15.10s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut (15.42s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut (15.16s)
+    --- FAIL: TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut (6.01s)
+panic: close of closed channel [recovered]
+	panic: close of closed channel
+
+goroutine 662 [running]:
+testing.tRunner.func1.2({0x1032e3400, 0x10391a760})
+	/usr/local/go/src/testing/testing.go:1396 +0x1c8
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:1399 +0x378
+panic({0x1032e3400, 0x10391a760})
+	/usr/local/go/src/runtime/panic.go:884 +0x204
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed.(*TestCase).indicateError(0x14000123d00, {0x103924380, 0x14000907140})
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/testbed/test_case.go:384 +0xec
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed.(*TestCase).StopAgent(0x14000123d00)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/testbed/test_case.go:210 +0x48
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests.Scenario10kItemsPerSecond(0x140010d6ea0, {0x12d697368, 0x14000a098c0}, {0x103949260, 0x14000a099e0}, {0x798bcc?, 0x1?, 0x1cdd12aaf013f?, 0x32948450?}, {0x103939e80, ...}, ...)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/scenarios.go:196 +0x374
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests.TestTrace10kSPS.func1(0x140017aa200?)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/trace_test.go:170 +0x58
+testing.tRunner(0x140010d6ea0, 0x140014b8258)
+	/usr/local/go/src/testing/testing.go:1446 +0x10c
+created by testing.(*T).Run
+	/usr/local/go/src/testing/testing.go:1493 +0x300
+exit status 2
+FAIL	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	67.904s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut
+2022/12/08 10:12:45 Starting mock backend...
+2022/12/08 10:12:45 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 10:12:45 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut/agent.log
+2022/12/08 10:12:45 Agent running, pid=37767
+2022/12/08 10:12:45 Starting load generator at 10000 items/sec.
+2022/12/08 10:12:48 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,800 items (9,267/sec)
+2022/12/08 10:12:48 Performance error: RAM consumption is 96 MiB, max expected is 40 MiB
+2022/12/08 10:12:48 Gracefully terminating Agent pid=37767, sending SIGTEM...
+2022/12/08 10:12:48 Agent process stopped, exit code=0
+2022/12/08 10:12:48 RAM consumption is 96 MiB, max expected is 40 MiB
+    test_case.go:378: RAM consumption is 96 MiB, max expected is 40 MiB
+2022/12/08 10:12:48 Stopped generator. Sent:     29200 items
+2022/12/08 10:12:48 Get "http://127.0.0.1:59384/metrics": dial tcp 127.0.0.1:59384: connect: connection refused
+    test_case.go:378: Get "http://127.0.0.1:59384/metrics": dial tcp 127.0.0.1:59384: connect: connection refused
+2022/12/08 10:12:48 Stopping mock backend...
+2022/12/08 10:12:48 Stopped backend. Received:    29,200 items (9,700/sec)
+--- FAIL: TestTrace10kSPS (3.02s)
+    --- FAIL: TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut (3.01s)
+panic: close of closed channel [recovered]
+	panic: close of closed channel
+
+goroutine 138 [running]:
+testing.tRunner.func1.2({0x10782b400, 0x107e62740})
+	/usr/local/go/src/testing/testing.go:1396 +0x1c8
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:1399 +0x378
+panic({0x10782b400, 0x107e62740})
+	/usr/local/go/src/runtime/panic.go:884 +0x204
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed.(*TestCase).indicateError(0x1400096a000, {0x107e6c360, 0x140005d6330})
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/testbed/test_case.go:383 +0xec
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed.(*TestCase).StopAgent(0x1400096a000)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/testbed/test_case.go:210 +0x48
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests.Scenario10kItemsPerSecond(0x140000db520, {0x131de58a8, 0x14000b06f00}, {0x107e91240, 0x14000b07020}, {0x4ce0d9c?, 0x1?, 0x1ce0ada8e5bf0?, 0x24681180?}, {0x107e81e60, ...}, ...)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/scenarios.go:196 +0x374
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests.TestTrace10kSPS.func1(0x0?)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/trace_test.go:170 +0x58
+testing.tRunner(0x140000db520, 0x140005f4630)
+	/usr/local/go/src/testing/testing.go:1446 +0x10c
+created by testing.(*T).Run
+	/usr/local/go/src/testing/testing.go:1493 +0x300
+exit status 2
+FAIL	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	3.980s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut
+2022/12/08 10:18:50 Starting mock backend...
+2022/12/08 10:18:50 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 10:18:50 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut/agent.log
+2022/12/08 10:18:50 Agent running, pid=41965
+2022/12/08 10:18:50 Starting load generator at 10000 items/sec.
+2022/12/08 10:18:53 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28300 items | Received:    27,800 items (9,265/sec)
+2022/12/08 10:18:56 Agent RAM (RES):  95 MiB, CPU: 7.6% | Sent:     58300 items | Received:    57,900 items (9,649/sec)
+2022/12/08 10:18:59 Agent RAM (RES): 126 MiB, CPU: 3.7% | Sent:     88300 items | Received:    87,900 items (9,766/sec)
+2022/12/08 10:19:02 Agent RAM (RES): 155 MiB, CPU: 4.1% | Sent:    118300 items | Received:   118,000 items (9,833/sec)
+2022/12/08 10:19:05 Agent RAM (RES): 159 MiB, CPU: 3.7% | Sent:    148300 items | Received:   148,000 items (9,866/sec)
+2022/12/08 10:19:05 Stopped generator. Sent:    150000 items
+2022/12/08 10:19:05 Gracefully terminating Agent pid=41965, sending SIGTEM...
+2022/12/08 10:19:05 Stopping process monitor.
+2022/12/08 10:19:05 Agent process stopped, exit code=0
+2022/12/08 10:19:05 Sent and received data matches.
+2022/12/08 10:19:05 Stopping mock backend...
+2022/12/08 10:19:05 Stopped backend. Received:   150,000 items (9,807/sec)
+--- PASS: TestTrace10kSPS (15.30s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut (15.30s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	16.172s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut
+2022/12/08 10:25:21 Starting mock backend...
+2022/12/08 10:25:21 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/08 10:25:21 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut/agent.log
+2022/12/08 10:25:21 Agent running, pid=45879
+2022/12/08 10:25:21 Starting load generator at 10000 items/sec.
+2022/12/08 10:25:24 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28300 items | Received:    27,800 items (9,265/sec)
+2022/12/08 10:25:27 Agent RAM (RES):  99 MiB, CPU: 8.0% | Sent:     58300 items | Received:    57,900 items (9,649/sec)
+2022/12/08 10:25:30 Agent RAM (RES): 131 MiB, CPU: 4.4% | Sent:     88300 items | Received:    87,900 items (9,766/sec)
+2022/12/08 10:25:33 Agent RAM (RES): 161 MiB, CPU: 4.7% | Sent:    118300 items | Received:   118,000 items (9,833/sec)
+2022/12/08 10:25:36 Agent RAM (RES): 165 MiB, CPU: 4.6% | Sent:    148300 items | Received:   148,000 items (9,866/sec)
+2022/12/08 10:25:36 Stopped generator. Sent:    150000 items
+2022/12/08 10:25:36 Gracefully terminating Agent pid=45879, sending SIGTEM...
+2022/12/08 10:25:36 Stopping process monitor.
+2022/12/08 10:25:36 Agent process stopped, exit code=0
+2022/12/08 10:25:36 Sent and received data matches.
+2022/12/08 10:25:36 Stopping mock backend...
+2022/12/08 10:25:36 Stopped backend. Received:   150,000 items (9,811/sec)
+--- PASS: TestTrace10kSPS (15.30s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut (15.29s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	16.192s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut
+2022/12/09 08:51:07 Starting mock backend...
+2022/12/09 08:51:07 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 08:51:07 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut/agent.log
+2022/12/09 08:51:07 Agent running, pid=97229
+2022/12/09 08:51:08 Starting load generator at 10000 items/sec.
+2022/12/09 08:51:10 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     26600 items | Received:    25,100 items (8,366/sec)
+2022/12/09 08:51:13 Agent RAM (RES):  72 MiB, CPU: 8.1% | Sent:     56600 items | Received:    55,100 items (9,183/sec)
+2022/12/09 08:51:16 Agent RAM (RES):  74 MiB, CPU: 5.0% | Sent:     86600 items | Received:    85,200 items (9,466/sec)
+2022/12/09 08:51:19 Agent RAM (RES):  75 MiB, CPU: 4.9% | Sent:    116600 items | Received:   115,300 items (9,608/sec)
+2022/12/09 08:51:22 Agent RAM (RES):  76 MiB, CPU: 4.8% | Sent:    146600 items | Received:   145,300 items (9,686/sec)
+2022/12/09 08:51:23 Stopped generator. Sent:    149900 items
+2022/12/09 08:51:23 Gracefully terminating Agent pid=97229, sending SIGTEM...
+2022/12/09 08:51:23 Stopping process monitor.
+2022/12/09 08:51:23 Agent process stopped, exit code=0
+2022/12/09 08:51:23 Sent and received data matches.
+2022/12/09 08:51:23 Stopping mock backend...
+2022/12/09 08:51:23 Stopped backend. Received:   149,900 items (9,601/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut
+2022/12/09 08:51:23 Starting mock backend...
+2022/12/09 08:51:23 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 08:51:23 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut/agent.log
+2022/12/09 08:51:23 Agent running, pid=97334
+2022/12/09 08:51:23 Starting load generator at 10000 items/sec.
+2022/12/09 08:51:26 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/09 08:51:29 Agent RAM (RES):  65 MiB, CPU: 6.3% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/09 08:51:32 Agent RAM (RES):  68 MiB, CPU: 4.4% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/09 08:51:35 Agent RAM (RES):  68 MiB, CPU: 4.3% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/09 08:51:38 Agent RAM (RES):  68 MiB, CPU: 4.2% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 08:51:38 Stopped generator. Sent:    149900 items
+2022/12/09 08:51:38 Gracefully terminating Agent pid=97334, sending SIGTEM...
+2022/12/09 08:51:38 Stopping process monitor.
+2022/12/09 08:51:38 Agent process stopped, exit code=0
+2022/12/09 08:51:38 Sent and received data matches.
+2022/12/09 08:51:38 Stopping mock backend...
+2022/12/09 08:51:38 Stopped backend. Received:   149,900 items (9,901/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut
+2022/12/09 08:51:38 Starting mock backend...
+2022/12/09 08:51:38 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 08:51:38 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut/agent.log
+2022/12/09 08:51:38 Agent running, pid=97517
+2022/12/09 08:51:38 Starting load generator at 10000 items/sec.
+2022/12/09 08:51:41 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/09 08:51:44 Agent RAM (RES):  75 MiB, CPU: 7.9% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/09 08:51:47 Agent RAM (RES):  75 MiB, CPU: 6.0% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/09 08:51:50 Agent RAM (RES):  78 MiB, CPU: 6.0% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/09 08:51:53 Agent RAM (RES):  79 MiB, CPU: 6.6% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 08:51:53 Stopped generator. Sent:    149900 items
+2022/12/09 08:51:53 Gracefully terminating Agent pid=97517, sending SIGTEM...
+2022/12/09 08:51:53 Stopping process monitor.
+2022/12/09 08:51:53 Agent process stopped, exit code=0
+2022/12/09 08:51:53 Sent and received data matches.
+2022/12/09 08:51:53 Stopping mock backend...
+2022/12/09 08:51:53 Stopped backend. Received:   149,900 items (9,864/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut
+2022/12/09 08:51:53 Starting mock backend...
+2022/12/09 08:51:53 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 08:51:53 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut/agent.log
+2022/12/09 08:51:53 Agent running, pid=97607
+2022/12/09 08:51:53 Starting load generator at 10000 items/sec.
+2022/12/09 08:51:56 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,800 items (9,266/sec)
+2022/12/09 08:51:59 Agent RAM (RES):  71 MiB, CPU: 7.0% | Sent:     59100 items | Received:    57,900 items (9,649/sec)
+2022/12/09 08:52:02 Agent RAM (RES):  72 MiB, CPU: 4.9% | Sent:     89100 items | Received:    87,900 items (9,766/sec)
+2022/12/09 08:52:05 Agent RAM (RES):  75 MiB, CPU: 5.4% | Sent:    119100 items | Received:   118,000 items (9,833/sec)
+2022/12/09 08:52:08 Agent RAM (RES):  77 MiB, CPU: 6.1% | Sent:    149100 items | Received:   148,100 items (9,873/sec)
+2022/12/09 08:52:08 Stopped generator. Sent:    150000 items
+2022/12/09 08:52:08 Gracefully terminating Agent pid=97607, sending SIGTEM...
+2022/12/09 08:52:08 Stopping process monitor.
+2022/12/09 08:52:08 Agent process stopped, exit code=0
+2022/12/09 08:52:08 Sent and received data matches.
+2022/12/09 08:52:08 Stopping mock backend...
+2022/12/09 08:52:08 Stopped backend. Received:   150,000 items (9,864/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut
+2022/12/09 08:52:08 Starting mock backend...
+2022/12/09 08:52:08 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 08:52:08 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut/agent.log
+2022/12/09 08:52:08 Agent running, pid=97777
+2022/12/09 08:52:09 Starting load generator at 10000 items/sec.
+2022/12/09 08:52:11 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/09 08:52:14 Agent RAM (RES):  95 MiB, CPU: 6.4% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/09 08:52:17 Agent RAM (RES): 127 MiB, CPU: 3.7% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/09 08:52:20 Agent RAM (RES): 143 MiB, CPU: 4.2% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 08:52:23 Agent RAM (RES): 147 MiB, CPU: 4.3% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 08:52:24 Stopped generator. Sent:    149900 items
+2022/12/09 08:52:24 Gracefully terminating Agent pid=97777, sending SIGTEM...
+2022/12/09 08:52:24 Stopping process monitor.
+2022/12/09 08:52:24 Agent process stopped, exit code=0
+2022/12/09 08:52:24 Sent and received data matches.
+2022/12/09 08:52:24 Stopping mock backend...
+2022/12/09 08:52:24 Stopped backend. Received:   149,900 items (9,908/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut
+2022/12/09 08:52:24 Starting mock backend...
+2022/12/09 08:52:24 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 08:52:24 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut/agent.log
+2022/12/09 08:52:24 Agent running, pid=97866
+2022/12/09 08:52:24 Starting load generator at 10000 items/sec.
+2022/12/09 08:52:27 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,233/sec)
+2022/12/09 08:52:30 Agent RAM (RES): 103 MiB, CPU: 8.0% | Sent:     59100 items | Received:    57,800 items (9,633/sec)
+2022/12/09 08:52:33 Agent RAM (RES): 136 MiB, CPU: 5.3% | Sent:     89100 items | Received:    87,800 items (9,755/sec)
+2022/12/09 08:52:36 Agent RAM (RES): 144 MiB, CPU: 5.3% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/09 08:52:39 Agent RAM (RES): 154 MiB, CPU: 5.4% | Sent:    149100 items | Received:   148,000 items (9,866/sec)
+2022/12/09 08:52:39 Performance error: RAM consumption is 186 MiB, max expected is 180 MiB
+2022/12/09 08:52:39 Gracefully terminating Agent pid=97866, sending SIGTEM...
+2022/12/09 08:52:39 Cannot send traces: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:61735: connect: connection refused"
+2022/12/09 08:52:39 Stopped generator. Sent:    150000 items
+2022/12/09 08:52:39 Agent process stopped, exit code=0
+2022/12/09 08:52:39 RAM consumption is 186 MiB, max expected is 180 MiB
+    test_case.go:378: RAM consumption is 186 MiB, max expected is 180 MiB
+2022/12/09 08:52:39 Get "http://127.0.0.1:61858/metrics": dial tcp 127.0.0.1:61858: connect: connection refused
+    test_case.go:378: Get "http://127.0.0.1:61858/metrics": dial tcp 127.0.0.1:61858: connect: connection refused
+2022/12/09 08:52:39 Stopping mock backend...
+2022/12/09 08:52:39 Stopped backend. Received:   149,200 items (9,885/sec)
+--- FAIL: TestTrace10kSPS (91.39s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut (15.61s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut (15.14s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut (15.20s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut (15.21s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut (15.13s)
+    --- FAIL: TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut (15.10s)
+panic: close of closed channel [recovered]
+	panic: close of closed channel
+
+goroutine 715 [running]:
+testing.tRunner.func1.2({0x1072af520, 0x1078e5b80})
+	/usr/local/go/src/testing/testing.go:1396 +0x1c8
+testing.tRunner.func1()
+	/usr/local/go/src/testing/testing.go:1399 +0x378
+panic({0x1072af520, 0x1078e5b80})
+	/usr/local/go/src/runtime/panic.go:884 +0x204
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed.(*TestCase).indicateError(0x14002d25000, {0x1078ef6e0, 0x14003c74a50})
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/testbed/test_case.go:383 +0xec
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed.(*TestCase).StopAgent(0x14002d25000)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/testbed/test_case.go:210 +0x48
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests.Scenario10kItemsPerSecond(0x1400043a820, {0x131681ca8, 0x140005916e0}, {0x107914440, 0x14000591800}, {0x476603c?, 0x1?, 0x1e5e7b64f7c9b?, 0x4bd5930?}, {0x1079050e0, ...}, ...)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/scenarios.go:196 +0x374
+github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests.TestTrace10kSPS.func1(0x14002f17340?)
+	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/trace_test.go:179 +0x58
+testing.tRunner(0x1400043a820, 0x140010edfb0)
+	/usr/local/go/src/testing/testing.go:1446 +0x10c
+created by testing.(*T).Run
+	/usr/local/go/src/testing/testing.go:1493 +0x300
+exit status 2
+FAIL	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	92.218s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut
+2022/12/09 09:00:12 Starting mock backend...
+2022/12/09 09:00:12 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 09:00:12 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut/agent.log
+2022/12/09 09:00:12 Agent running, pid=2115
+2022/12/09 09:00:12 Starting load generator at 10000 items/sec.
+2022/12/09 09:00:15 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28300 items | Received:    28,000 items (9,333/sec)
+2022/12/09 09:00:18 Agent RAM (RES):  73 MiB, CPU: 8.0% | Sent:     58300 items | Received:    58,000 items (9,666/sec)
+2022/12/09 09:00:21 Agent RAM (RES):  74 MiB, CPU: 5.2% | Sent:     88300 items | Received:    88,100 items (9,788/sec)
+2022/12/09 09:00:24 Agent RAM (RES):  75 MiB, CPU: 5.2% | Sent:    118300 items | Received:   118,200 items (9,850/sec)
+2022/12/09 09:00:27 Agent RAM (RES):  76 MiB, CPU: 5.0% | Sent:    148300 items | Received:   148,200 items (9,879/sec)
+2022/12/09 09:00:27 Stopped generator. Sent:    149900 items
+2022/12/09 09:00:28 Gracefully terminating Agent pid=2115, sending SIGTEM...
+2022/12/09 09:00:28 Stopping process monitor.
+2022/12/09 09:00:28 Agent process stopped, exit code=0
+2022/12/09 09:00:28 Sent and received data matches.
+2022/12/09 09:00:28 Stopping mock backend...
+2022/12/09 09:00:28 Stopped backend. Received:   149,900 items (9,782/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut
+2022/12/09 09:00:28 Starting mock backend...
+2022/12/09 09:00:28 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 09:00:28 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut/agent.log
+2022/12/09 09:00:28 Agent running, pid=2282
+2022/12/09 09:00:28 Starting load generator at 10000 items/sec.
+2022/12/09 09:00:31 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/09 09:00:34 Agent RAM (RES):  64 MiB, CPU: 6.0% | Sent:     59100 items | Received:    57,800 items (9,632/sec)
+2022/12/09 09:00:37 Agent RAM (RES):  65 MiB, CPU: 4.5% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/09 09:00:40 Agent RAM (RES):  66 MiB, CPU: 4.9% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/09 09:00:43 Agent RAM (RES):  66 MiB, CPU: 5.3% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 09:00:43 Stopped generator. Sent:    149900 items
+2022/12/09 09:00:43 Gracefully terminating Agent pid=2282, sending SIGTEM...
+2022/12/09 09:00:43 Stopping process monitor.
+2022/12/09 09:00:43 Agent process stopped, exit code=0
+2022/12/09 09:00:43 Sent and received data matches.
+2022/12/09 09:00:43 Stopping mock backend...
+2022/12/09 09:00:43 Stopped backend. Received:   149,900 items (9,914/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut
+2022/12/09 09:00:43 Starting mock backend...
+2022/12/09 09:00:43 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 09:00:43 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut/agent.log
+2022/12/09 09:00:43 Agent running, pid=2376
+2022/12/09 09:00:43 Starting load generator at 10000 items/sec.
+2022/12/09 09:00:46 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/09 09:00:49 Agent RAM (RES):  73 MiB, CPU: 7.7% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/09 09:00:52 Agent RAM (RES):  74 MiB, CPU: 6.2% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/09 09:00:55 Agent RAM (RES):  75 MiB, CPU: 5.8% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/09 09:00:58 Agent RAM (RES):  75 MiB, CPU: 6.0% | Sent:    149000 items | Received:   147,800 items (9,852/sec)
+2022/12/09 09:00:58 Stopped generator. Sent:    149900 items
+2022/12/09 09:00:58 Gracefully terminating Agent pid=2376, sending SIGTEM...
+2022/12/09 09:00:58 Stopping process monitor.
+2022/12/09 09:00:58 Agent process stopped, exit code=0
+2022/12/09 09:00:58 Sent and received data matches.
+2022/12/09 09:00:58 Stopping mock backend...
+2022/12/09 09:00:58 Stopped backend. Received:   149,900 items (9,867/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut
+2022/12/09 09:00:58 Starting mock backend...
+2022/12/09 09:00:58 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 09:00:58 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut/agent.log
+2022/12/09 09:00:58 Agent running, pid=2545
+2022/12/09 09:00:58 Starting load generator at 10000 items/sec.
+2022/12/09 09:01:01 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/09 09:01:04 Agent RAM (RES):  68 MiB, CPU: 7.3% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/09 09:01:07 Agent RAM (RES):  71 MiB, CPU: 5.4% | Sent:     89100 items | Received:    87,800 items (9,755/sec)
+2022/12/09 09:01:10 Agent RAM (RES):  74 MiB, CPU: 5.2% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 09:01:13 Agent RAM (RES):  75 MiB, CPU: 5.7% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 09:01:13 Stopped generator. Sent:    150000 items
+2022/12/09 09:01:13 Gracefully terminating Agent pid=2545, sending SIGTEM...
+2022/12/09 09:01:13 Stopping process monitor.
+2022/12/09 09:01:13 Agent process stopped, exit code=0
+2022/12/09 09:01:13 Sent and received data matches.
+2022/12/09 09:01:13 Stopping mock backend...
+2022/12/09 09:01:13 Stopped backend. Received:   150,000 items (9,725/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut
+2022/12/09 09:01:13 Starting mock backend...
+2022/12/09 09:01:13 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 09:01:13 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut/agent.log
+2022/12/09 09:01:13 Agent running, pid=2643
+2022/12/09 09:01:13 Starting load generator at 10000 items/sec.
+2022/12/09 09:01:16 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,197/sec)
+2022/12/09 09:01:19 Agent RAM (RES):  95 MiB, CPU: 7.1% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/09 09:01:22 Agent RAM (RES): 127 MiB, CPU: 4.9% | Sent:     89100 items | Received:    87,700 items (9,743/sec)
+2022/12/09 09:01:25 Agent RAM (RES): 150 MiB, CPU: 4.9% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 09:01:28 Agent RAM (RES): 154 MiB, CPU: 4.1% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 09:01:28 Stopped generator. Sent:    149900 items
+2022/12/09 09:01:28 Gracefully terminating Agent pid=2643, sending SIGTEM...
+2022/12/09 09:01:28 Stopping process monitor.
+2022/12/09 09:01:28 Agent process stopped, exit code=0
+2022/12/09 09:01:28 Sent and received data matches.
+2022/12/09 09:01:28 Stopping mock backend...
+2022/12/09 09:01:28 Stopped backend. Received:   149,900 items (9,924/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut
+2022/12/09 09:01:28 Starting mock backend...
+2022/12/09 09:01:28 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 09:01:28 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut/agent.log
+2022/12/09 09:01:28 Agent running, pid=2817
+2022/12/09 09:01:29 Starting load generator at 10000 items/sec.
+2022/12/09 09:01:31 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/09 09:01:34 Agent RAM (RES):  99 MiB, CPU: 7.8% | Sent:     59100 items | Received:    57,600 items (9,599/sec)
+2022/12/09 09:01:37 Agent RAM (RES): 132 MiB, CPU: 4.7% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/09 09:01:40 Agent RAM (RES): 163 MiB, CPU: 5.1% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 09:01:43 Agent RAM (RES): 167 MiB, CPU: 5.5% | Sent:    149100 items | Received:   147,800 items (9,853/sec)
+2022/12/09 09:01:44 Stopped generator. Sent:    149900 items
+2022/12/09 09:01:44 Gracefully terminating Agent pid=2817, sending SIGTEM...
+2022/12/09 09:01:44 Stopping process monitor.
+2022/12/09 09:01:44 Agent process stopped, exit code=0
+2022/12/09 09:01:44 Sent and received data matches.
+2022/12/09 09:01:44 Stopping mock backend...
+2022/12/09 09:01:44 Stopped backend. Received:   149,900 items (9,661/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/12/09 09:01:44 Starting mock backend...
+2022/12/09 09:01:44 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 09:01:44 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+2022/12/09 09:01:44 Agent running, pid=2907
+2022/12/09 09:01:44 Starting load generator at 10000 items/sec.
+2022/12/09 09:01:47 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29500 items | Received:    28,000 items (9,332/sec)
+2022/12/09 09:01:50 Agent RAM (RES):  64 MiB, CPU: 5.6% | Sent:     59500 items | Received:    58,100 items (9,682/sec)
+2022/12/09 09:01:53 Agent RAM (RES):  65 MiB, CPU: 3.9% | Sent:     89500 items | Received:    88,100 items (9,788/sec)
+2022/12/09 09:01:56 Agent RAM (RES):  65 MiB, CPU: 3.7% | Sent:    119500 items | Received:   118,200 items (9,849/sec)
+2022/12/09 09:01:59 Agent RAM (RES):  65 MiB, CPU: 3.7% | Sent:    149500 items | Received:   148,300 items (9,886/sec)
+2022/12/09 09:01:59 Stopped generator. Sent:    150000 items
+2022/12/09 09:01:59 Gracefully terminating Agent pid=2907, sending SIGTEM...
+2022/12/09 09:01:59 Stopping process monitor.
+2022/12/09 09:01:59 Agent process stopped, exit code=0
+2022/12/09 09:01:59 Sent and received data matches.
+2022/12/09 09:01:59 Stopping mock backend...
+2022/12/09 09:01:59 Stopped backend. Received:   150,000 items (9,881/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/12/09 09:01:59 Starting mock backend...
+2022/12/09 09:01:59 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 09:01:59 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+2022/12/09 09:01:59 Agent running, pid=3080
+2022/12/09 09:01:59 Starting load generator at 10000 items/sec.
+2022/12/09 09:02:02 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/09 09:02:05 Agent RAM (RES):  66 MiB, CPU: 6.6% | Sent:     59100 items | Received:    57,700 items (9,616/sec)
+2022/12/09 09:02:08 Agent RAM (RES):  67 MiB, CPU: 5.1% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/09 09:02:11 Agent RAM (RES):  67 MiB, CPU: 5.1% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 09:02:14 Agent RAM (RES):  67 MiB, CPU: 5.2% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 09:02:14 Stopped generator. Sent:    150000 items
+2022/12/09 09:02:15 Gracefully terminating Agent pid=3080, sending SIGTEM...
+2022/12/09 09:02:15 Stopping process monitor.
+2022/12/09 09:02:15 Agent process stopped, exit code=0
+2022/12/09 09:02:15 Sent and received data matches.
+2022/12/09 09:02:15 Stopping mock backend...
+2022/12/09 09:02:15 Stopped backend. Received:   150,000 items (9,724/sec)
+--- PASS: TestTrace10kSPS (122.32s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut (15.33s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut (15.12s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut (15.19s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut (15.43s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut (15.11s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut (15.52s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP (15.18s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.43s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	127.385s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut
+2022/12/09 13:18:39 Starting mock backend...
+2022/12/09 13:18:39 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:18:39 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut/agent.log
+2022/12/09 13:18:39 Agent running, pid=36896
+2022/12/09 13:18:42 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:18:42 cannot get process memory for 36896: no such process
+2022/12/09 13:18:42 cannot get process times for 36896: no such process
+2022/12/09 13:18:45 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:18:45 cannot get process memory for 36896: no such process
+2022/12/09 13:18:45 cannot get process times for 36896: no such process
+2022/12/09 13:18:48 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:18:48 cannot get process memory for 36896: no such process
+2022/12/09 13:18:48 cannot get process times for 36896: no such process
+    test_case.go:381: Time out waiting for connection to tcp:127.0.0.1:58483
+2022/12/09 13:18:50 Starting load generator at 10000 items/sec.
+2022/12/09 13:18:50 Cannot send traces: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:58483: connect: connection refused"
+2022/12/09 13:18:51 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17300 items | Received:         0 items (0/sec)
+2022/12/09 13:18:51 cannot get process memory for 36896: no such process
+2022/12/09 13:18:51 cannot get process times for 36896: no such process
+2022/12/09 13:18:54 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     47300 items | Received:         0 items (0/sec)
+2022/12/09 13:18:54 cannot get process memory for 36896: no such process
+2022/12/09 13:18:54 cannot get process times for 36896: no such process
+2022/12/09 13:18:57 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     77300 items | Received:         0 items (0/sec)
+2022/12/09 13:18:57 cannot get process memory for 36896: no such process
+2022/12/09 13:18:57 cannot get process times for 36896: no such process
+2022/12/09 13:19:00 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    107300 items | Received:         0 items (0/sec)
+2022/12/09 13:19:00 cannot get process memory for 36896: no such process
+2022/12/09 13:19:00 cannot get process times for 36896: no such process
+2022/12/09 13:19:03 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    137300 items | Received:         0 items (0/sec)
+2022/12/09 13:19:03 cannot get process memory for 36896: no such process
+2022/12/09 13:19:03 cannot get process times for 36896: no such process
+2022/12/09 13:19:05 Stopped generator. Sent:    150000 items
+2022/12/09 13:19:06 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/09 13:19:06 cannot get process memory for 36896: no such process
+2022/12/09 13:19:06 cannot get process times for 36896: no such process
+2022/12/09 13:19:09 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/09 13:19:09 cannot get process memory for 36896: no such process
+2022/12/09 13:19:09 cannot get process times for 36896: no such process
+2022/12/09 13:19:12 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/09 13:19:12 cannot get process memory for 36896: no such process
+2022/12/09 13:19:12 cannot get process times for 36896: no such process
+    test_case.go:381: Time out waiting for all data items received
+2022/12/09 13:19:15 testbed error: Get "http://127.0.0.1:58503/metrics": dial tcp 127.0.0.1:58503: connect: connection refused
+    test_case.go:401: testbed error: Get "http://127.0.0.1:58503/metrics": dial tcp 127.0.0.1:58503: connect: connection refused
+2022/12/09 13:19:15 Gracefully terminating Agent pid=36896, sending SIGTEM...
+2022/12/09 13:19:15 Stopping process monitor.
+2022/12/09 13:19:15 Agent process stopped, exit code=1
+2022/12/09 13:19:15 Agent execution failed: exit status 1
+2022/12/09 13:19:15 testbed error: exit status 1
+    test_case.go:401: testbed error: exit status 1
+    validator.go:41: 
+        	Error Trace:	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/validator.go:41
+        	            				/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/test_case.go:342
+        	            				/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/scenarios.go:198
+        	            				/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/trace_test.go:179
+        	Error:      	Not equal: 
+        	            	expected: 150000
+        	            	actual  : 0
+        	Test:       	TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut
+        	Messages:   	Received and sent counters do not match.
+2022/12/09 13:19:15 Stopping mock backend...
+2022/12/09 13:19:15 Stopped backend. Received:         0 items (0/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut
+2022/12/09 13:19:15 Starting mock backend...
+2022/12/09 13:19:15 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:19:15 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut/agent.log
+2022/12/09 13:19:15 Agent running, pid=37234
+2022/12/09 13:19:18 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:19:18 cannot get process memory for 37234: no such process
+2022/12/09 13:19:18 cannot get process times for 37234: no such process
+2022/12/09 13:19:21 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:19:21 cannot get process memory for 37234: no such process
+2022/12/09 13:19:21 cannot get process times for 37234: no such process
+2022/12/09 13:19:24 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:19:24 cannot get process memory for 37234: no such process
+2022/12/09 13:19:24 cannot get process times for 37234: no such process
+    test_case.go:381: Time out waiting for connection to tcp:127.0.0.1:58485
+2022/12/09 13:19:25 Starting load generator at 10000 items/sec.
+2022/12/09 13:19:25 Cannot send traces: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:58485: connect: connection refused"
+2022/12/09 13:19:27 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17351 items | Received:         0 items (0/sec)
+2022/12/09 13:19:27 cannot get process memory for 37234: no such process
+2022/12/09 13:19:27 cannot get process times for 37234: no such process
+2022/12/09 13:19:30 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     47400 items | Received:         0 items (0/sec)
+2022/12/09 13:19:30 cannot get process memory for 37234: no such process
+2022/12/09 13:19:30 cannot get process times for 37234: no such process
+2022/12/09 13:19:33 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     77400 items | Received:         0 items (0/sec)
+2022/12/09 13:19:33 cannot get process memory for 37234: no such process
+2022/12/09 13:19:33 cannot get process times for 37234: no such process
+2022/12/09 13:19:36 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    107400 items | Received:         0 items (0/sec)
+2022/12/09 13:19:36 cannot get process memory for 37234: no such process
+2022/12/09 13:19:36 cannot get process times for 37234: no such process
+2022/12/09 13:19:39 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    137400 items | Received:         0 items (0/sec)
+2022/12/09 13:19:39 cannot get process memory for 37234: no such process
+2022/12/09 13:19:39 cannot get process times for 37234: no such process
+2022/12/09 13:19:40 Stopped generator. Sent:    150000 items
+2022/12/09 13:19:42 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/09 13:19:42 cannot get process memory for 37234: no such process
+2022/12/09 13:19:42 cannot get process times for 37234: no such process
+2022/12/09 13:19:45 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/09 13:19:45 cannot get process memory for 37234: no such process
+2022/12/09 13:19:45 cannot get process times for 37234: no such process
+2022/12/09 13:19:48 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/09 13:19:48 cannot get process memory for 37234: no such process
+2022/12/09 13:19:48 cannot get process times for 37234: no such process
+    test_case.go:381: Time out waiting for all data items received
+2022/12/09 13:19:50 testbed error: Get "http://127.0.0.1:58565/metrics": dial tcp 127.0.0.1:58565: connect: connection refused
+    test_case.go:401: testbed error: Get "http://127.0.0.1:58565/metrics": dial tcp 127.0.0.1:58565: connect: connection refused
+2022/12/09 13:19:50 Gracefully terminating Agent pid=37234, sending SIGTEM...
+2022/12/09 13:19:50 Agent process stopped, exit code=1
+2022/12/09 13:19:50 Agent execution failed: exit status 1
+2022/12/09 13:19:50 testbed error: exit status 1
+    test_case.go:401: testbed error: exit status 1
+2022/12/09 13:19:50 Stopping process monitor.
+    validator.go:41: 
+        	Error Trace:	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/validator.go:41
+        	            				/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/test_case.go:342
+        	            				/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/scenarios.go:198
+        	            				/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/trace_test.go:179
+        	Error:      	Not equal: 
+        	            	expected: 150000
+        	            	actual  : 0
+        	Test:       	TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut
+        	Messages:   	Received and sent counters do not match.
+2022/12/09 13:19:50 Stopping mock backend...
+2022/12/09 13:19:50 Stopped backend. Received:         0 items (0/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut
+2022/12/09 13:19:50 Starting mock backend...
+2022/12/09 13:19:50 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:19:50 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut/agent.log
+2022/12/09 13:19:50 Agent running, pid=37491
+2022/12/09 13:19:53 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:19:53 cannot get process memory for 37491: no such process
+2022/12/09 13:19:53 cannot get process times for 37491: no such process
+2022/12/09 13:19:56 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:19:56 cannot get process memory for 37491: no such process
+2022/12/09 13:19:56 cannot get process times for 37491: no such process
+2022/12/09 13:19:59 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:19:59 cannot get process memory for 37491: no such process
+2022/12/09 13:19:59 cannot get process times for 37491: no such process
+    test_case.go:381: Time out waiting for connection to tcp:127.0.0.1:58487
+2022/12/09 13:20:01 Starting load generator at 10000 items/sec.
+2022/12/09 13:20:01 Cannot send traces: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:58487: connect: connection refused"
+2022/12/09 13:20:02 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17300 items | Received:         0 items (0/sec)
+2022/12/09 13:20:02 cannot get process memory for 37491: no such process
+2022/12/09 13:20:02 cannot get process times for 37491: no such process
+2022/12/09 13:20:05 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     47300 items | Received:         0 items (0/sec)
+2022/12/09 13:20:05 cannot get process memory for 37491: no such process
+2022/12/09 13:20:05 cannot get process times for 37491: no such process
+2022/12/09 13:20:08 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     77300 items | Received:         0 items (0/sec)
+2022/12/09 13:20:08 cannot get process memory for 37491: no such process
+2022/12/09 13:20:08 cannot get process times for 37491: no such process
+2022/12/09 13:20:11 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    107300 items | Received:         0 items (0/sec)
+2022/12/09 13:20:11 cannot get process memory for 37491: no such process
+2022/12/09 13:20:11 cannot get process times for 37491: no such process
+2022/12/09 13:20:14 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    137300 items | Received:         0 items (0/sec)
+2022/12/09 13:20:14 cannot get process memory for 37491: no such process
+2022/12/09 13:20:14 cannot get process times for 37491: no such process
+2022/12/09 13:20:16 Stopped generator. Sent:    150000 items
+2022/12/09 13:20:17 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/09 13:20:17 cannot get process memory for 37491: no such process
+2022/12/09 13:20:17 cannot get process times for 37491: no such process
+2022/12/09 13:20:20 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/09 13:20:20 cannot get process memory for 37491: no such process
+2022/12/09 13:20:20 cannot get process times for 37491: no such process
+2022/12/09 13:20:23 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    150000 items | Received:         0 items (0/sec)
+2022/12/09 13:20:23 cannot get process memory for 37491: no such process
+2022/12/09 13:20:23 cannot get process times for 37491: no such process
+    test_case.go:381: Time out waiting for all data items received
+2022/12/09 13:20:26 testbed error: Get "http://127.0.0.1:58609/metrics": dial tcp 127.0.0.1:58609: connect: connection refused
+    test_case.go:401: testbed error: Get "http://127.0.0.1:58609/metrics": dial tcp 127.0.0.1:58609: connect: connection refused
+2022/12/09 13:20:26 Gracefully terminating Agent pid=37491, sending SIGTEM...
+2022/12/09 13:20:26 Agent process stopped, exit code=1
+2022/12/09 13:20:26 Agent execution failed: exit status 1
+2022/12/09 13:20:26 testbed error: exit status 1
+    test_case.go:401: testbed error: exit status 1
+2022/12/09 13:20:26 Stopping process monitor.
+    validator.go:41: 
+        	Error Trace:	/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/validator.go:41
+        	            				/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/test_case.go:342
+        	            				/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/scenarios.go:198
+        	            				/Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/trace_test.go:179
+        	Error:      	Not equal: 
+        	            	expected: 150000
+        	            	actual  : 0
+        	Test:       	TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut
+        	Messages:   	Received and sent counters do not match.
+2022/12/09 13:20:26 Stopping mock backend...
+2022/12/09 13:20:26 Stopped backend. Received:         0 items (0/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut
+2022/12/09 13:20:26 Starting mock backend...
+2022/12/09 13:20:26 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:20:26 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut/agent.log
+2022/12/09 13:20:26 Agent running, pid=37825
+2022/12/09 13:20:29 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:20:29 cannot get process memory for 37825: no such process
+2022/12/09 13:20:29 cannot get process times for 37825: no such process
+2022/12/09 13:20:32 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:20:32 cannot get process memory for 37825: no such process
+2022/12/09 13:20:32 cannot get process times for 37825: no such process
+2022/12/09 13:20:35 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/12/09 13:20:35 cannot get process memory for 37825: no such process
+2022/12/09 13:20:35 cannot get process times for 37825: no such process
+    test_case.go:381: Time out waiting for connection to tcp:127.0.0.1:58489
+2022/12/09 13:20:36 Starting load generator at 10000 items/sec.
+2022/12/09 13:20:36 Cannot send traces: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:58489: connect: connection refused"
+2022/12/09 13:20:38 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17300 items | Received:         0 items (0/sec)
+2022/12/09 13:20:38 cannot get process memory for 37825: no such process
+2022/12/09 13:20:38 cannot get process times for 37825: no such process
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut
+2022/12/09 13:21:18 Starting mock backend...
+2022/12/09 13:21:18 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:21:18 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut/agent.log
+2022/12/09 13:21:18 Agent running, pid=38303
+2022/12/09 13:21:18 Starting load generator at 10000 items/sec.
+2022/12/09 13:21:21 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28300 items | Received:    27,900 items (9,299/sec)
+2022/12/09 13:21:24 Agent RAM (RES):  73 MiB, CPU: 7.6% | Sent:     58300 items | Received:    57,900 items (9,649/sec)
+2022/12/09 13:21:27 Agent RAM (RES):  75 MiB, CPU: 4.4% | Sent:     88300 items | Received:    88,000 items (9,777/sec)
+2022/12/09 13:21:30 Agent RAM (RES):  76 MiB, CPU: 4.6% | Sent:    118300 items | Received:   118,100 items (9,841/sec)
+2022/12/09 13:21:33 Agent RAM (RES):  78 MiB, CPU: 4.6% | Sent:    148300 items | Received:   148,100 items (9,873/sec)
+2022/12/09 13:21:33 Stopped generator. Sent:    150000 items
+2022/12/09 13:21:33 Gracefully terminating Agent pid=38303, sending SIGTEM...
+2022/12/09 13:21:33 Stopping process monitor.
+2022/12/09 13:21:33 Agent process stopped, exit code=0
+2022/12/09 13:21:33 Sent and received data matches.
+2022/12/09 13:21:33 Stopping mock backend...
+2022/12/09 13:21:33 Stopped backend. Received:   150,000 items (9,853/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut
+2022/12/09 13:21:33 Starting mock backend...
+2022/12/09 13:21:33 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:21:33 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut/agent.log
+2022/12/09 13:21:33 Agent running, pid=38393
+2022/12/09 13:21:33 Starting load generator at 10000 items/sec.
+2022/12/09 13:21:36 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/09 13:21:39 Agent RAM (RES):  66 MiB, CPU: 5.6% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/09 13:21:42 Agent RAM (RES):  67 MiB, CPU: 3.8% | Sent:     89100 items | Received:    87,700 items (9,743/sec)
+2022/12/09 13:21:45 Agent RAM (RES):  67 MiB, CPU: 3.7% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 13:21:48 Agent RAM (RES):  67 MiB, CPU: 4.4% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 13:21:48 Stopped generator. Sent:    149900 items
+2022/12/09 13:21:48 Gracefully terminating Agent pid=38393, sending SIGTEM...
+2022/12/09 13:21:48 Stopping process monitor.
+2022/12/09 13:21:49 Agent process stopped, exit code=0
+2022/12/09 13:21:49 Sent and received data matches.
+2022/12/09 13:21:49 Stopping mock backend...
+2022/12/09 13:21:49 Stopped backend. Received:   149,900 items (9,868/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut
+2022/12/09 13:21:49 Starting mock backend...
+2022/12/09 13:21:49 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:21:49 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut/agent.log
+2022/12/09 13:21:49 Agent running, pid=38564
+2022/12/09 13:21:49 Starting load generator at 10000 items/sec.
+2022/12/09 13:21:52 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/09 13:21:55 Agent RAM (RES):  74 MiB, CPU: 8.2% | Sent:     59100 items | Received:    57,700 items (9,616/sec)
+2022/12/09 13:21:58 Agent RAM (RES):  76 MiB, CPU: 6.4% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/09 13:22:01 Agent RAM (RES):  77 MiB, CPU: 6.1% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 13:22:04 Agent RAM (RES):  77 MiB, CPU: 5.9% | Sent:    149100 items | Received:   147,800 items (9,853/sec)
+2022/12/09 13:22:04 Stopped generator. Sent:    149900 items
+2022/12/09 13:22:04 Gracefully terminating Agent pid=38564, sending SIGTEM...
+2022/12/09 13:22:04 Stopping process monitor.
+2022/12/09 13:22:04 Agent process stopped, exit code=0
+2022/12/09 13:22:04 Sent and received data matches.
+2022/12/09 13:22:04 Stopping mock backend...
+2022/12/09 13:22:04 Stopped backend. Received:   149,900 items (9,717/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut
+2022/12/09 13:22:04 Starting mock backend...
+2022/12/09 13:22:04 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:22:04 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut/agent.log
+2022/12/09 13:22:04 Agent running, pid=38656
+2022/12/09 13:22:04 Starting load generator at 10000 items/sec.
+2022/12/09 13:22:07 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    28,000 items (9,330/sec)
+2022/12/09 13:22:10 Agent RAM (RES):  71 MiB, CPU: 7.5% | Sent:     59200 items | Received:    58,000 items (9,665/sec)
+2022/12/09 13:22:13 Agent RAM (RES):  74 MiB, CPU: 5.0% | Sent:     89200 items | Received:    88,100 items (9,787/sec)
+2022/12/09 13:22:16 Agent RAM (RES):  74 MiB, CPU: 4.7% | Sent:    119200 items | Received:   118,200 items (9,849/sec)
+2022/12/09 13:22:19 Agent RAM (RES):  75 MiB, CPU: 4.9% | Sent:    149100 items | Received:   148,200 items (9,879/sec)
+2022/12/09 13:22:19 Stopped generator. Sent:    150000 items
+2022/12/09 13:22:19 Gracefully terminating Agent pid=38656, sending SIGTEM...
+2022/12/09 13:22:19 Stopping process monitor.
+2022/12/09 13:22:19 Agent process stopped, exit code=0
+2022/12/09 13:22:19 Sent and received data matches.
+2022/12/09 13:22:19 Stopping mock backend...
+2022/12/09 13:22:19 Stopped backend. Received:   150,000 items (9,847/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut
+2022/12/09 13:22:19 Starting mock backend...
+2022/12/09 13:22:19 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:22:19 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut/agent.log
+2022/12/09 13:22:19 Agent running, pid=38825
+2022/12/09 13:22:19 Starting load generator at 10000 items/sec.
+2022/12/09 13:22:22 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29591 items | Received:    28,000 items (9,330/sec)
+2022/12/09 13:22:25 Agent RAM (RES):  95 MiB, CPU: 6.3% | Sent:     59600 items | Received:    58,100 items (9,681/sec)
+2022/12/09 13:22:28 Agent RAM (RES): 127 MiB, CPU: 3.5% | Sent:     89500 items | Received:    88,100 items (9,788/sec)
+2022/12/09 13:22:31 Agent RAM (RES): 158 MiB, CPU: 3.8% | Sent:    119560 items | Received:   118,200 items (9,849/sec)
+2022/12/09 13:22:34 Agent RAM (RES): 163 MiB, CPU: 3.4% | Sent:    149500 items | Received:   148,300 items (9,886/sec)
+2022/12/09 13:22:34 Stopped generator. Sent:    149900 items
+2022/12/09 13:22:34 Gracefully terminating Agent pid=38825, sending SIGTEM...
+2022/12/09 13:22:34 Stopping process monitor.
+2022/12/09 13:22:34 Agent process stopped, exit code=0
+2022/12/09 13:22:34 Sent and received data matches.
+2022/12/09 13:22:34 Stopping mock backend...
+2022/12/09 13:22:34 Stopped backend. Received:   149,900 items (9,902/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut
+2022/12/09 13:22:34 Starting mock backend...
+2022/12/09 13:22:34 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:22:34 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut/agent.log
+2022/12/09 13:22:34 Agent running, pid=38914
+2022/12/09 13:22:34 Starting load generator at 10000 items/sec.
+2022/12/09 13:22:37 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29600 items | Received:    28,000 items (9,331/sec)
+2022/12/09 13:22:40 Agent RAM (RES): 102 MiB, CPU: 7.5% | Sent:     59500 items | Received:    58,000 items (9,665/sec)
+2022/12/09 13:22:43 Agent RAM (RES): 134 MiB, CPU: 4.6% | Sent:     89517 items | Received:    88,100 items (9,788/sec)
+2022/12/09 13:22:46 Agent RAM (RES): 154 MiB, CPU: 5.0% | Sent:    119500 items | Received:   118,200 items (9,849/sec)
+2022/12/09 13:22:49 Agent RAM (RES): 159 MiB, CPU: 4.6% | Sent:    149500 items | Received:   148,200 items (9,880/sec)
+2022/12/09 13:22:49 Stopped generator. Sent:    150000 items
+2022/12/09 13:22:49 Gracefully terminating Agent pid=38914, sending SIGTEM...
+2022/12/09 13:22:49 Stopping process monitor.
+2022/12/09 13:22:49 Agent process stopped, exit code=0
+2022/12/09 13:22:49 Sent and received data matches.
+2022/12/09 13:22:49 Stopping mock backend...
+2022/12/09 13:22:49 Stopped backend. Received:   150,000 items (9,931/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/12/09 13:22:49 Starting mock backend...
+2022/12/09 13:22:49 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:22:49 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+2022/12/09 13:22:49 Agent running, pid=39086
+2022/12/09 13:22:50 Starting load generator at 10000 items/sec.
+2022/12/09 13:22:52 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/09 13:22:55 Agent RAM (RES):  64 MiB, CPU: 5.7% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/09 13:22:58 Agent RAM (RES):  65 MiB, CPU: 4.1% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/09 13:23:01 Agent RAM (RES):  65 MiB, CPU: 3.5% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 13:23:04 Agent RAM (RES):  66 MiB, CPU: 3.5% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 13:23:05 Stopped generator. Sent:    149900 items
+2022/12/09 13:23:05 Gracefully terminating Agent pid=39086, sending SIGTEM...
+2022/12/09 13:23:05 Stopping process monitor.
+2022/12/09 13:23:05 Agent process stopped, exit code=0
+2022/12/09 13:23:05 Sent and received data matches.
+2022/12/09 13:23:05 Stopping mock backend...
+2022/12/09 13:23:05 Stopped backend. Received:   149,900 items (9,895/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/12/09 13:23:05 Starting mock backend...
+2022/12/09 13:23:05 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:23:05 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+2022/12/09 13:23:05 Agent running, pid=39176
+2022/12/09 13:23:05 Starting load generator at 10000 items/sec.
+2022/12/09 13:23:08 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,199/sec)
+2022/12/09 13:23:11 Agent RAM (RES):  66 MiB, CPU: 6.5% | Sent:     59100 items | Received:    57,700 items (9,616/sec)
+2022/12/09 13:23:14 Agent RAM (RES):  66 MiB, CPU: 5.2% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/09 13:23:17 Agent RAM (RES):  67 MiB, CPU: 4.8% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 13:23:20 Agent RAM (RES):  67 MiB, CPU: 5.0% | Sent:    149100 items | Received:   147,800 items (9,853/sec)
+2022/12/09 13:23:20 Stopped generator. Sent:    150000 items
+2022/12/09 13:23:20 Gracefully terminating Agent pid=39176, sending SIGTEM...
+2022/12/09 13:23:20 Stopping process monitor.
+2022/12/09 13:23:20 Agent process stopped, exit code=0
+2022/12/09 13:23:20 Sent and received data matches.
+2022/12/09 13:23:20 Stopping mock backend...
+2022/12/09 13:23:20 Stopped backend. Received:   150,000 items (9,671/sec)
+--- PASS: TestTrace10kSPS (122.00s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut (15.22s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut (15.19s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut (15.43s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut (15.23s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut (15.14s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut (15.12s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP (15.15s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.51s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	122.804s
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut
+2022/12/09 13:28:10 Starting mock backend...
+2022/12/09 13:28:10 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:28:10 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut/agent.log
+2022/12/09 13:28:10 Agent running, pid=41938
+2022/12/09 13:28:10 Starting load generator at 10000 items/sec.
+2022/12/09 13:28:13 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     28300 items | Received:    28,000 items (9,332/sec)
+2022/12/09 13:28:16 Agent RAM (RES):  73 MiB, CPU: 8.2% | Sent:     58300 items | Received:    58,000 items (9,666/sec)
+2022/12/09 13:28:19 Agent RAM (RES):  75 MiB, CPU: 5.0% | Sent:     88300 items | Received:    88,100 items (9,788/sec)
+2022/12/09 13:28:22 Agent RAM (RES):  78 MiB, CPU: 4.6% | Sent:    118300 items | Received:   118,200 items (9,849/sec)
+2022/12/09 13:28:25 Agent RAM (RES):  78 MiB, CPU: 4.8% | Sent:    148300 items | Received:   148,200 items (9,879/sec)
+2022/12/09 13:28:25 Stopped generator. Sent:    150000 items
+2022/12/09 13:28:25 Gracefully terminating Agent pid=41938, sending SIGTEM...
+2022/12/09 13:28:25 Stopping process monitor.
+2022/12/09 13:28:25 Agent process stopped, exit code=0
+2022/12/09 13:28:25 Sent and received data matches.
+2022/12/09 13:28:25 Stopping mock backend...
+2022/12/09 13:28:25 Stopped backend. Received:   150,000 items (9,789/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut
+2022/12/09 13:28:25 Starting mock backend...
+2022/12/09 13:28:25 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:28:25 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut/agent.log
+2022/12/09 13:28:25 Agent running, pid=42028
+2022/12/09 13:28:25 Starting load generator at 10000 items/sec.
+2022/12/09 13:28:28 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/09 13:28:31 Agent RAM (RES):  67 MiB, CPU: 5.8% | Sent:     59100 items | Received:    57,800 items (9,632/sec)
+2022/12/09 13:28:34 Agent RAM (RES):  67 MiB, CPU: 3.8% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/09 13:28:37 Agent RAM (RES):  67 MiB, CPU: 4.3% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/09 13:28:40 Agent RAM (RES):  67 MiB, CPU: 4.0% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 13:28:40 Stopped generator. Sent:    150000 items
+2022/12/09 13:28:40 Gracefully terminating Agent pid=42028, sending SIGTEM...
+2022/12/09 13:28:40 Stopping process monitor.
+2022/12/09 13:28:41 Agent process stopped, exit code=0
+2022/12/09 13:28:41 Sent and received data matches.
+2022/12/09 13:28:41 Stopping mock backend...
+2022/12/09 13:28:41 Stopped backend. Received:   150,000 items (9,877/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut
+2022/12/09 13:28:41 Starting mock backend...
+2022/12/09 13:28:41 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:28:41 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut/agent.log
+2022/12/09 13:28:41 Agent running, pid=42214
+2022/12/09 13:28:41 Starting load generator at 10000 items/sec.
+2022/12/09 13:28:44 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/09 13:28:47 Agent RAM (RES):  73 MiB, CPU: 7.6% | Sent:     59100 items | Received:    57,600 items (9,599/sec)
+2022/12/09 13:28:50 Agent RAM (RES):  76 MiB, CPU: 5.8% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/09 13:28:53 Agent RAM (RES):  76 MiB, CPU: 5.5% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 13:28:56 Agent RAM (RES):  76 MiB, CPU: 6.1% | Sent:    149100 items | Received:   147,800 items (9,853/sec)
+2022/12/09 13:28:56 Stopped generator. Sent:    150000 items
+2022/12/09 13:28:56 Gracefully terminating Agent pid=42214, sending SIGTEM...
+2022/12/09 13:28:56 Stopping process monitor.
+2022/12/09 13:28:56 Agent process stopped, exit code=0
+2022/12/09 13:28:56 Sent and received data matches.
+2022/12/09 13:28:56 Stopping mock backend...
+2022/12/09 13:28:56 Stopped backend. Received:   150,000 items (9,672/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut
+2022/12/09 13:28:56 Starting mock backend...
+2022/12/09 13:28:56 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:28:56 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut/agent.log
+2022/12/09 13:28:56 Agent running, pid=42313
+2022/12/09 13:28:56 Starting load generator at 10000 items/sec.
+2022/12/09 13:28:59 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/09 13:29:02 Agent RAM (RES):  72 MiB, CPU: 7.0% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/09 13:29:05 Agent RAM (RES):  75 MiB, CPU: 5.0% | Sent:     89100 items | Received:    87,800 items (9,755/sec)
+2022/12/09 13:29:08 Agent RAM (RES):  75 MiB, CPU: 5.2% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 13:29:11 Agent RAM (RES):  75 MiB, CPU: 5.2% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 13:29:11 Stopped generator. Sent:    149900 items
+2022/12/09 13:29:11 Gracefully terminating Agent pid=42313, sending SIGTEM...
+2022/12/09 13:29:11 Stopping process monitor.
+2022/12/09 13:29:11 Agent process stopped, exit code=0
+2022/12/09 13:29:11 Sent and received data matches.
+2022/12/09 13:29:11 Stopping mock backend...
+2022/12/09 13:29:11 Stopped backend. Received:   149,900 items (9,926/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut
+2022/12/09 13:29:11 Starting mock backend...
+2022/12/09 13:29:11 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:29:11 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut/agent.log
+2022/12/09 13:29:11 Agent running, pid=42496
+2022/12/09 13:29:11 Starting load generator at 10000 items/sec.
+2022/12/09 13:29:14 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/09 13:29:17 Agent RAM (RES):  95 MiB, CPU: 6.6% | Sent:     59100 items | Received:    57,700 items (9,616/sec)
+2022/12/09 13:29:20 Agent RAM (RES): 127 MiB, CPU: 3.8% | Sent:     89100 items | Received:    87,700 items (9,744/sec)
+2022/12/09 13:29:23 Agent RAM (RES): 148 MiB, CPU: 3.7% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 13:29:26 Agent RAM (RES): 153 MiB, CPU: 3.6% | Sent:    149100 items | Received:   147,800 items (9,853/sec)
+2022/12/09 13:29:26 Stopped generator. Sent:    150000 items
+2022/12/09 13:29:27 Gracefully terminating Agent pid=42496, sending SIGTEM...
+2022/12/09 13:29:27 Stopping process monitor.
+2022/12/09 13:29:27 Agent process stopped, exit code=0
+2022/12/09 13:29:27 Sent and received data matches.
+2022/12/09 13:29:27 Stopping mock backend...
+2022/12/09 13:29:27 Stopped backend. Received:   150,000 items (9,717/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut
+2022/12/09 13:29:27 Starting mock backend...
+2022/12/09 13:29:27 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:29:27 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut/agent.log
+2022/12/09 13:29:27 Agent running, pid=42590
+2022/12/09 13:29:27 Starting load generator at 10000 items/sec.
+2022/12/09 13:29:30 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,198/sec)
+2022/12/09 13:29:33 Agent RAM (RES): 100 MiB, CPU: 7.4% | Sent:     59100 items | Received:    57,700 items (9,617/sec)
+2022/12/09 13:29:36 Agent RAM (RES): 133 MiB, CPU: 4.7% | Sent:     89100 items | Received:    87,700 items (9,745/sec)
+2022/12/09 13:29:39 Agent RAM (RES): 163 MiB, CPU: 4.8% | Sent:    119100 items | Received:   117,800 items (9,816/sec)
+2022/12/09 13:29:42 Agent RAM (RES): 166 MiB, CPU: 5.0% | Sent:    149100 items | Received:   147,900 items (9,860/sec)
+2022/12/09 13:29:42 Stopped generator. Sent:    149900 items
+2022/12/09 13:29:42 Gracefully terminating Agent pid=42590, sending SIGTEM...
+2022/12/09 13:29:42 Stopping process monitor.
+2022/12/09 13:29:42 Agent process stopped, exit code=0
+2022/12/09 13:29:42 Sent and received data matches.
+2022/12/09 13:29:42 Stopping mock backend...
+2022/12/09 13:29:42 Stopped backend. Received:   149,900 items (9,893/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/12/09 13:29:42 Starting mock backend...
+2022/12/09 13:29:42 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:29:42 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+2022/12/09 13:29:42 Agent running, pid=42770
+2022/12/09 13:29:42 Starting load generator at 10000 items/sec.
+2022/12/09 13:29:45 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,700 items (9,231/sec)
+2022/12/09 13:29:48 Agent RAM (RES):  65 MiB, CPU: 5.8% | Sent:     59100 items | Received:    57,700 items (9,615/sec)
+2022/12/09 13:29:51 Agent RAM (RES):  66 MiB, CPU: 4.4% | Sent:     89100 items | Received:    87,800 items (9,754/sec)
+2022/12/09 13:29:54 Agent RAM (RES):  66 MiB, CPU: 3.9% | Sent:    119100 items | Received:   117,900 items (9,824/sec)
+2022/12/09 13:29:57 Agent RAM (RES):  66 MiB, CPU: 3.8% | Sent:    149100 items | Received:   147,900 items (9,859/sec)
+2022/12/09 13:29:57 Stopped generator. Sent:    149900 items
+2022/12/09 13:29:57 Gracefully terminating Agent pid=42770, sending SIGTEM...
+2022/12/09 13:29:57 Stopping process monitor.
+2022/12/09 13:29:57 Agent process stopped, exit code=0
+2022/12/09 13:29:57 Sent and received data matches.
+2022/12/09 13:29:57 Stopping mock backend...
+2022/12/09 13:29:57 Stopped backend. Received:   149,900 items (9,876/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/12/09 13:29:57 Starting mock backend...
+2022/12/09 13:29:57 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/12/09 13:29:57 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+2022/12/09 13:29:57 Agent running, pid=42861
+2022/12/09 13:29:57 Starting load generator at 10000 items/sec.
+2022/12/09 13:30:00 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     29100 items | Received:    27,600 items (9,202/sec)
+2022/12/09 13:30:03 Agent RAM (RES):  66 MiB, CPU: 7.5% | Sent:     59100 items | Received:    57,700 items (9,618/sec)
+2022/12/09 13:30:06 Agent RAM (RES):  67 MiB, CPU: 5.3% | Sent:     89100 items | Received:    87,700 items (9,745/sec)
+2022/12/09 13:30:09 Agent RAM (RES):  67 MiB, CPU: 5.1% | Sent:    119100 items | Received:   117,800 items (9,817/sec)
+2022/12/09 13:30:12 Agent RAM (RES):  68 MiB, CPU: 5.3% | Sent:    149100 items | Received:   147,900 items (9,860/sec)
+2022/12/09 13:30:12 Stopped generator. Sent:    150000 items
+2022/12/09 13:30:12 Gracefully terminating Agent pid=42861, sending SIGTEM...
+2022/12/09 13:30:12 Stopping process monitor.
+2022/12/09 13:30:12 Agent process stopped, exit code=0
+2022/12/09 13:30:12 Sent and received data matches.
+2022/12/09 13:30:12 Stopping mock backend...
+2022/12/09 13:30:12 Stopped backend. Received:   150,000 items (9,724/sec)
+--- PASS: TestTrace10kSPS (122.34s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-plainOut (15.33s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-plainOut (15.19s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-gzipOut (15.51s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-gzipOut (15.10s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-plainIn-zstdOut (15.44s)
+    --- PASS: TestTrace10kSPS/OTLP-gRPC-gzipIn-zstdOut (15.15s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP (15.18s)
+    --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.43s)
+PASS
+ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	123.139s

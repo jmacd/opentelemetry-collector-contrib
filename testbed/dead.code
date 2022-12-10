@@ -1,0 +1,30 @@
+
+replace go.opentelemetry.io/collector => ../../collector
+
+replace go.opentelemetry.io/collector/service => ../../collector/service
+
+replace go.opentelemetry.io/collector/component => ../../collector/component
+
+replace go.opentelemetry.io/collector/confmap => ../../collector/confmap
+
+replace go.opentelemetry.io/collector/consumer => ../../collector/consumer
+
+replace go.opentelemetry.io/collector/exporter/loggingexporter => ../../collector/exporter/loggingexporter
+
+replace go.opentelemetry.io/collector/exporter/otlpexporter => ../../collector/exporter/otlpexporter
+
+replace go.opentelemetry.io/collector/exporter/otlphttpexporter => ../../collector/exporter/otlphttpexporter
+
+replace go.opentelemetry.io/collector/extension/ballastextension => ../../collector/extension/ballastextension
+
+replace go.opentelemetry.io/collector/extension/zpagesextension => ../../collector/extension/zpagesextension
+
+replace go.opentelemetry.io/collector/pdata => ../../collector/pdata
+
+replace go.opentelemetry.io/collector/processor/batchprocessor => ../../collector/processor/batchprocessor
+
+replace go.opentelemetry.io/collector/processor/memorylimiterprocessor => ../../collector/processor/memorylimiterprocessor
+
+replace go.opentelemetry.io/collector/receiver/otlpreceiver => ../../collector/receiver/otlpreceiver
+
+replace go.opentelemetry.io/collector/semconv => ../../collector/semconv

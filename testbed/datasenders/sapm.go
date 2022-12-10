@@ -21,6 +21,11 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer"
+<<<<<<< HEAD
+=======
+	"go.opentelemetry.io/collector/exporter/exportertest"
+	"go.uber.org/zap"
+>>>>>>> 08cd036e9da7fa0678402fe8ce1d4d7bd3234a6a
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sapmexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed"
@@ -55,6 +60,11 @@ func (je *SapmDataSender) Start() error {
 		DisableCompression: true,
 		AccessToken:        "MyToken",
 	}
+<<<<<<< HEAD
+=======
+	params := exportertest.NewNopCreateSettings()
+	params.Logger = zap.L()
+>>>>>>> 08cd036e9da7fa0678402fe8ce1d4d7bd3234a6a
 
 	exporter, err := factory.CreateTracesExporter(context.Background(), testbed.ExporterCreateSettings(), cfg)
 	if err != nil {

@@ -1,0 +1,213 @@
+=== RUN   TestTrace10kSPS
+=== RUN   TestTrace10kSPS/OTLP-gRPC
+2022/11/30 13:54:57 Starting mock backend...
+2022/11/30 13:54:57 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/11/30 13:54:57 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC/agent.log
+2022/11/30 13:54:57 Agent running, pid=26120
+2022/11/30 13:55:00 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:55:00 cannot get process memory for 26120: no such process
+2022/11/30 13:55:00 cannot get process times for 26120: no such process
+2022/11/30 13:55:03 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:55:03 cannot get process memory for 26120: no such process
+2022/11/30 13:55:03 cannot get process times for 26120: no such process
+2022/11/30 13:55:06 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:55:06 cannot get process memory for 26120: no such process
+2022/11/30 13:55:06 cannot get process times for 26120: no such process
+    test_case.go:287: Time out waiting for connection to tcp:127.0.0.1:57107
+2022/11/30 13:55:07 Starting load generator at 10000 items/sec.
+2022/11/30 13:55:07 Cannot send traces: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:57107: connect: connection refused"
+2022/11/30 13:55:09 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17200 items | Received:         0 items (0/sec)
+2022/11/30 13:55:09 cannot get process memory for 26120: no such process
+2022/11/30 13:55:09 cannot get process times for 26120: no such process
+2022/11/30 13:55:12 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     47200 items | Received:         0 items (0/sec)
+2022/11/30 13:55:12 cannot get process memory for 26120: no such process
+2022/11/30 13:55:12 cannot get process times for 26120: no such process
+2022/11/30 13:55:15 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     77200 items | Received:         0 items (0/sec)
+2022/11/30 13:55:15 cannot get process memory for 26120: no such process
+2022/11/30 13:55:15 cannot get process times for 26120: no such process
+2022/11/30 13:55:18 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    107200 items | Received:         0 items (0/sec)
+2022/11/30 13:55:18 cannot get process memory for 26120: no such process
+2022/11/30 13:55:18 cannot get process times for 26120: no such process
+2022/11/30 13:55:21 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    137200 items | Received:         0 items (0/sec)
+2022/11/30 13:55:21 cannot get process memory for 26120: no such process
+2022/11/30 13:55:21 cannot get process times for 26120: no such process
+2022/11/30 13:55:22 Stopped generator. Sent:    149900 items
+2022/11/30 13:55:24 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149900 items | Received:         0 items (0/sec)
+2022/11/30 13:55:24 cannot get process memory for 26120: no such process
+2022/11/30 13:55:24 cannot get process times for 26120: no such process
+2022/11/30 13:55:27 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149900 items | Received:         0 items (0/sec)
+2022/11/30 13:55:27 cannot get process memory for 26120: no such process
+2022/11/30 13:55:27 cannot get process times for 26120: no such process
+2022/11/30 13:55:30 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149900 items | Received:         0 items (0/sec)
+2022/11/30 13:55:30 cannot get process memory for 26120: no such process
+2022/11/30 13:55:30 cannot get process times for 26120: no such process
+    test_case.go:287: Time out waiting for all data items received
+2022/11/30 13:55:33 Gracefully terminating Agent pid=26120, sending SIGTEM...
+2022/11/30 13:55:33 Agent process stopped, exit code=2
+2022/11/30 13:55:33 Agent execution failed: exit status 2
+2022/11/30 13:55:33 exit status 2
+    test_case.go:303: exit status 2
+2022/11/30 13:55:33 Stopping mock backend...
+2022/11/30 13:55:33 Stopping process monitor.
+2022/11/30 13:55:33 Stopped backend. Received:         0 items (0/sec)
+=== RUN   TestTrace10kSPS/OTLP-gRPC-gzip
+2022/11/30 13:55:33 Starting mock backend...
+2022/11/30 13:55:33 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/11/30 13:55:33 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-gRPC-gzip/agent.log
+2022/11/30 13:55:33 Agent running, pid=26424
+2022/11/30 13:55:36 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:55:36 cannot get process memory for 26424: no such process
+2022/11/30 13:55:36 cannot get process times for 26424: no such process
+2022/11/30 13:55:39 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:55:39 cannot get process memory for 26424: no such process
+2022/11/30 13:55:39 cannot get process times for 26424: no such process
+2022/11/30 13:55:42 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:55:42 cannot get process memory for 26424: no such process
+2022/11/30 13:55:42 cannot get process times for 26424: no such process
+    test_case.go:287: Time out waiting for connection to tcp:127.0.0.1:57109
+2022/11/30 13:55:43 Starting load generator at 10000 items/sec.
+2022/11/30 13:55:43 Cannot send traces: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 127.0.0.1:57109: connect: connection refused"
+2022/11/30 13:55:45 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17100 items | Received:         0 items (0/sec)
+2022/11/30 13:55:45 cannot get process memory for 26424: no such process
+2022/11/30 13:55:45 cannot get process times for 26424: no such process
+2022/11/30 13:55:48 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     47100 items | Received:         0 items (0/sec)
+2022/11/30 13:55:48 cannot get process memory for 26424: no such process
+2022/11/30 13:55:48 cannot get process times for 26424: no such process
+2022/11/30 13:55:51 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     77100 items | Received:         0 items (0/sec)
+2022/11/30 13:55:51 cannot get process memory for 26424: no such process
+2022/11/30 13:55:51 cannot get process times for 26424: no such process
+2022/11/30 13:55:54 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    107000 items | Received:         0 items (0/sec)
+2022/11/30 13:55:54 cannot get process memory for 26424: no such process
+2022/11/30 13:55:54 cannot get process times for 26424: no such process
+2022/11/30 13:55:57 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    137000 items | Received:         0 items (0/sec)
+2022/11/30 13:55:57 cannot get process memory for 26424: no such process
+2022/11/30 13:55:57 cannot get process times for 26424: no such process
+2022/11/30 13:55:58 Stopped generator. Sent:    149800 items
+2022/11/30 13:56:00 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149800 items | Received:         0 items (0/sec)
+2022/11/30 13:56:00 cannot get process memory for 26424: no such process
+2022/11/30 13:56:00 cannot get process times for 26424: no such process
+2022/11/30 13:56:03 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149800 items | Received:         0 items (0/sec)
+2022/11/30 13:56:03 cannot get process memory for 26424: no such process
+2022/11/30 13:56:03 cannot get process times for 26424: no such process
+2022/11/30 13:56:06 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149800 items | Received:         0 items (0/sec)
+2022/11/30 13:56:06 cannot get process memory for 26424: no such process
+2022/11/30 13:56:06 cannot get process times for 26424: no such process
+    test_case.go:287: Time out waiting for all data items received
+2022/11/30 13:56:08 Gracefully terminating Agent pid=26424, sending SIGTEM...
+2022/11/30 13:56:08 Agent process stopped, exit code=2
+2022/11/30 13:56:08 Agent execution failed: exit status 2
+2022/11/30 13:56:08 exit status 2
+2022/11/30 13:56:08 Stopping process monitor.
+    test_case.go:303: exit status 2
+2022/11/30 13:56:08 Stopping mock backend...
+2022/11/30 13:56:08 Stopped backend. Received:         0 items (0/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP
+2022/11/30 13:56:08 Starting mock backend...
+2022/11/30 13:56:08 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/11/30 13:56:08 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP/agent.log
+2022/11/30 13:56:08 Agent running, pid=26756
+2022/11/30 13:56:11 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:56:11 cannot get process memory for 26756: no such process
+2022/11/30 13:56:11 cannot get process times for 26756: no such process
+2022/11/30 13:56:14 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:56:14 cannot get process memory for 26756: no such process
+2022/11/30 13:56:14 cannot get process times for 26756: no such process
+2022/11/30 13:56:17 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:56:17 cannot get process memory for 26756: no such process
+2022/11/30 13:56:17 cannot get process times for 26756: no such process
+    test_case.go:287: Time out waiting for connection to tcp:127.0.0.1:57111
+2022/11/30 13:56:18 Starting load generator at 10000 items/sec.
+2022/11/30 13:56:18 Cannot send traces: failed to make an HTTP request: Post "http://127.0.0.1:57111/v1/traces": dial tcp 127.0.0.1:57111: connect: connection refused
+2022/11/30 13:56:20 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17100 items | Received:         0 items (0/sec)
+2022/11/30 13:56:20 cannot get process memory for 26756: no such process
+2022/11/30 13:56:20 cannot get process times for 26756: no such process
+2022/11/30 13:56:23 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     47100 items | Received:         0 items (0/sec)
+2022/11/30 13:56:23 cannot get process memory for 26756: no such process
+2022/11/30 13:56:23 cannot get process times for 26756: no such process
+2022/11/30 13:56:26 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     77100 items | Received:         0 items (0/sec)
+2022/11/30 13:56:26 cannot get process memory for 26756: no such process
+2022/11/30 13:56:26 cannot get process times for 26756: no such process
+2022/11/30 13:56:29 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    107100 items | Received:         0 items (0/sec)
+2022/11/30 13:56:29 cannot get process memory for 26756: no such process
+2022/11/30 13:56:29 cannot get process times for 26756: no such process
+2022/11/30 13:56:32 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    137100 items | Received:         0 items (0/sec)
+2022/11/30 13:56:32 cannot get process memory for 26756: no such process
+2022/11/30 13:56:32 cannot get process times for 26756: no such process
+2022/11/30 13:56:33 Stopped generator. Sent:    149900 items
+2022/11/30 13:56:35 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149900 items | Received:         0 items (0/sec)
+2022/11/30 13:56:35 cannot get process memory for 26756: no such process
+2022/11/30 13:56:35 cannot get process times for 26756: no such process
+2022/11/30 13:56:38 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149900 items | Received:         0 items (0/sec)
+2022/11/30 13:56:38 cannot get process memory for 26756: no such process
+2022/11/30 13:56:38 cannot get process times for 26756: no such process
+2022/11/30 13:56:41 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149900 items | Received:         0 items (0/sec)
+2022/11/30 13:56:41 cannot get process memory for 26756: no such process
+2022/11/30 13:56:41 cannot get process times for 26756: no such process
+    test_case.go:287: Time out waiting for all data items received
+2022/11/30 13:56:44 Gracefully terminating Agent pid=26756, sending SIGTEM...
+2022/11/30 13:56:44 Agent process stopped, exit code=1
+2022/11/30 13:56:44 Agent execution failed: exit status 1
+2022/11/30 13:56:44 exit status 1
+    test_case.go:303: exit status 1
+2022/11/30 13:56:44 Stopping mock backend...
+2022/11/30 13:56:44 Stopping process monitor.
+2022/11/30 13:56:44 Stopped backend. Received:         0 items (0/sec)
+=== RUN   TestTrace10kSPS/OTLP-HTTP-gzip
+2022/11/30 13:56:44 Starting mock backend...
+2022/11/30 13:56:44 Starting Agent (/Users/josh.macdonald/src/opentelemetry/collector-contrib/bin/otelcontribcol_testbed_darwin_arm64)
+2022/11/30 13:56:44 Writing Agent log to /Users/josh.macdonald/src/opentelemetry/collector-contrib/testbed/tests/results/TestTrace10kSPS/OTLP-HTTP-gzip/agent.log
+2022/11/30 13:56:44 Agent running, pid=27012
+2022/11/30 13:56:47 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:56:47 cannot get process memory for 27012: no such process
+2022/11/30 13:56:47 cannot get process times for 27012: no such process
+2022/11/30 13:56:50 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:56:50 cannot get process memory for 27012: no such process
+2022/11/30 13:56:50 cannot get process times for 27012: no such process
+2022/11/30 13:56:53 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:         0 items | Received:         0 items (0/sec)
+2022/11/30 13:56:53 cannot get process memory for 27012: no such process
+2022/11/30 13:56:53 cannot get process times for 27012: no such process
+    test_case.go:287: Time out waiting for connection to tcp:127.0.0.1:57113
+2022/11/30 13:56:54 Starting load generator at 10000 items/sec.
+2022/11/30 13:56:54 Cannot send traces: failed to make an HTTP request: Post "http://127.0.0.1:57113/v1/traces": dial tcp 127.0.0.1:57113: connect: connection refused
+2022/11/30 13:56:56 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     17100 items | Received:         0 items (0/sec)
+2022/11/30 13:56:56 cannot get process memory for 27012: no such process
+2022/11/30 13:56:56 cannot get process times for 27012: no such process
+2022/11/30 13:56:59 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     47000 items | Received:         0 items (0/sec)
+2022/11/30 13:56:59 cannot get process memory for 27012: no such process
+2022/11/30 13:56:59 cannot get process times for 27012: no such process
+2022/11/30 13:57:02 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:     76900 items | Received:         0 items (0/sec)
+2022/11/30 13:57:02 cannot get process memory for 27012: no such process
+2022/11/30 13:57:02 cannot get process times for 27012: no such process
+2022/11/30 13:57:05 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    106900 items | Received:         0 items (0/sec)
+2022/11/30 13:57:05 cannot get process memory for 27012: no such process
+2022/11/30 13:57:05 cannot get process times for 27012: no such process
+2022/11/30 13:57:08 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    136900 items | Received:         0 items (0/sec)
+2022/11/30 13:57:08 cannot get process memory for 27012: no such process
+2022/11/30 13:57:08 cannot get process times for 27012: no such process
+2022/11/30 13:57:09 Stopped generator. Sent:    149800 items
+2022/11/30 13:57:11 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149800 items | Received:         0 items (0/sec)
+2022/11/30 13:57:11 cannot get process memory for 27012: no such process
+2022/11/30 13:57:11 cannot get process times for 27012: no such process
+2022/11/30 13:57:14 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149800 items | Received:         0 items (0/sec)
+2022/11/30 13:57:14 cannot get process memory for 27012: no such process
+2022/11/30 13:57:14 cannot get process times for 27012: no such process
+2022/11/30 13:57:17 Agent RAM (RES):   0 MiB, CPU: 0.0% | Sent:    149800 items | Received:         0 items (0/sec)
+2022/11/30 13:57:17 cannot get process memory for 27012: no such process
+2022/11/30 13:57:17 cannot get process times for 27012: no such process
+    test_case.go:287: Time out waiting for all data items received
+2022/11/30 13:57:19 Gracefully terminating Agent pid=27012, sending SIGTEM...
+2022/11/30 13:57:19 Agent process stopped, exit code=1
+2022/11/30 13:57:19 Agent execution failed: exit status 1
+2022/11/30 13:57:19 exit status 1
+    test_case.go:303: exit status 1
+2022/11/30 13:57:19 Stopping mock backend...
+2022/11/30 13:57:19 Stopping process monitor.
+2022/11/30 13:57:19 Stopped backend. Received:         0 items (0/sec)
+--- [31mFAIL[0m: TestTrace10kSPS (142.19s)
+    --- [31mFAIL[0m: TestTrace10kSPS/OTLP-gRPC (35.54s)
+    --- [31mFAIL[0m: TestTrace10kSPS/OTLP-gRPC-gzip (35.55s)
+    --- [31mFAIL[0m: TestTrace10kSPS/OTLP-HTTP (35.55s)
+    --- [31mFAIL[0m: TestTrace10kSPS/OTLP-HTTP-gzip (35.56s)
+[31mFAIL[0m
+exit status 1
+[31mFAIL[0m	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	143.105s

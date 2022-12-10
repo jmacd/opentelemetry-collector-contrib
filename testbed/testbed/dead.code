@@ -1,0 +1,51 @@
+
+// ExporterCreateSettings creates exporter settings that can be
+// monitored by the testbed.
+func (dsb *DataSenderBase) ExporterCreateSettings() component.ExporterCreateSettings {
+	dsb.Reader = metric.NewManualReader()
+	provider := metric.NewMeterProvider(metric.WithReader(dsb.Reader))
+
+	params := componenttest.NewNopExporterCreateSettings()
+	params.Logger = zap.L()
+	params.MetricsLevel = configtelemetry.LevelDetailed
+	params.MeterProvider = provider
+
+	return params
+}
+		for _, m := range val.Metric {
+			var s string
+			for _, l := range m.GetLabel() {
+				s = fmt.Sprint(s, ",", l.GetName(), "=", l.GetValue())
+			}
+			fmt.Println("ATTRS", s)
+		}
+
+	
+	// data, err := reader.Collect(context.Background())
+	// require.NoError(t, err)
+
+	// require.Equal(t, 1, len(data.ScopeMetrics))
+	// require.Equal(t, expectScope, data.ScopeMetrics[0].Scope)
+
+	comp := "none"
+	if bor.compression != "" {
+		comp = bor.compression
+	}
+	str += fmt.Sprintf(`
+    compression: "%s"`, comp)
+
+
+
+		// require.Less(t, len(val.Metric), 3)
+
+		// for _, m := range val.Metric {
+		// 	var s string
+		// 	for _, l := range m.GetLabel() {
+		// 		s = fmt.Sprint(s, ",", l.GetName(), "=", l.GetValue())
+		// 	}
+		// 		fmt.Println(s)
+		// 	}
+		// }
+
+		// require.Equal(tc.t, 1, len(val.Metric), "for %v", val)
+
