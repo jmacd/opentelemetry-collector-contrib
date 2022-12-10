@@ -20,11 +20,6 @@ import (
 
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer"
-<<<<<<< HEAD
-=======
-	"go.opentelemetry.io/collector/exporter/exportertest"
-	"go.uber.org/zap"
->>>>>>> 08cd036e9da7fa0678402fe8ce1d4d7bd3234a6a
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed"
@@ -55,11 +50,6 @@ func (zs *zipkinDataSender) Start() error {
 	cfg.RetrySettings.Enabled = false
 	// Disable sending queue, we should push data from the caller goroutine.
 	cfg.QueueSettings.Enabled = false
-<<<<<<< HEAD
-=======
-	params := exportertest.NewNopCreateSettings()
-	params.Logger = zap.L()
->>>>>>> 08cd036e9da7fa0678402fe8ce1d4d7bd3234a6a
 
 	exp, err := factory.CreateTracesExporter(context.Background(), testbed.ExporterCreateSettings(), cfg)
 	if err != nil {

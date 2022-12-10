@@ -20,11 +20,6 @@ import (
 
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/consumer"
-<<<<<<< HEAD
-=======
-	"go.opentelemetry.io/collector/exporter/exportertest"
-	"go.uber.org/zap"
->>>>>>> 08cd036e9da7fa0678402fe8ce1d4d7bd3234a6a
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed"
@@ -52,11 +47,6 @@ func (pds *prometheusDataSender) Start() error {
 	cfg := factory.CreateDefaultConfig().(*prometheusexporter.Config)
 	cfg.Endpoint = pds.GetEndpoint().String()
 	cfg.Namespace = pds.namespace
-<<<<<<< HEAD
-=======
-	params := exportertest.NewNopCreateSettings()
-	params.Logger = zap.L()
->>>>>>> 08cd036e9da7fa0678402fe8ce1d4d7bd3234a6a
 
 	exp, err := factory.CreateMetricsExporter(context.Background(), testbed.ExporterCreateSettings(), cfg)
 	if err != nil {

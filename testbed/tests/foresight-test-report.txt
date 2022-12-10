@@ -1962,3 +1962,6 @@ ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	122
     --- PASS: TestTrace10kSPS/OTLP-HTTP-gzip (15.43s)
 PASS
 ok  	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests	123.139s
+# github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests
+../datasenders/carbon.go:25:1: expected 'STRING', found '<<'
+FAIL	github.com/open-telemetry/opentelemetry-collector-contrib/testbed/tests [setup failed]

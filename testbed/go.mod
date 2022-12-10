@@ -4,8 +4,12 @@ go 1.18
 
 require (
 	github.com/fluent/fluent-logger-golang v1.9.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/carbonexporter v0.0.0-00010101000000-000000000000
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/jaegerexporter v0.67.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/opencensusexporter v0.67.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/prometheusexporter v0.0.0-00010101000000-000000000000
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/sapmexporter v0.0.0-00010101000000-000000000000
+	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/signalfxexporter v0.67.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/exporter/zipkinexporter v0.67.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/common v0.67.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.67.0
@@ -63,7 +67,6 @@ require (
 	github.com/armon/go-metrics v0.4.0 // indirect
 	github.com/aws/aws-sdk-go v1.44.155 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -90,7 +93,9 @@ require (
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/swag v0.22.1 // indirect
 	github.com/go-resty/resty/v2 v2.1.1-0.20191201195748-d7b97669fe48 // indirect
+	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/go-zookeeper/zk v1.0.3 // indirect
+	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gogo/googleapis v1.4.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.2.0 // indirect
@@ -114,7 +119,6 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.3.1 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
-	github.com/hashicorp/go-msgpack v0.5.5 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
@@ -150,6 +154,9 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/sharedcomponent v0.67.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/batchperresourceattr v0.67.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/experimentalmetricmetadata v0.67.0 // indirect
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry v0.67.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/jaeger v0.67.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.67.0 // indirect
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus v0.67.0 // indirect
@@ -171,7 +178,10 @@ require (
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.9 // indirect
 	github.com/signalfx/com_signalfx_metrics_protobuf v0.0.3 // indirect
+	github.com/signalfx/gohistogram v0.0.0-20160107210732-1ccfd2ff5083 // indirect
+	github.com/signalfx/golib/v3 v3.3.46 // indirect
 	github.com/signalfx/sapm-proto v0.12.0 // indirect
+	github.com/signalfx/signalfx-agent/pkg/apm v0.0.0-20220920175102-539ae8d8ba8e // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/spf13/cobra v1.6.1 // indirect
