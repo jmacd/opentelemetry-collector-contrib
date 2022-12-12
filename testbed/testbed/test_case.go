@@ -95,7 +95,7 @@ type TestCase struct {
 }
 
 const mibibyte = 1024 * 1024
-const testcaseDurationVar = "TESTCASE_DURATION"
+const testcaseDurationVar = "TESTBED_DURATION"
 
 // NewTestCase creates a new TestCase. It expects agent-config.yaml in the specified directory.
 func NewTestCase(
@@ -267,13 +267,13 @@ func (tc *TestCase) gatherAgentMetrics() {
 		cnt := val.Metric[0].GetCounter()
 		val := cnt.GetValue()
 
-		if strings.HasSuffix(key, "_sent_wire_bytes_total") {
+		if strings.HasSuffix(key, "_sent_wire_total") {
 			ns.sentWireBytes = val
-		} else if strings.HasSuffix(key, "_sent_bytes_total") {
+		} else if strings.HasSuffix(key, "_sent_total") {
 			ns.sentBytes = val
-		} else if strings.HasSuffix(key, "_recv_wire_bytes_total") {
+		} else if strings.HasSuffix(key, "_recv_wire_total") {
 			ns.recvWireBytes = val
-		} else if strings.HasSuffix(key, "_recv_bytes_total") {
+		} else if strings.HasSuffix(key, "_recv_total") {
 			ns.recvBytes = val
 		} else {
 			continue
@@ -319,6 +319,8 @@ func (tc *TestCase) AgentMemoryInfo() (uint32, uint32, error) {
 
 // Stop stops the load generator, the agent and the backend.
 func (tc *TestCase) Stop() {
+	testDuration := time.Since(tc.MockBackend.startedAt)
+
 	// Stop monitoring the agent
 	close(tc.doneSignal)
 
@@ -326,6 +328,8 @@ func (tc *TestCase) Stop() {
 	tc.StopLoad()
 	tc.StopAgent()
 	tc.StopBackend()
+
+	tc.logFinalStats(testDuration)
 
 	if tc.skipResults {
 		return
@@ -434,4 +438,21 @@ func (tc *TestCase) logStatsOnce() {
 		tc.agentProc.GetResourceConsumption(),
 		tc.LoadGenerator.GetStats(),
 		tc.MockBackend.GetStats())
+}
+
+func (tc *TestCase) logFinalStats(testDuration time.Duration) {
+	if es := tc.exporterStats; es != nil {
+		log.Printf("Exporter %.4f MiB/s (%.4f wire MiB/s); recv %.4f MiB/s (%.4f wire MiB/s)",
+			float64(es.sentBytes)/mibibyte/testDuration.Seconds(),
+			float64(es.sentWireBytes)/mibibyte/testDuration.Seconds(),
+			float64(es.recvBytes)/mibibyte/testDuration.Seconds(),
+			float64(es.recvWireBytes)/mibibyte/testDuration.Seconds())
+	}
+	if rs := tc.receiverStats; rs != nil {
+		log.Printf("Receiver %.4f MiB/s (%.4f wire MiB/s); sent %.4f MiB/s (%.4f wire MiB/s)",
+			float64(rs.recvBytes)/mibibyte/testDuration.Seconds(),
+			float64(rs.recvWireBytes)/mibibyte/testDuration.Seconds(),
+			float64(rs.sentBytes)/mibibyte/testDuration.Seconds(),
+			float64(rs.sentWireBytes)/mibibyte/testDuration.Seconds())
+	}
 }

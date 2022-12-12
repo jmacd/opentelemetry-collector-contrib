@@ -64,6 +64,7 @@ type BaseOTLPDataReceiver struct {
 	metricsReceiver receiver.Metrics
 	logReceiver     receiver.Logs
 	compression     string
+	arrowStreams    int
 }
 
 func (bor *BaseOTLPDataReceiver) Start(tc consumer.Traces, mc consumer.Metrics, lc consumer.Logs) error {
@@ -75,6 +76,11 @@ func (bor *BaseOTLPDataReceiver) Start(tc consumer.Traces, mc consumer.Metrics, 
 	} else {
 		cfg.HTTP.Endpoint = fmt.Sprintf("127.0.0.1:%d", bor.Port)
 		cfg.GRPC = nil
+	}
+	if bor.arrowStreams > 0 {
+		cfg.Protocols.Arrow = &otlpreceiver.ArrowSettings{
+			Enabled: true,
+		}
 	}
 	var err error
 	set := receivertest.NewNopCreateSettings()
@@ -99,6 +105,11 @@ func (bor *BaseOTLPDataReceiver) Start(tc consumer.Traces, mc consumer.Metrics, 
 
 func (bor *BaseOTLPDataReceiver) WithCompression(compression string) *BaseOTLPDataReceiver {
 	bor.compression = compression
+	return bor
+}
+
+func (bor *BaseOTLPDataReceiver) WithArrow(n int) *BaseOTLPDataReceiver {
+	bor.arrowStreams = n
 	return bor
 }
 
@@ -134,6 +145,13 @@ func (bor *BaseOTLPDataReceiver) GenConfigYAMLStr() string {
 	}
 	str += fmt.Sprintf(`
     compression: "%s"`, comp)
+
+	if bor.arrowStreams > 0 {
+		str = str + fmt.Sprintf(`
+    arrow:
+      enabled: true
+      num_streams: %d`, bor.arrowStreams)
+	}
 
 	return str
 }

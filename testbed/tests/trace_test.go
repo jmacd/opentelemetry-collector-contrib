@@ -22,7 +22,9 @@ package tests
 
 import (
 	"context"
+	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,8 +48,16 @@ func inputWithGzip(cfg *otlpexporter.Config) {
 	cfg.GRPCClientSettings.Compression = "gzip"
 }
 
+func inputWithZstd(cfg *otlpexporter.Config) {
+	cfg.GRPCClientSettings.Compression = "zstd"
+}
+
 func inputNoCompression(cfg *otlpexporter.Config) {
 	cfg.GRPCClientSettings.Compression = "none"
+}
+
+func inputWithArrow1(cfg *otlpexporter.Config) {
+	cfg.EnableArrow(1)
 }
 
 func TestTrace10kSPS(t *testing.T) {
@@ -118,13 +128,31 @@ func TestTrace10kSPS(t *testing.T) {
 			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("zstd"),
 			testbed.ResourceSpec{
 				ExpectedMaxCPU: 30,
-				ExpectedMaxRAM: 175,
+				ExpectedMaxRAM: 200,
 			},
 		},
 		{
 			"OTLP-gRPC-gzipIn-zstdOut",
 			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithGzip),
 			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("zstd"),
+			testbed.ResourceSpec{
+				ExpectedMaxCPU: 30,
+				ExpectedMaxRAM: 200,
+			},
+		},
+		{
+			"OTLP-Arrow-gzipIn-arrowZstdOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithGzip),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("zstd").WithArrow(1),
+			testbed.ResourceSpec{
+				ExpectedMaxCPU: 30,
+				ExpectedMaxRAM: 350,
+			},
+		},
+		{
+			"OTLP-Arrow-arrowZstdIn-plainOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithArrow1, inputWithZstd),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("none"),
 			testbed.ResourceSpec{
 				ExpectedMaxCPU: 30,
 				ExpectedMaxRAM: 200,
@@ -524,6 +552,124 @@ func TestTraceAttributesProcessor(t *testing.T) {
 				// Verify attributes was not added to the new internal data span.
 				assert.Equal(t, span.Attributes().Len(), 0)
 			})
+		})
+	}
+}
+
+func TestTracesFromFile(t *testing.T) {
+	tests := []struct {
+		name     string
+		sender   testbed.DataSender
+		receiver testbed.DataReceiver
+	}{
+		{
+			"OTLP-gRPC-gzipIn-plainOut",
+			testbed.NewOTLPTraceDataSender(
+				testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithGzip),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("none"),
+		},
+		{
+			"OTLP-gRPC-plainIn-plainOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputNoCompression),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("none"),
+		},
+		{
+			"OTLP-gRPC-gzipIn-gzipOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithGzip),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("gzip"),
+		},
+		{
+			"OTLP-gRPC-plainIn-gzipOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputNoCompression),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("gzip"),
+		},
+		{
+			"OTLP-gRPC-plainIn-zstdOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputNoCompression),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("zstd"),
+		},
+		{
+			"OTLP-gRPC-gzipIn-zstdOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithGzip),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("zstd"),
+		},
+		{
+			"OTLP-Arrow-gzipIn-arrowZstdOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithGzip),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("zstd").WithArrow(1),
+		},
+		{
+			"OTLP-Arrow-arrowZstdIn-plainOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithArrow1, inputWithZstd),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("none"),
+		},
+	}
+
+	processors := map[string]string{
+		"batch": `
+  batch:
+`,
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			resultDir, err := filepath.Abs(filepath.Join("results", t.Name()))
+			require.NoError(t, err)
+
+			path := os.Getenv("TESTBED_TRACES_DATASET_FILE")
+			if path == "" {
+				t.Skip("please set TESTBED_TRACES_DATASET_FILE to use this test")
+				return
+			}
+
+			batchSize, err := strconv.Atoi(os.Getenv("TESTBED_TRACES_BATCH_SIZE"))
+			assert.NoError(t, err, "please set TESTBED_TRACES_BATCH_SIZE to an integer")
+
+			// TODO sort order option
+
+			dataProvider, err := testbed.NewRealTraceDatasetProvider(path, uint64(batchSize), []string{})
+			assert.NoError(t, err)
+
+			options := testbed.LoadOptions{
+				DataItemsPerSecond: 1000, // TODO rate option
+				Parallel:           1,    // TODO parallelism option
+				ItemsPerBatch:      batchSize,
+			}
+			agentProc := testbed.NewChildProcessCollector()
+
+			configStr, metricsPort := createConfigYaml(t, test.sender, test.receiver, resultDir, processors, nil)
+			configCleanup, err := agentProc.PrepareConfig(configStr)
+			require.NoError(t, err)
+			defer configCleanup()
+
+			tc := testbed.NewTestCase(
+				t,
+				dataProvider,
+				test.sender,
+				test.receiver,
+				agentProc,
+				&testbed.PerfTestValidator{},
+				performanceResultsSummary,
+				testbed.WithMetricsPort(metricsPort),
+			)
+			defer tc.Stop()
+
+			tc.StartBackend()
+			tc.StartAgent()
+
+			tc.StartLoad(options)
+
+			tc.Sleep(tc.Duration)
+
+			tc.StopLoad()
+
+			tc.WaitFor(func() bool { return tc.LoadGenerator.DataItemsSent() > 0 }, "load generator started")
+			tc.WaitFor(func() bool { return tc.LoadGenerator.DataItemsSent() == tc.MockBackend.DataItemsReceived() },
+				"all data items received")
+
+			tc.StopAgent()
+
+			tc.ValidateData()
 		})
 	}
 }
