@@ -105,9 +105,9 @@ func TestTrace10kSPS(t *testing.T) {
 			},
 		},
 		{
-			"OTLP-gRPC-gzipIn-gzipOut",
+			"OTLP-gRPC-gzipIn-zstdOut",
 			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithGzip),
-			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("gzip"),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("zstd"),
 			testbed.ResourceSpec{
 				ExpectedMaxCPU: 30,
 				ExpectedMaxRAM: 100,
@@ -123,9 +123,9 @@ func TestTrace10kSPS(t *testing.T) {
 			},
 		},
 		{
-			"OTLP-gRPC-plainIn-zstdOut",
+			"OTLP-gRPC-plainIn-gzipOut",
 			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputNoCompression),
-			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("zstd"),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("gzip"),
 			testbed.ResourceSpec{
 				ExpectedMaxCPU: 30,
 				ExpectedMaxRAM: 200,
@@ -141,17 +141,17 @@ func TestTrace10kSPS(t *testing.T) {
 			},
 		},
 		{
-			"OTLP-Arrow-gzipIn-arrowZstdOut",
+			"OTLP-Arrow-gzipIn-arrowPlainOut",
 			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithGzip),
-			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("zstd").WithArrow(1),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("none").WithArrow(1),
 			testbed.ResourceSpec{
 				ExpectedMaxCPU: 30,
 				ExpectedMaxRAM: 350,
 			},
 		},
 		{
-			"OTLP-Arrow-arrowZstdIn-plainOut",
-			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithArrow1, inputWithZstd),
+			"OTLP-Arrow-arrowPlainIn-plainOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithArrow1, inputNoCompression),
 			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("none"),
 			testbed.ResourceSpec{
 				ExpectedMaxCPU: 30,
@@ -599,8 +599,18 @@ func TestTracesFromFile(t *testing.T) {
 			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("zstd").WithArrow(1),
 		},
 		{
+			"OTLP-Arrow-plainIn-arrowPlainOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputNoCompression),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("none").WithArrow(1),
+		},
+		{
 			"OTLP-Arrow-arrowZstdIn-plainOut",
 			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithArrow1, inputWithZstd),
+			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("none"),
+		},
+		{
+			"OTLP-Arrow-arrowPlainIn-plainOut",
+			testbed.NewOTLPTraceDataSender(testbed.DefaultHost, testbed.GetAvailablePort(t), inputWithArrow1, inputNoCompression),
 			testbed.NewOTLPDataReceiver(testbed.GetAvailablePort(t)).WithCompression("none"),
 		},
 	}
@@ -625,14 +635,20 @@ func TestTracesFromFile(t *testing.T) {
 			batchSize, err := strconv.Atoi(os.Getenv("TESTBED_TRACES_BATCH_SIZE"))
 			assert.NoError(t, err, "please set TESTBED_TRACES_BATCH_SIZE to an integer")
 
+			spansPerSec, err := strconv.Atoi(os.Getenv("TESTBED_TRACES_SPANS_PER_SECOND"))
+			assert.NoError(t, err, "please set TESTBED_TRACES_SPANS_PER_SECOND to an integer")
+
+			parallel, err := strconv.Atoi(os.Getenv("TESTBED_TRACES_PARALLEL"))
+			assert.NoError(t, err, "please set TESTBED_TRACES_PARALLEL to an integer")
+
 			// TODO sort order option
 
 			dataProvider, err := testbed.NewRealTraceDatasetProvider(path, uint64(batchSize), []string{})
 			assert.NoError(t, err)
 
 			options := testbed.LoadOptions{
-				DataItemsPerSecond: 1000, // TODO rate option
-				Parallel:           1,    // TODO parallelism option
+				DataItemsPerSecond: spansPerSec,
+				Parallel:           parallel,
 				ItemsPerBatch:      batchSize,
 			}
 			agentProc := testbed.NewChildProcessCollector()
@@ -651,6 +667,10 @@ func TestTracesFromFile(t *testing.T) {
 				&testbed.PerfTestValidator{},
 				performanceResultsSummary,
 				testbed.WithMetricsPort(metricsPort),
+				testbed.WithResourceLimits(testbed.ResourceSpec{
+					ExpectedMaxCPU: 500.0,
+					ExpectedMaxRAM: 2500,
+				}),
 			)
 			defer tc.Stop()
 

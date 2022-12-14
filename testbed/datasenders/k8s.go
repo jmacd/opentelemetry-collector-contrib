@@ -89,6 +89,10 @@ func (f *FileLogK8sWriter) Start() error {
 	return nil
 }
 
+func (f *FileLogK8sWriter) Shutdown(context.Context) error {
+	return nil
+}
+
 func (f *FileLogK8sWriter) ConsumeLogs(_ context.Context, logs plog.Logs) error {
 	for i := 0; i < logs.ResourceLogs().Len(); i++ {
 		for j := 0; j < logs.ResourceLogs().At(i).ScopeLogs().Len(); j++ {

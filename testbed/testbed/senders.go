@@ -37,6 +37,8 @@ type DataSender interface {
 	// sending data.
 	Start() error
 
+	Shutdown(context.Context) error
+
 	// Flush sends any accumulated data.
 	Flush()
 
@@ -76,6 +78,9 @@ type LogDataSender interface {
 type DataSenderBase struct {
 	Port int
 	Host string
+
+	// if Component is non-nil, it will be shut down automatically.
+	Component component.Component
 }
 
 // ExporterCreateSettings creates standard exporter settings for the testbed.
@@ -92,6 +97,15 @@ func (dsb *DataSenderBase) GetEndpoint() net.Addr {
 
 func (dsb *DataSenderBase) Flush() {
 	// Exporter interface does not support Flush, so nothing to do.
+}
+
+func (dsb *DataSenderBase) Shutdown(ctx context.Context) error {
+	if dsb.Component == nil {
+		return nil
+	}
+	err := dsb.Component.Shutdown(ctx)
+	dsb.Component = nil
+	return err
 }
 
 type otlpHTTPDataSender struct {
@@ -157,6 +171,7 @@ func (ote *otlpHTTPTraceDataSender) Start() error {
 		return err
 	}
 
+	ote.Component = exp
 	ote.Traces = exp
 	return exp.Start(context.Background(), componenttest.NewNopHost())
 }
@@ -192,6 +207,7 @@ func (ome *otlpHTTPMetricsDataSender) Start() error {
 		return err
 	}
 
+	ome.Component = exp
 	ome.Metrics = exp
 	return exp.Start(context.Background(), componenttest.NewNopHost())
 }
@@ -225,6 +241,7 @@ func (olds *otlpHTTPLogsDataSender) Start() error {
 		return err
 	}
 
+	olds.Component = exp
 	olds.Logs = exp
 	return exp.Start(context.Background(), componenttest.NewNopHost())
 }
@@ -251,11 +268,21 @@ func (ods *otlpDataSender) fillConfig(cfg *otlpexporter.Config) *otlpexporter.Co
 
 func (ods *otlpDataSender) GenConfigYAMLStr() string {
 	// Note that this generates a receiver config for agent.
-	return fmt.Sprintf(`
+	str := fmt.Sprintf(`
   otlp:
     protocols:
       grpc:
         endpoint: "%s"`, ods.GetEndpoint())
+
+	factory := otlpexporter.NewFactory()
+	cfg := ods.fillConfig(factory.CreateDefaultConfig().(*otlpexporter.Config))
+
+	if cfg.Arrow.Enabled {
+		str = fmt.Sprint(str, `
+      arrow:
+        enabled: true`)
+	}
+	return str
 }
 
 func (ods *otlpDataSender) ProtocolName() string {
@@ -290,6 +317,7 @@ func (ote *otlpTraceDataSender) Start() error {
 		return err
 	}
 
+	ote.Component = exp
 	ote.Traces = exp
 	return exp.Start(context.Background(), componenttest.NewNopHost())
 }
@@ -323,6 +351,7 @@ func (ome *otlpMetricsDataSender) Start() error {
 		return err
 	}
 
+	ome.Component = exp
 	ome.Metrics = exp
 	return exp.Start(context.Background(), componenttest.NewNopHost())
 }
@@ -356,6 +385,7 @@ func (olds *otlpLogsDataSender) Start() error {
 		return err
 	}
 
+	olds.Component = exp
 	olds.Logs = exp
 	return exp.Start(context.Background(), componenttest.NewNopHost())
 }

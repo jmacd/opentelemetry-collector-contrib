@@ -230,14 +230,14 @@ func (cp *childProcessCollector) Stop() (stopped bool, err error) {
 
 		cp.isStopped = true
 
-		log.Printf("Gracefully terminating %s pid=%d, sending SIGTEM...", cp.name, cp.cmd.Process.Pid)
+		log.Printf("Gracefully terminating %s pid=%d, sending SIGTERM...", cp.name, cp.cmd.Process.Pid)
 
 		// Notify resource monitor to stop.
 		close(cp.doneSignal)
 
 		// Gracefully signal process to stop.
 		if err = cp.cmd.Process.Signal(syscall.SIGTERM); err != nil {
-			log.Printf("Cannot send SIGTEM: %s", err.Error())
+			log.Printf("Cannot send SIGTERM: %s", err.Error())
 		}
 
 		finished := make(chan struct{})
@@ -246,11 +246,18 @@ func (cp *childProcessCollector) Stop() (stopped bool, err error) {
 		// to the process if it doesn't finish.
 		go func() {
 			// Wait 10 seconds.
-			t := time.After(10 * time.Second)
+			t1 := time.After(10 * time.Second)
+			t2 := time.After(15 * time.Second)
 			select {
-			case <-t:
+			case <-t1:
 				// Time is out. Kill the process.
-				log.Printf("%s pid=%d is not responding to SIGTERM. Sending SIGKILL to kill forcedly.",
+				log.Printf("%s pid=%d is not responding to SIGTERM. Sending SIGABRT to print a stacktrace.",
+					cp.name, cp.cmd.Process.Pid)
+				if err = cp.cmd.Process.Signal(syscall.SIGABRT); err != nil {
+					log.Printf("Cannot send SIGABRT: %s", err.Error())
+				}
+			case <-t2:
+				log.Printf("%s pid=%d Sending SIGABRT to kill forcedly.",
 					cp.name, cp.cmd.Process.Pid)
 				if err = cp.cmd.Process.Signal(syscall.SIGKILL); err != nil {
 					log.Printf("Cannot send SIGKILL: %s", err.Error())

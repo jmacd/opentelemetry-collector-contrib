@@ -15,6 +15,7 @@
 package testbed // import "github.com/open-telemetry/opentelemetry-collector-contrib/testbed/testbed"
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -290,6 +291,7 @@ func (tc *TestCase) StartLoad(options LoadOptions) {
 // StopLoad stops load generator.
 func (tc *TestCase) StopLoad() {
 	tc.LoadGenerator.Stop()
+	require.NoError(tc.t, tc.Sender.Shutdown(context.Background()))
 }
 
 // StartBackend starts the specified backend type.

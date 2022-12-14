@@ -63,6 +63,10 @@ func (f *FileLogWriter) Start() error {
 	return nil
 }
 
+func (f *FileLogWriter) Shutdown(context.Context) error {
+	return nil
+}
+
 func (f *FileLogWriter) ConsumeLogs(_ context.Context, logs plog.Logs) error {
 	for i := 0; i < logs.ResourceLogs().Len(); i++ {
 		for j := 0; j < logs.ResourceLogs().At(i).ScopeLogs().Len(); j++ {
