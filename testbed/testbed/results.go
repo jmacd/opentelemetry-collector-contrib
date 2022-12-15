@@ -118,12 +118,12 @@ func (r *PerformanceResults) Add(_ string, result interface{}) {
 	if testResult.exported != nil && testResult.exported.sentBytes != 0 {
 		comp := testResult.exported.sentWireBytes / testResult.exported.sentBytes
 		outWire = fmtFloat(comp)
-		outMiBsec = fmtFloat(float64(testResult.exported.sentWireBytes) / mibibyte)
+		outMiBsec = fmtFloat(float64(testResult.exported.sentWireBytes) / mibibyte / testResult.duration.Seconds())
 	}
 	if testResult.received != nil && testResult.received.recvBytes != 0 {
 		comp := testResult.received.recvWireBytes / testResult.received.recvBytes
 		inWire = fmtFloat(comp)
-		inMiBsec = fmtFloat(float64(testResult.received.recvWireBytes) / mibibyte)
+		inMiBsec = fmtFloat(float64(testResult.received.recvWireBytes) / mibibyte / testResult.duration.Seconds())
 	}
 	_, _ = io.WriteString(r.resultsFile,
 		fmt.Sprintf("%-40s|%-6s|%7.0fs|%8.1f|%8.1f|%11d|%11d|%10d|%14d|%12s|%12s|%12s|%12s|%12s|%12s\n",
