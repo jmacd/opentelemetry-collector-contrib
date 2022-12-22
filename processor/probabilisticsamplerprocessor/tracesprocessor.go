@@ -35,12 +35,19 @@ type traceSamplerProcessor struct {
 // newTracesProcessor returns a processor.TracesProcessor that will perform head sampling according to the given
 // configuration.
 func newTracesProcessor(ctx context.Context, set component.ProcessorCreateSettings, cfg *Config, nextConsumer consumer.Traces) (component.TracesProcessor, error) {
+	sampCfg := thresholdWidth(cfg.Precision).calc(fmt.Sprintf("%x", cfg.Probability))
+
+	fmt.Printf(`Sampling probability: %.10f
+Exact probability: %.10f
+Encoded probability: %s
+Sampling threshold: %x
+`, sampCfg.Probability, sampCfg.LowProb, sampCfg.LowCoded, sampCfg.LowThreshold)
 
 	tsp := &traceSamplerProcessor{
 		// Adjust sampling percentage on private so recalculations are avoided.
 		scaledSamplingRate: 1,
 		logger:             set.Logger,
-		prob:               hexDigits(cfg.Precision).calc(fmt.Sprintf("%x", cfg.Probability)),
+		prob:               sampCfg,
 	}
 
 	return processorhelper.NewTracesProcessor(
@@ -63,7 +70,7 @@ func (tsp *traceSamplerProcessor) processTraces(ctx context.Context, td ptrace.T
 				span := ils.Spans().At(i)
 				span.TraceState().FromRaw("ot=t:" + tsp.prob.LowCoded)
 
-				// HACK
+				// HACK: show the tracestate b/c the loggingexporter doesn't.
 				span.Attributes().PutStr("otel.tracestate", "t:"+tsp.prob.LowCoded)
 			}
 

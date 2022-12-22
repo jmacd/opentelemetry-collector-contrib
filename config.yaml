@@ -6,7 +6,7 @@ receivers:
 
 processors:
   probability_sampler:
-    probability: 0.3333
+    probability: 0.003333
     precision: 3
 
 exporters:
