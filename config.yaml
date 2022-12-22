@@ -1,0 +1,25 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 127.0.0.1:4318
+
+processors:
+  probability_sampler:
+    probability: 0.3333
+    precision: 3
+
+exporters:
+  logging:      
+    loglevel: debug
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [probability_sampler]
+      exporters: [logging]
+
+  telemetry:
+    metrics:
+      address: localhost:8888

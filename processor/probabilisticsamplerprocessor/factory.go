@@ -16,42 +16,34 @@ package probabilisticsamplerprocessor // import "github.com/open-telemetry/opent
 
 import (
 	"context"
-	"sync"
 
-	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
-	"go.opentelemetry.io/collector/config/configtelemetry"
 	"go.opentelemetry.io/collector/consumer"
 )
 
 const (
 	// The value of "type" trace-samplers in configuration.
-	typeStr = "probabilistic_sampler"
+	typeStr = "probability_sampler"
+
 	// The stability level of the processor.
 	stability = component.StabilityLevelBeta
 )
 
-var onceMetrics sync.Once
-
 // NewFactory returns a new factory for the Probabilistic sampler processor.
 func NewFactory() component.ProcessorFactory {
-	onceMetrics.Do(func() {
-		// TODO: Handle this err
-		_ = view.Register(SamplingProcessorMetricViews(configtelemetry.LevelNormal)...)
-	})
-
 	return component.NewProcessorFactory(
 		typeStr,
 		createDefaultConfig,
 		component.WithTracesProcessor(createTracesProcessor, stability),
-		component.WithLogsProcessor(createLogsProcessor, component.StabilityLevelAlpha))
+	)
 }
 
 func createDefaultConfig() component.Config {
 	return &Config{
 		ProcessorSettings: config.NewProcessorSettings(component.NewID(typeStr)),
-		AttributeSource:   defaultAttributeSource,
+		Probability:       1,
+		Precision:         3,
 	}
 }
 
@@ -63,14 +55,4 @@ func createTracesProcessor(
 	nextConsumer consumer.Traces,
 ) (component.TracesProcessor, error) {
 	return newTracesProcessor(ctx, set, cfg.(*Config), nextConsumer)
-}
-
-// createLogsProcessor creates a log processor based on this config.
-func createLogsProcessor(
-	ctx context.Context,
-	set component.ProcessorCreateSettings,
-	cfg component.Config,
-	nextConsumer consumer.Logs,
-) (component.LogsProcessor, error) {
-	return newLogsProcessor(ctx, set, nextConsumer, cfg.(*Config))
 }
