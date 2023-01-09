@@ -16,6 +16,8 @@ package ottlfuncs // import "github.com/open-telemetry/opentelemetry-collector-c
 
 // Modeled on
 // https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-field-config-route-v3-routematch-runtime-fraction
+// as in
+// https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/traffic_splitting#traffic-shifting-between-two-upstreams
 
 import (
 	"context"

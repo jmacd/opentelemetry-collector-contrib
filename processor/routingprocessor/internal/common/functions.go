@@ -24,6 +24,7 @@ import (
 func Functions[K any]() map[string]interface{} {
 	return map[string]interface{}{
 		"IsMatch":              ottlfuncs.IsMatch[K],
+		"runtime_fraction":     ottlfuncs.RuntimeFraction[K],
 		"delete_key":           ottlfuncs.DeleteKey[K],
 		"delete_matching_keys": ottlfuncs.DeleteMatchingKeys[K],
 		// noop function, it is required since the parsing of conditions is not implemented yet,

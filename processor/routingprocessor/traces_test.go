@@ -449,3 +449,62 @@ type mockTracesExporter struct {
 	mockComponent
 	consumertest.TracesSink
 }
+
+func TestTraces_Routing_RuntimeFraction(t *testing.T) {
+	defaultExp := &mockTracesExporter{}
+	tExp := &mockTracesExporter{}
+
+	host := newMockHost(map[component.DataType]map[component.ID]component.Component{
+		component.DataTypeTraces: {
+			component.NewID("otlp"):                      defaultExp,
+			component.NewIDWithName("otlp", "alternate"): tExp,
+		},
+	})
+
+	exp := newTracesProcessor(component.TelemetrySettings{Logger: zap.NewNop()}, &Config{
+		FromAttribute:    "X-Tenant",
+		AttributeSource:  contextAttributeSource,
+		DefaultExporters: []string{"otlp"},
+		Table: []RoutingTableItem{
+			{
+				Statement: "route() where runtime_fraction(1, 10)",
+				Exporters: []string{"otlp/alternate"},
+			},
+		},
+	})
+	require.NoError(t, exp.Start(context.Background(), host))
+
+	tr := ptrace.NewTraces()
+	rs := tr.ResourceSpans().AppendEmpty()
+	rs.Resource().Attributes().PutStr("X-Tenant", "acme")
+
+	t.Run("non default route is properly used", func(t *testing.T) {
+		assert.NoError(t, exp.ConsumeTraces(
+			metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{
+				"X-Tenant": "acme",
+			})),
+			tr,
+		))
+		assert.Len(t, defaultExp.AllTraces(), 0,
+			"trace should not be routed to default exporter",
+		)
+		assert.Len(t, tExp.AllTraces(), 1,
+			"trace should be routed to non default exporter",
+		)
+	})
+
+	t.Run("default route is taken when no matching route can be found", func(t *testing.T) {
+		assert.NoError(t, exp.ConsumeTraces(
+			metadata.NewIncomingContext(context.Background(), metadata.New(map[string]string{
+				"X-Tenant": "some-custom-value1",
+			})),
+			tr,
+		))
+		assert.Len(t, defaultExp.AllTraces(), 1,
+			"trace should be routed to default exporter",
+		)
+		assert.Len(t, tExp.AllTraces(), 1,
+			"trace should not be routed to non default exporter",
+		)
+	})
+}
