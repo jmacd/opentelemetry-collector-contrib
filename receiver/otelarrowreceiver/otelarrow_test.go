@@ -232,7 +232,7 @@ func newReceiver(t *testing.T, factory receiver.Factory, settings component.Tele
 
 type senderFunc func(td ptrace.Traces)
 
-func TestShutdown(t *testing.T) {
+func TestStandardShutdown(t *testing.T) {
 	endpointGrpc := testutil.GetAvailableLocalAddress(t)
 
 	nextSink := new(consumertest.TracesSink)
@@ -266,6 +266,93 @@ func TestShutdown(t *testing.T) {
 	// Send traces to the receiver until we signal via done channel, and then
 	// send one more trace after that.
 	go generateTraces(senderGrpc, doneSignalGrpc)
+
+	// Wait until the receiver outputs anything to the sink.
+	assert.Eventually(t, func() bool {
+		return nextSink.SpanCount() > 0
+	}, time.Second, 10*time.Millisecond)
+
+	// Now shutdown the receiver, while continuing sending traces to it.
+	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancelFn()
+	err = r.Shutdown(ctx)
+	assert.NoError(t, err)
+
+	// Remember how many spans the sink received. This number should not change after this
+	// point because after Shutdown() returns the component is not allowed to produce
+	// any more data.
+	sinkSpanCountAfterShutdown := nextSink.SpanCount()
+
+	// Now signal to generateTraces to exit the main generation loop, then send
+	// one more trace and stop.
+	doneSignalGrpc <- true
+
+	// Wait until all follow up traces are sent.
+	<-doneSignalGrpc
+
+	// The last, additional trace should not be received by sink, so the number of spans in
+	// the sink should not change.
+	assert.EqualValues(t, sinkSpanCountAfterShutdown, nextSink.SpanCount())
+}
+
+func TestOTelArrowShutdown(t *testing.T) {
+	ctx := context.Background()
+
+	endpointGrpc := testutil.GetAvailableLocalAddress(t)
+
+	nextSink := new(consumertest.TracesSink)
+
+	// Create OTelArrow receiver
+	factory := NewFactory()
+	cfg := factory.CreateDefaultConfig().(*Config)
+	cfg.GRPC.Keepalive = &configgrpc.KeepaliveServerConfig{
+		ServerParameters: &configgrpc.KeepaliveServerParameters{},
+	}
+	cfg.GRPC.Keepalive.ServerParameters.MaxConnectionAge = time.Second
+	cfg.GRPC.Keepalive.ServerParameters.MaxConnectionAgeGrace = 5 * time.Second
+	cfg.GRPC.NetAddr.Endpoint = endpointGrpc
+	set := receivertest.NewNopSettings()
+	set.ID = testReceiverID
+	r, err := NewFactory().CreateTracesReceiver(
+		ctx,
+		set,
+		cfg,
+		nextSink)
+	require.NoError(t, err)
+	require.NotNil(t, r)
+	require.NoError(t, r.Start(context.Background(), componenttest.NewNopHost()))
+
+	conn, err := grpc.NewClient(endpointGrpc, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	defer conn.Close()
+
+	doneSignalGrpc := make(chan bool)
+
+	client := arrowpb.NewArrowTracesServiceClient(conn)
+	stream, err := client.ArrowTraces(ctx, grpc.WaitForReady(true))
+	require.NoError(t, err)
+	producer := arrowRecord.NewProducer()
+	defer func() {
+		require.NoError(t, conn.Close())
+	}()
+
+	start := time.Now()
+	var once sync.Once
+
+	// Send traces to the receiver until we signal via done channel, and then
+	// send one more trace after that.
+	go generateTraces(func(td ptrace.Traces) {
+		if time.Since(start) > 5*time.Second {
+			once.Do(func() {
+				require.NoError(t, stream.CloseSend())
+			})
+			return
+		}
+		batch, err := producer.BatchArrowRecordsFromTraces(td)
+		require.NoError(t, err)
+		err = stream.Send(batch)
+		require.NoError(t, err)
+	}, doneSignalGrpc)
 
 	// Wait until the receiver outputs anything to the sink.
 	assert.Eventually(t, func() bool {
