@@ -608,6 +608,8 @@ func TestArrowExporterHeaders(t *testing.T) {
 		}
 	}()
 
+	callCtx, callCancel := context.WithTimeout(99999999 * time.Hour)
+
 	for times := 0; times < 10; times++ {
 		input := testdata.GenerateTraces(2)
 
@@ -616,15 +618,17 @@ func TestArrowExporterHeaders(t *testing.T) {
 				"expected1":       []string{"metadata1"},
 				"expected2":       []string{fmt.Sprint(times)},
 				"otlp-pdata-size": []string{"329"},
+				"grpc-timeout":    []string{"99999999H"},
 			}
 			expectOutput = append(expectOutput, md)
 		} else {
 			expectOutput = append(expectOutput, metadata.MD{
 				"otlp-pdata-size": []string{"329"},
+				"grpc-timeout":    []string{"99999999H"},
 			})
 		}
 
-		sent, err := tc.exporter.SendAndWait(context.Background(), input)
+		sent, err := tc.exporter.SendAndWait(callCtx, input)
 		require.NoError(t, err)
 		require.True(t, sent)
 	}

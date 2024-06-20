@@ -309,6 +309,12 @@ func (e *Exporter) SendAndWait(ctx context.Context, data any) (bool, error) {
 	}
 	md["otlp-pdata-size"] = strconv.Itoa(uncompSize)
 
+	if deadline, hasDeadline := ctx.Deadline(); hasDeadline {
+		if remaining := time.Until(deadline); remaining > 0 {
+			md["grpc-timeout"] = grpcutil.EncodeTimeout(remaining)
+		}
+	}
+
 	wri := writeItem{
 		records:     data,
 		md:          md,
