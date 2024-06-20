@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	arrowpb "github.com/open-telemetry/otel-arrow/api/experimental/arrow/v1"
 	"github.com/open-telemetry/otel-arrow/collector/admission"
@@ -196,12 +197,14 @@ func newHeaderReceiver(streamCtx context.Context, as auth.Server, includeMetadat
 // combineHeaders calculates per-request Metadata by combining the stream's
 // client.Info with additional key:values associated with the arrow batch.
 func (h *headerReceiver) combineHeaders(ctx context.Context, hdrsBytes []byte) (context.Context, map[string][]string, error) {
+	timeout := time.Hour // @@@ DEFAULT
+
 	if len(hdrsBytes) == 0 && len(h.streamHdrs) == 0 {
-		return ctx, nil, nil
+		return h.newContext(ctx, timeout, nil), nil, nil
 	}
 
 	if len(hdrsBytes) == 0 {
-		return h.newContext(ctx, h.streamHdrs), h.streamHdrs, nil
+		return h.newContext(ctx, timeout, h.streamHdrs), h.streamHdrs, nil
 	}
 
 	// Note that we will parse the headers even if they are not
@@ -238,6 +241,15 @@ func (h *headerReceiver) combineHeaders(ctx context.Context, hdrsBytes []byte) (
 		ctx = carrier.Extract(ctx, propagation.MapCarrier(flat))
 	}
 
+	if val, ok := h.tmpHdrs["grpc-timeout"]; ok && len(val) > 0 {
+		to, err := grpcutil.DecodeTimeout(val)
+		if err == nil && to > timeout {
+			timeout = to
+		} else {
+			r.telemetry.Logger.Debug("invalid timeout", zap.Error(err))
+		}
+	}
+
 	// Add streamHdrs that were not carried in the per-request headers.
 	for k, v := range h.streamHdrs {
 		// Note: This is done after the per-request metadata is defined
@@ -262,7 +274,7 @@ func (h *headerReceiver) combineHeaders(ctx context.Context, hdrsBytes []byte) (
 
 	// Note: newHdrs is passed to the Auth plugin.  Whether
 	// newHdrs is set in the context depends on h.includeMetadata.
-	return h.newContext(ctx, newHdrs), newHdrs, nil
+	return h.newContext(ctx, timeout, newHdrs), newHdrs, nil
 }
 
 // tmpHdrsAppend appends to tmpHdrs, from decoder's emit function.
@@ -275,7 +287,7 @@ func (h *headerReceiver) tmpHdrsAppend(hf hpack.HeaderField) {
 	}
 }
 
-func (h *headerReceiver) newContext(ctx context.Context, hdrs map[string][]string) context.Context {
+func (h *headerReceiver) newContext(ctx context.Context, clientTimeout time.Duration, hdrs map[string][]string) context.Context {
 	// Retain the Addr/Auth of the stream connection, update the
 	// per-request metadata from the Arrow batch.
 	var md client.Metadata
