@@ -651,8 +651,24 @@ func nearLimitGenFunc() MkGen {
 }
 
 func TestIntegrationAdmissionLimited(t *testing.T) {
-	for _, allowWait := range []bool{false, true} {
-		t.Run(fmt.Sprint("allow_wait=", allowWait), func(t *testing.T) {
+	for _, test := range []struct {
+		bounded   bool
+		allowWait bool
+	}{
+		{
+			bounded:   true,  // bounded queue
+			allowWait: false, // no waiters allowed
+		},
+		{
+			bounded:   true, // bounded queue
+			allowWait: true, // with waiters allowed
+		},
+		{
+			bounded:   false, // bounded queue
+			allowWait: true,  // config not used
+		},
+	} {
+		t.Run(fmt.Sprint("bounded=", test.bounded, ",allow_wait=", test.allowWait), func(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
@@ -666,17 +682,25 @@ func TestIntegrationAdmissionLimited(t *testing.T) {
 
 			var ending func(*testing.T, testParams, *testConsumer, [][]ptrace.Traces) (_, _ map[string]int)
 			var waitingLimit uint64
-			if allowWait {
-				ending = standardEnding
-				waitingLimit = uint64(params.threadCount)
+			var admitLimit uint64
+			if test.bounded {
+				if test.allowWait {
+					admitLimit = 1
+					waitingLimit = uint64(params.threadCount)
+					ending = standardEnding
+				} else {
+					admitLimit = 1
+					waitingLimit = 0
+					ending = failureAdmissionLimitEnding
+				}
 			} else {
-				ending = failureAdmissionLimitEnding
+				admitLimit = 0
 				waitingLimit = 0
+				ending = standardEnding
 			}
 
 			testIntegrationTraces(ctx, t, params, func(ecfg *ExpConfig, rcfg *RecvConfig) {
-				rcfg.Admission.RequestLimitMiB = 1
-				// either allow, or don't allow, all threads to wait
+				rcfg.Admission.RequestLimitMiB = admitLimit
 				rcfg.Admission.WaitingLimitMiB = waitingLimit
 				ecfg.Arrow.NumStreams = 10
 
