@@ -451,10 +451,10 @@ func TestBoundedQueueLimits(t *testing.T) {
 			var bq admission.Queue
 			if tt.expectErr {
 				ctc.stream.EXPECT().Send(statusOKFor(batch.BatchId)).Times(0)
-				bq = admission.NewBoundedQueue(noopTelemetry, int64(sizer.TracesSize(td)-100), 10)
+				bq = admission.NewBoundedQueue(noopTelemetry, uint64(sizer.TracesSize(td)-100), 10)
 			} else {
 				ctc.stream.EXPECT().Send(statusOKFor(batch.BatchId)).Times(1).Return(nil)
-				bq = admission.NewBoundedQueue(noopTelemetry, tt.admitLimit, 10)
+				bq = admission.NewBoundedQueue(noopTelemetry, uint64(tt.admitLimit), 10)
 			}
 
 			ctc.start(ctc.newRealConsumer, bq)
