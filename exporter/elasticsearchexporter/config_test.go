@@ -371,9 +371,10 @@ func TestConfig(t *testing.T) {
 
 				cfg.QueueBatchConfig.Enabled = true
 				cfg.QueueBatchConfig.NumConsumers = 100
-				cfg.QueueBatchConfig.Sizer = exporterhelper.RequestSizerTypeRequests
+				cfg.QueueBatchConfig.Sizer = exporterhelper.RequestSizerTypeItems
 				cfg.QueueBatchConfig.Batch = configoptional.Some(
 					exporterhelper.BatchConfig{
+<<<<<<< HEAD
 						// Note: It's not obvious how this "requests" sizer
 						// is configured, given that config.yaml reads "{}".
 						// This is part of the test expectation.
@@ -381,6 +382,10 @@ func TestConfig(t *testing.T) {
 						// missing field in this configuration, not because
 						// of an unset sizer as we might expect!
 						Sizer: exporterhelper.RequestSizerTypeRequests,
+=======
+						Sizer:        exporterhelper.RequestSizerTypeItems,
+						FlushTimeout: 10 * time.Second,
+>>>>>>> 2bd54e1ad9a6699c8bd861b24e0315580e8124bd
 					},
 				)
 			}),

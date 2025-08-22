@@ -124,7 +124,9 @@ elasticsearch/queuebatch_enabled_invalid:
   endpoint: https://elastic.example.com:9200
   sending_queue:
     enabled: true
+    sizer: "items"
     num_consumers: 100
+<<<<<<< HEAD
     batch: {}
 elasticsearch/queuebatch_enabled_complete:
   endpoint: https://elastic.example.com:9200
@@ -138,3 +140,7 @@ elasticsearch/queuebatch_enabled_complete:
       sizer: bytes
       min_size: 100000
       max_size: 10000000
+=======
+    batch:
+      flush_timeout: 10s
+>>>>>>> 2bd54e1ad9a6699c8bd861b24e0315580e8124bd
