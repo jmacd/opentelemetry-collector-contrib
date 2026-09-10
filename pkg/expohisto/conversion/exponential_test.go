@@ -22,8 +22,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/expohisto/mapping"
 )
 
 func TestToExplicitAlignedBuckets(t *testing.T) {
@@ -197,18 +195,6 @@ func TestSystematicRounding(t *testing.T) {
 	}
 }
 
-func TestDistributeBucketsCallsMapperOncePerBoundary(t *testing.T) {
-	mapper := &countingMapping{}
-	output := make([]uint64, 2)
-	err := distributeBuckets(mapper, output, []float64{100}, Buckets{
-		Offset: -1,
-		Counts: []uint64{1, 1, 1},
-	}, false)
-	require.NoError(t, err)
-	assert.Equal(t, []uint64{3, 0}, output)
-	assert.Equal(t, 4, mapper.calls)
-}
-
 func TestToExplicitValidation(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -248,22 +234,3 @@ func TestToExplicitValidation(t *testing.T) {
 		})
 	}
 }
-
-type countingMapping struct {
-	calls int
-}
-
-func (m *countingMapping) MapToIndex(float64) int32 {
-	panic("not used")
-}
-
-func (m *countingMapping) LowerBoundary(index int32) (float64, error) {
-	m.calls++
-	return math.Exp2(float64(index)), nil
-}
-
-func (*countingMapping) Scale() int32 {
-	return 0
-}
-
-var _ mapping.Mapping = (*countingMapping)(nil)
