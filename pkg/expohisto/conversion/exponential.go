@@ -29,7 +29,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/expohisto/mapping/logarithm"
 )
 
-// Buckets is one positive-magnitude exponential histogram bucket range.
+// Buckets is an exponential histogram magnitude bucket range.
 type Buckets struct {
 	Offset int32
 	Counts []uint64
@@ -47,14 +47,14 @@ type ExponentialHistogram struct {
 }
 
 // ToExplicit converts an exponential histogram into explicit histogram bucket
-// counts. It assumes observations are log-uniformly distributed within
-// non-zero exponential buckets and linearly distributed within the zero
-// bucket. Randomized systematic rounding preserves the exact total count while
-// keeping cumulative rounding error below one observation. The returned slice
-// always has len(bounds)+1 entries.
-func ToExplicit(input ExponentialHistogram, bounds []float64) ([]uint64, error) {
+// counts. The distribution must be upper, midpoint, uniform, or random. The
+// returned slice always has len(bounds)+1 entries.
+func ToExplicit(input ExponentialHistogram, bounds []float64, distribution string) ([]uint64, error) {
 	if err := validateBounds(bounds); err != nil {
 		return nil, err
+	}
+	if !validDistribution(distribution) {
+		return nil, fmt.Errorf("invalid distribution %q", distribution)
 	}
 	if math.IsNaN(input.ZeroThreshold) || math.IsInf(input.ZeroThreshold, 0) || input.ZeroThreshold < 0 {
 		return nil, fmt.Errorf("invalid zero threshold: %v", input.ZeroThreshold)
@@ -76,21 +76,15 @@ func ToExplicit(input ExponentialHistogram, bounds []float64) ([]uint64, error) 
 
 	output := make([]uint64, len(bounds)+1)
 	if input.ZeroCount != 0 {
-		if input.ZeroThreshold == 0 {
-			if err := addToBucket(output, explicitBucket(bounds, 0), input.ZeroCount); err != nil {
-				return nil, err
-			}
-		} else {
-			if err := distributeWeighted(output, bounds, -input.ZeroThreshold, input.ZeroThreshold, input.ZeroCount, false, rand.Uint64()); err != nil {
-				return nil, err
-			}
+		if err := distribute(output, bounds, -input.ZeroThreshold, input.ZeroThreshold, input.ZeroCount, distribution); err != nil {
+			return nil, err
 		}
 	}
 
-	if err := distributeBuckets(mapper, output, bounds, input.Negative, true); err != nil {
+	if err := distributeBuckets(mapper, output, bounds, input.Negative, distribution, true); err != nil {
 		return nil, fmt.Errorf("negative buckets: %w", err)
 	}
-	if err := distributeBuckets(mapper, output, bounds, input.Positive, false); err != nil {
+	if err := distributeBuckets(mapper, output, bounds, input.Positive, distribution, false); err != nil {
 		return nil, fmt.Errorf("positive buckets: %w", err)
 	}
 
@@ -109,6 +103,15 @@ func sourceBucketCount(input ExponentialHistogram) (uint64, error) {
 		}
 	}
 	return total, nil
+}
+
+func validDistribution(distribution string) bool {
+	switch distribution {
+	case "upper", "midpoint", "uniform", "random":
+		return true
+	default:
+		return false
+	}
 }
 
 func validateBounds(bounds []float64) error {
@@ -133,7 +136,7 @@ func newMapping(scale int32) (mapping.Mapping, error) {
 	return logarithm.NewMapping(scale)
 }
 
-func distributeBuckets(mapper mapping.Mapping, output []uint64, bounds []float64, buckets Buckets, negative bool) error {
+func distributeBuckets(mapper mapping.Mapping, output []uint64, bounds []float64, buckets Buckets, distribution string, negative bool) error {
 	if len(buckets.Counts) == 0 {
 		return nil
 	}
@@ -158,7 +161,7 @@ func distributeBuckets(mapper mapping.Mapping, output []uint64, bounds []float64
 				// Negative buckets reverse the magnitude bounds.
 				bucketLower, bucketUpper = -upper, -lower
 			}
-			if err := distributeWeighted(output, bounds, bucketLower, bucketUpper, count, true, rand.Uint64()); err != nil {
+			if err := distribute(output, bounds, bucketLower, bucketUpper, count, distribution); err != nil {
 				return err
 			}
 		}
@@ -167,7 +170,25 @@ func distributeBuckets(mapper mapping.Mapping, output []uint64, bounds []float64
 	return nil
 }
 
-func distributeWeighted(output []uint64, bounds []float64, lower, upper float64, count uint64, logarithmic bool, roundingOffset uint64) error {
+func distribute(output []uint64, bounds []float64, lower, upper float64, count uint64, distribution string) error {
+	if lower == upper {
+		return addToBucket(output, explicitBucket(bounds, lower), count)
+	}
+	switch distribution {
+	case "upper":
+		return addToBucket(output, explicitBucket(bounds, upper), count)
+	case "midpoint":
+		return addToBucket(output, explicitBucket(bounds, lower/2+upper/2), count)
+	case "uniform":
+		return distributeWeighted(output, bounds, lower, upper, count, math.MaxUint64)
+	case "random":
+		return distributeWeighted(output, bounds, lower, upper, count, rand.Uint64())
+	default:
+		panic("validated distribution")
+	}
+}
+
+func distributeWeighted(output []uint64, bounds []float64, lower, upper float64, count uint64, roundingOffset uint64) error {
 	first := explicitBucket(bounds, lower)
 	last := explicitBucket(bounds, upper)
 	weights := make([]float64, last-first+1)
@@ -187,7 +208,7 @@ func distributeWeighted(output []uint64, bounds []float64, lower, upper float64,
 		if overlapLower >= overlapUpper {
 			continue
 		}
-		weight := intervalMeasure(overlapLower, overlapUpper, logarithmic)
+		weight := overlapUpper - overlapLower
 		weights[bucket-first] = weight
 		total += weight
 	}
@@ -216,16 +237,6 @@ func distributeWeighted(output []uint64, bounds []float64, lower, upper float64,
 		allocated = next
 	}
 	return nil
-}
-
-func intervalMeasure(lower, upper float64, logarithmic bool) float64 {
-	if !logarithmic {
-		return upper - lower
-	}
-	if lower > 0 {
-		return math.Log(upper) - math.Log(lower)
-	}
-	return math.Log(-lower) - math.Log(-upper)
 }
 
 func explicitBucket(bounds []float64, value float64) int {

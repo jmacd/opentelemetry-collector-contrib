@@ -1,16 +1,14 @@
-change_type: breaking
+change_type: bug_fix
 
 component: processor/transform
 
-note: Replace exponential-to-explicit histogram conversion with one rigorous probabilistic algorithm
+note: Fix exponential-to-explicit histogram conversion
 
 issues: [50737]
 
 subtext: |
   The conversion now handles positive, negative, and zero buckets, includes the
   required overflow bucket, preserves data point metadata, and uses the
-  exponential histogram mapping implementation for bucket boundaries. The OTTL
-  function now accepts only the explicit bounds argument; the distribution
-  strategy argument has been removed.
+  exponential histogram mapping implementation for bucket boundaries.
 
 change_logs: [user, api]

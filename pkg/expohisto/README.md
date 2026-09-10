@@ -67,8 +67,8 @@ receivers, processors, and exporters.
 
 The `conversion` sub-package translates exponential histogram buckets
 into explicit histogram layouts. It uses the mapping sub-packages for
-source bucket boundaries, preserves the total count exactly, and uses
-low-discrepancy probabilistic redistribution.
+source bucket boundaries, preserves the total count exactly, and supports
+deterministic and randomized redistribution.
 
 ## Implementation
 

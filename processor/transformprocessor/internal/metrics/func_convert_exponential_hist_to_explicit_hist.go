@@ -16,6 +16,7 @@ import (
 )
 
 type convertExponentialHistToExplicitHistArguments struct {
+	DistributionFn string
 	ExplicitBounds []float64
 }
 
@@ -29,13 +30,16 @@ func createconvertExponentialHistToExplicitHistFunction(_ ottl.FunctionContext, 
 	if !ok {
 		return nil, errors.New("convertExponentialHistToExplicitHistFactory args must be of type *convertExponentialHistToExplicitHistArguments")
 	}
-	return convertExponentialHistToExplicitHist(args.ExplicitBounds)
+	if args.DistributionFn == "" {
+		args.DistributionFn = "random"
+	}
+	return convertExponentialHistToExplicitHist(args.DistributionFn, args.ExplicitBounds)
 }
 
-func convertExponentialHistToExplicitHist(explicitBounds []float64) (ottl.ExprFunc[*ottlmetric.TransformContext], error) {
-	// Validate arguments while constructing the OTTL function, including when
-	// the function never encounters an exponential histogram.
-	if _, err := conversion.ToExplicit(conversion.ExponentialHistogram{Scale: 0}, explicitBounds); err != nil {
+// convertExponentialHistToExplicitHist converts an exponential histogram to a bucketed histogram.
+func convertExponentialHistToExplicitHist(distribution string, explicitBounds []float64) (ottl.ExprFunc[*ottlmetric.TransformContext], error) {
+	// Validate arguments before the function encounters metric data.
+	if _, err := conversion.ToExplicit(conversion.ExponentialHistogram{Scale: 0}, explicitBounds, distribution); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +73,7 @@ func convertExponentialHistToExplicitHist(explicitBounds []float64) (ottl.ExprFu
 					Offset: source.Negative().Offset(),
 					Counts: source.Negative().BucketCounts().AsRaw(),
 				},
-			}, explicitBounds)
+			}, explicitBounds, distribution)
 			if err != nil {
 				return nil, fmt.Errorf("converting exponential histogram data point %d: %w", i, err)
 			}
